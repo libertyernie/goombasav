@@ -25,10 +25,10 @@ void could_not_open(const char* filename) {
 int main(int argc, char** argv) {
 	if (argc != 4) usage();
 	if (argv[1][0] != 'x' && argv[1][0] != 'r') usage();
-	
+
+	FILE* gba;
+	FILE* gbc;
 	if (argv[1][0] == 'x') {
-		FILE* gba;
-		FILE* gbc;
 		gba = (strcmp("-", argv[2]) == 0)
 			? stdin
 			: fopen(argv[2], "rb");
@@ -39,13 +39,13 @@ int main(int argc, char** argv) {
 		if (gbc == NULL) could_not_open(argv[3]);
 		goomba_extract_file(gba, gbc);
 	} else if (argv[1][0] == 'r') {
-		FILE* gba;
-		FILE* gbc;
 		gba = fopen(argv[2], "r+b");
 		if (gba == NULL) could_not_open(argv[2]);
 		gbc = fopen(argv[3], "rb");
 		if (gbc == NULL) could_not_open(argv[3]);
 		goomba_replace_file(gba, gbc);
 	}
+	fclose(gba);
+	fclose(gbc);
 	return 0;
 }
