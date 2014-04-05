@@ -26,6 +26,6 @@ typedef struct {
 
 void* goomba_extract(const void* header_ptr);
 void goomba_extract_file(FILE* in, FILE* out);
-void goomba_replace(FILE* gba, FILE* gbc);
+void goomba_replace_file(FILE* gba, FILE* gbc);
 
 #endif

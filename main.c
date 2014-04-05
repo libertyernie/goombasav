@@ -43,11 +43,9 @@ int main(int argc, char** argv) {
 		FILE* gbc;
 		gba = fopen(argv[2], "r+b");
 		if (gba == NULL) could_not_open(argv[2]);
-		gbc = (strcmp("-", argv[3]) == 0)
-			? stdin
-			: fopen(argv[3], "rb");
+		gbc = fopen(argv[3], "rb");
 		if (gbc == NULL) could_not_open(argv[3]);
-		goomba_replace(gba, gbc);
+		goomba_replace_file(gba, gbc);
 	}
 	return 0;
 }
