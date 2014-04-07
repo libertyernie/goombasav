@@ -6,8 +6,14 @@
 #include "minilzo-2.06/minilzo.h"
 #define SRAMSAVE 1
 
-#define GOOMBA_COLOR_SRAM_SIZE 65536
-#define GOOMBASAV_PRINT_DATA
+void goomba_print_stateheader(FILE* stream, stateheader* sh) {
+	fprintf(stream, "size: %d\n", sh->size);
+	fprintf(stream, "type: %d\n", sh->type);
+	fprintf(stream, "uncompressed_size: %d\n", sh->uncompressed_size);
+	fprintf(stream, "framecount: %d\n", sh->framecount);
+	fprintf(stream, "checksum: %d\n", sh->checksum);
+	fprintf(stream, "title: %s\n", sh->title);
+}
 
 /**
  * Allocates memory to store the uncompressed GB/GBC save file extracted from
@@ -16,14 +22,6 @@
  */
 void* goomba_extract(const void* header_ptr) {
 	stateheader* sh = (stateheader*)header_ptr;
-	#ifdef GOOMBASAV_PRINT_DATA
-	fprintf(stderr, "size: %d\n", sh->size);
-	fprintf(stderr, "type: %d\n", sh->type);
-	fprintf(stderr, "uncompressed_size: %d\n", sh->uncompressed_size);
-	fprintf(stderr, "framecount: %d\n", sh->framecount);
-	fprintf(stderr, "checksum: %d\n", sh->checksum);
-	fprintf(stderr, "title: %s\n", sh->title);
-	#endif
 
 	if (sh->type != 1) {
 		fprintf(stderr, "Error: this is not SRAM data\n");
@@ -47,19 +45,6 @@ void* goomba_extract(const void* header_ptr) {
 	return uncompressed_data;
 }
 
-void goomba_extract_file(FILE* in, FILE* out) {
-	stateheader* sh = (stateheader*)malloc(GOOMBA_COLOR_SRAM_SIZE);
-	fread(sh, 1, 4, in);
-	fread(sh, GOOMBA_COLOR_SRAM_SIZE - 4, 1, in);
-	
-	void* uncompressed_data = goomba_extract(sh);
-	if (uncompressed_data != NULL) {
-		fwrite(uncompressed_data, 1, sh->uncompressed_size, out);
-		free(uncompressed_data);
-	}
-	free(sh);
-}
-
 size_t copy_until_64bytes0(void* dest, const void* src) {
 	// if you used almost all 64KB earlier for some reason, it will segfault
 	// to prevent this, you could add a zero buffer to the end of the GBA SRAM data when you first read it in
@@ -81,8 +66,6 @@ size_t copy_until_64bytes0(void* dest, const void* src) {
 	}
 	// 64 bytes of zeroes found - subtract those from the count (even though they were copied, they don't need to be copied back later)
 	bytes_copied -= bytes_zero;
-	fprintf(stderr, "--backed up %d bytes--\n", bytes_copied);
-	fprintf(stderr, "--zeroes:   %d bytes--\n", bytes_zero);
 	return bytes_copied;
 }
 
@@ -94,14 +77,6 @@ size_t copy_until_64bytes0(void* dest, const void* src) {
 void* goomba_replace(void* gba_header, const void* gbc_sram, size_t gbc_length) {
 	unsigned char* gba_header_ptr = (unsigned char*)gba_header;
 	stateheader* sh = (stateheader*)gba_header_ptr;
-#ifdef GOOMBASAV_PRINT_DATA
-	fprintf(stderr, "size: %d\n", sh->size);
-	fprintf(stderr, "type: %d\n", sh->type);
-	fprintf(stderr, "uncompressed_size: %d\n", sh->uncompressed_size);
-	fprintf(stderr, "framecount: %d\n", sh->framecount);
-	fprintf(stderr, "checksum: %d\n", sh->checksum);
-	fprintf(stderr, "title: %s\n", sh->title);
-#endif
 
 	if (gbc_length < sh->uncompressed_size) {
 		fprintf(stderr, "Error: the length of the GBC data (%d) is too short - expected %d bytes.\n",
@@ -150,24 +125,4 @@ void* goomba_replace(void* gba_header, const void* gbc_sram, size_t gbc_length) 
 	free(backup);
 
 	return gba_header_ptr;
-}
-
-void goomba_replace_file(FILE* gba, FILE* gbc) {
-	unsigned char* gba_data = (unsigned char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
-	fread(gba_data, GOOMBA_COLOR_SRAM_SIZE, 1, gba);
-
-	fseek(gbc, 0, SEEK_END);
-	size_t gbc_length = ftell(gbc);
-	fseek(gbc, 0, SEEK_SET);
-
-	void* gbc_data = malloc(gbc_length);
-	fread(gbc_data, gbc_length, 1, gbc);
-
-	void* new_gba_sram = goomba_replace(gba_data + 4, gbc_data, gbc_length);
-	if (new_gba_sram != NULL) {
-		fseek(gba, 4, SEEK_SET);
-		fwrite(new_gba_sram, GOOMBA_COLOR_SRAM_SIZE, 1, gba);
-	}
-	free(gba_data);
-	free(gbc_data);
 }

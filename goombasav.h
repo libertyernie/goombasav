@@ -2,6 +2,7 @@
 #define __GOOMBASAV_H
 
 #include <stdint.h>
+#define GOOMBA_COLOR_SRAM_SIZE 65536
 
 typedef struct {		//(modified stateheader)
 	uint16_t size;
@@ -24,8 +25,8 @@ typedef struct {
 	char title[32];
 } stateheader;
 
+void goomba_print_stateheader(FILE* stream, stateheader* sh);
 void* goomba_extract(const void* header_ptr);
-void goomba_extract_file(FILE* in, FILE* out);
-void goomba_replace_file(FILE* gba, FILE* gbc);
+void* goomba_replace(void* gba_header, const void* gbc_sram, size_t gbc_length);
 
 #endif

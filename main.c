@@ -22,6 +22,51 @@ void could_not_open(const char* filename) {
 	exit(EXIT_FAILURE);
 }
 
+void extract(FILE* gba, FILE* gbc) {
+	char* gba_data = (char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
+	fread(gba_data, 1, GOOMBA_COLOR_SRAM_SIZE, gba);
+	fclose(gba);
+
+	stateheader* sh = (stateheader*)(gba_data + 4);
+	goomba_print_stateheader(stderr, sh);
+	uint32_t uncompressed_size = sh->uncompressed_size;
+
+	void* gbc_data = goomba_extract(sh);
+	if (gbc_data != NULL) {
+		fwrite(gbc_data, 1, uncompressed_size, gbc);
+	}
+	fclose(gbc);
+	free(gbc_data);
+	if (gbc_data == NULL) {
+		exit(EXIT_FAILURE);
+	}
+}
+
+void replace(FILE* gba, FILE* gbc) {
+	char* gba_data = (char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
+	fread(gba_data, GOOMBA_COLOR_SRAM_SIZE, 1, gba);
+
+	goomba_print_stateheader(stderr, (stateheader*)(gba_data + 4));
+
+	fseek(gbc, 0, SEEK_END);
+	size_t gbc_length = ftell(gbc);
+	fseek(gbc, 0, SEEK_SET);
+
+	void* gbc_data = malloc(gbc_length);
+	fread(gbc_data, gbc_length, 1, gbc);
+
+	void* new_gba_sram = goomba_replace(gba_data + 4, gbc_data, gbc_length);
+	if (new_gba_sram != NULL) {
+		fseek(gba, 4, SEEK_SET);
+		fwrite(new_gba_sram, GOOMBA_COLOR_SRAM_SIZE, 1, gba);
+	}
+	free(gba_data);
+	free(gbc_data);
+	if (new_gba_sram == NULL) {
+		exit(EXIT_FAILURE);
+	}
+}
+
 int main(int argc, char** argv) {
 	if (argc != 4) usage();
 	if (argv[1][0] != 'x' && argv[1][0] != 'r') usage();
@@ -33,17 +78,20 @@ int main(int argc, char** argv) {
 			? stdin
 			: fopen(argv[2], "rb");
 		if (gba == NULL) could_not_open(argv[2]);
+
 		gbc = (strcmp("-", argv[3]) == 0)
 			? stdin
 			: fopen(argv[3], "wb");
 		if (gbc == NULL) could_not_open(argv[3]);
-		goomba_extract_file(gba, gbc);
+
+		extract(gba, gbc);
 	} else if (argv[1][0] == 'r') {
 		gba = fopen(argv[2], "r+b");
 		if (gba == NULL) could_not_open(argv[2]);
 		gbc = fopen(argv[3], "rb");
 		if (gbc == NULL) could_not_open(argv[3]);
-		goomba_replace_file(gba, gbc);
+
+		replace(gba, gbc);
 	}
 	fclose(gba);
 	fclose(gbc);
