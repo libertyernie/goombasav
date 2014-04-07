@@ -6,11 +6,14 @@
 #include "goombasav.h"
 
 const char* USAGE = "Usage: goombasav {x/r} [Goomba Color save file] [raw GBC save file]\n"
+"       goombasav [Goomba Color save file]\n"
 "\n"
-"x - extract save data from first file -> store in second file\n"
-"r - replace data in first file <- read from second file\n"
+"  x: extract save data from first file -> store in second file\n"
+"  r: replace data in first file <- read from second file\n"
+"  no argument: view Goomba Color SRAM header\n"
 "\n"
-"For the x command, the input and/or output files can be \"-\" for stdin/stdout\n";
+"When viewing or extracting data, the input and/or output files can be \"-\"\n"
+"for standard input/output.\n";
 
 void usage() {
 	fprintf(stderr, USAGE);
@@ -25,7 +28,6 @@ void could_not_open(const char* filename) {
 void extract(FILE* gba, FILE* gbc) {
 	char* gba_data = (char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
 	fread(gba_data, 1, GOOMBA_COLOR_SRAM_SIZE, gba);
-	fclose(gba);
 
 	stateheader* sh = (stateheader*)(gba_data + 4);
 	goomba_print_stateheader(stderr, sh);
@@ -35,7 +37,6 @@ void extract(FILE* gba, FILE* gbc) {
 	if (gbc_data != NULL) {
 		fwrite(gbc_data, 1, uncompressed_size, gbc);
 	}
-	fclose(gbc);
 	free(gbc_data);
 	if (gbc_data == NULL) {
 		exit(EXIT_FAILURE);
@@ -68,12 +69,25 @@ void replace(FILE* gba, FILE* gbc) {
 }
 
 int main(int argc, char** argv) {
-	if (argc != 4) usage();
-	if (argv[1][0] != 'x' && argv[1][0] != 'r') usage();
+	if (argc != 4 && argc != 2) usage();
 
-	FILE* gba;
-	FILE* gbc;
-	if (argv[1][0] == 'x') {
+	FILE* gba = NULL;
+	FILE* gbc = NULL;
+	if (argc == 2) {
+		if (strcmp("--help", argv[1]) == 0 || strcmp("/?", argv[1]) == 0) {
+			usage();
+		} else {
+			gba = (strcmp("-", argv[1]) == 0)
+				? stdin
+				: fopen(argv[1], "rb");
+			if (gba == NULL) could_not_open(argv[2]);
+
+			stateheader sh;
+			fread(&sh, 1, 4, gba); // dump
+			fread(&sh, sizeof(stateheader), 1, gba); // read header
+			goomba_print_stateheader(stdout, &sh);
+		}
+	} else if (argv[1][0] == 'x') {
 		gba = (strcmp("-", argv[2]) == 0)
 			? stdin
 			: fopen(argv[2], "rb");
@@ -92,8 +106,10 @@ int main(int argc, char** argv) {
 		if (gbc == NULL) could_not_open(argv[3]);
 
 		replace(gba, gbc);
+	} else {
+		usage();
 	}
-	fclose(gba);
-	fclose(gbc);
+	if (gba != NULL) fclose(gba);
+	if (gbc != NULL) fclose(gbc);
 	return 0;
 }
