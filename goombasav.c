@@ -4,15 +4,40 @@
 
 #include "goombasav.h"
 #include "minilzo-2.06/minilzo.h"
-#define SRAMSAVE 1
+
+const char* goomba_typestr(uint16_t type) {
+	switch (type) {
+	case GOOMBA_STATESAVE:
+		return "Savestate";
+	case GOOMBA_SRAMSAVE:
+		return "SRAM";
+	case GOOMBA_CONFIGSAVE:
+		return "Configuration";
+	default:
+		return "Unknown";
+	}
+}
 
 void goomba_print_stateheader(FILE* stream, stateheader* sh) {
 	fprintf(stream, "size: %d\n", sh->size);
-	fprintf(stream, "type: %d\n", sh->type);
+	fprintf(stream, "type: %s (%d)\n", goomba_typestr(sh->type), sh->type);
 	fprintf(stream, "uncompressed_size: %d\n", sh->uncompressed_size);
 	fprintf(stream, "framecount: %d\n", sh->framecount);
 	fprintf(stream, "checksum: %d\n", sh->checksum);
 	fprintf(stream, "title: %s\n", sh->title);
+}
+
+bool plausible(stateheader sh) {
+	return sh.type < 3 && sh.size >= sizeof(stateheader);
+}
+
+stateheader* goomba_next(const void* current_header) {
+	stateheader* sh = (stateheader*)current_header;
+	uint16_t s = sh->size;
+	char* c = (char*)sh;
+	c += s;
+	sh = (stateheader*)c;
+	return (plausible(*sh) ? sh : NULL);
 }
 
 /**
@@ -23,7 +48,7 @@ void goomba_print_stateheader(FILE* stream, stateheader* sh) {
 void* goomba_extract(const void* header_ptr) {
 	stateheader* sh = (stateheader*)header_ptr;
 
-	if (sh->type != 1) {
+	if (sh->type != GOOMBA_SRAMSAVE) {
 		fprintf(stderr, "Error: this is not SRAM data\n");
 		return NULL;
 	}
@@ -92,7 +117,7 @@ void* goomba_replace(void* gba_header, const void* gbc_sram, size_t gbc_length) 
 		fprintf(stderr, "Warning: unknown data at end of GBC save file - last %d bytes will be ignored\n", gbc_length - sh->uncompressed_size);
 	}
 
-	if (sh->type != SRAMSAVE) {
+	if (sh->type != GOOMBA_SRAMSAVE) {
 		fprintf(stderr, "The data at gba_sram + gba_header_location is not SRAM data.\n");
 		return NULL;
 	}
