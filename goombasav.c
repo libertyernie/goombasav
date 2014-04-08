@@ -19,11 +19,21 @@ const char* goomba_typestr(uint16_t type) {
 }
 
 void goomba_print_stateheader(FILE* stream, const stateheader* sh) {
-	fprintf(stream, "size: %d\n", sh->size);
-	fprintf(stream, "type: %s (%d)\n", goomba_typestr(sh->type), sh->type);
-	fprintf(stream, "uncompressed_size: %d\n", sh->uncompressed_size);
-	fprintf(stream, "framecount: %d\n", sh->framecount);
-	fprintf(stream, "checksum: %d\n", sh->checksum);
+	fprintf(stream, "size: %u\n", sh->size);
+	fprintf(stream, "type: %s (%u)\n", goomba_typestr(sh->type), sh->type);
+	if (sh->type == GOOMBA_CONFIGSAVE) {
+		configdata* cd = (configdata*)sh;
+		fprintf(stream, "bordercolor: %u\n", cd->bordercolor);
+		fprintf(stream, "palettebank: %u\n", cd->palettebank);
+		fprintf(stream, "misc: %u\n", cd->misc);
+		fprintf(stream, "reserved3: %u\n", cd->reserved3);
+		fprintf(stream, "sram_checksum: %8X\n", cd->sram_checksum);
+		//fprintf(stream, "zero: %d\n", cd->zero);
+	} else {
+		fprintf(stream, "uncompressed_size: %u\n", sh->uncompressed_size);
+		fprintf(stream, "framecount: %u\n", sh->framecount);
+		fprintf(stream, "checksum: %8X\n", sh->checksum);
+	}
 	fprintf(stream, "title: %s\n", sh->title);
 }
 
@@ -31,14 +41,14 @@ bool stateheader_plausible(stateheader sh) {
 	return sh.type < 3 && sh.size >= sizeof(stateheader);
 }
 
-///<summary>
-///<para>When given a pointer to a stateheader, returns a pointer to where the
-///next stateheader will be located (if any). Use stateheader_plausible to
-///determine if there really is a header at this location.</para>
-///
-///<para>If stateheader_plausible determines that the input is not a valid
-///stateheader, NULL will be returned.</para>
-///</summary>
+/**
+ * When given a pointer to a stateheader, returns a pointer to where the next
+ * stateheader will be located (if any). Use stateheader_plausible to
+ * determine if there really is a header at this location.
+ *
+ * If stateheader_plausible determines that the input is not a valid
+ * stateheader, NULL will be returned.
+ */
 stateheader* stateheader_advance(const stateheader* sh) {
 	if (!stateheader_plausible(*sh)) return NULL;
 
