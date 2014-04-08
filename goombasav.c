@@ -41,8 +41,9 @@ void stateheader_print_summary(FILE* stream, const stateheader* sh) {
 	fprintf(stream, "%s: %s (%u b / %u uncomp)\n", stateheader_typestr(sh->type), sh->title, sh->size, sh->uncompressed_size);
 }
 
-bool stateheader_plausible(stateheader sh) {
-	return sh.type < 3 && sh.size >= sizeof(stateheader) && (sh.type == GOOMBA_CONFIGSAVE || sh.uncompressed_size > 0);
+bool stateheader_plausible(const stateheader* sh) {
+	return sh->type < 3 && sh->size >= sizeof(stateheader) && // check type (0,1,2) and size (at least 48)
+		(sh->type == GOOMBA_CONFIGSAVE || sh->uncompressed_size > 0); // check uncompressed_size, but not for configsave
 }
 
 /**
@@ -54,7 +55,7 @@ bool stateheader_plausible(stateheader sh) {
  * stateheader, NULL will be returned.
  */
 stateheader* stateheader_advance(const stateheader* sh) {
-	if (!stateheader_plausible(*sh)) return NULL;
+	if (!stateheader_plausible(sh)) return NULL;
 
 	uint16_t s = sh->size;
 	char* c = (char*)sh;
@@ -96,7 +97,7 @@ size_t copy_until_invalid_header(void* dest, const void* src) {
 	size_t bytes_copied = 0;
 	while (true) {
 		const stateheader* sh = (const stateheader*)src;
-		if (!stateheader_plausible(*sh)) break;
+		if (!stateheader_plausible(sh)) break;
 
 		memcpy(dest, src, sh->size);
 

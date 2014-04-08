@@ -38,7 +38,7 @@ stateheader** stateheader_scan(const void* first_header, size_t max_num_headers)
 
 	stateheader* sh = (stateheader*)first_header;
 	int i = 0;
-	while (stateheader_plausible(*sh)) {
+	while (stateheader_plausible(sh)) {
 		headers[i] = sh;
 		i++;
 		sh = stateheader_advance(sh);
