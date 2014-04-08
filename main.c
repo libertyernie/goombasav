@@ -135,10 +135,22 @@ int main(int argc, char** argv) {
 				: fopen(argv[1], "rb");
 			if (gba == NULL) could_not_open(argv[2]);
 
-			stateheader sh;
-			fread(&sh, 1, 4, gba); // dump
-			fread(&sh, sizeof(stateheader), 1, gba); // read header
-			stateheader_print(stdout, &sh);
+			char* gba_data = (char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
+			fread(gba_data, 1, GOOMBA_COLOR_SRAM_SIZE, gba);
+			stateheader** headers = stateheader_scan(gba_data + 4, 20);
+			if (headers[0] == NULL) {
+				fprintf(stderr, "No headers found\n");
+				exit(EXIT_FAILURE);
+			}
+
+			int i = 0;
+			while (headers[i] != NULL) {
+				printf("%d. ", i);
+				stateheader_print_summary(stdout, headers[i]);
+				i++;
+			}
+
+			exit(EXIT_SUCCESS);
 		}
 	} else if (argv[1][0] == 'x') {
 		gba = (strcmp("-", argv[2]) == 0)
