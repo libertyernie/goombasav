@@ -92,28 +92,18 @@ void* goomba_extract(const void* header_ptr) {
 	return uncompressed_data;
 }
 
-// probably broken
-size_t copy_until_64bytes0(void* dest, const void* src) {
-	// if you used almost all 64KB earlier for some reason, it will segfault
-	// to prevent this, you could add a zero buffer to the end of the GBA SRAM data when you first read it in
-
+size_t copy_until_invalid_header(void* dest, const void* src) {
 	size_t bytes_copied = 0;
-	int bytes_zero = 0;
-	uint64_t* dest2 = (uint64_t*)dest; // copy 8 bytes (64 bits) at once
-	uint64_t* src2 = (uint64_t*)src;
-	while (bytes_zero < 64) { // copy until 64 bytes worth of zeroes are encountered
-		*dest2 = *src2;
-		if (*src2 == 0) {
-			bytes_zero += sizeof(uint64_t);
-		} else {
-			bytes_zero = 0; // reset counter
-		}
-		dest2++;
-		src2++;
-		bytes_copied += sizeof(uint64_t);
+	while (true) {
+		const stateheader* sh = (const stateheader*)src;
+		if (!stateheader_plausible(*sh)) break;
+
+		memcpy(dest, src, sh->size);
+
+		src = (char*)src + sh->size;
+		dest = (char*)dest + sh->size;
+		bytes_copied += sh->size;
 	}
-	// 64 bytes of zeroes found - subtract those from the count (even though they were copied, they don't need to be copied back later)
-	bytes_copied -= bytes_zero;
 	return bytes_copied;
 }
 
@@ -147,7 +137,7 @@ void* goomba_replace(void* gba_header, const void* gbc_sram, size_t gbc_length) 
 
 	// backup data that comes after this header
 	unsigned char* backup = (unsigned char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
-	size_t backup_len = copy_until_64bytes0(backup, gba_header_ptr + sh->size);
+	size_t backup_len = copy_until_invalid_header(backup, gba_header_ptr + sh->size);
 
 	// compress gbc sram
 	lzo_uint compressed_size;
@@ -159,13 +149,12 @@ void* goomba_replace(void* gba_header, const void* gbc_sram, size_t gbc_length) 
 	free(wrkmem);
 
 	sh->size = compressed_size + sizeof(stateheader);
-	// pad to 16 bytes!
+	// pad to 4 bytes!
 	// if I don't do this, goomba color might not load the palette settings, or seemingly 'forget' them later
 	// btw, the settings are stored in the configdata struct defined in goombasav.h
-	while (sh->size % 16 != 0) {
+	while (sh->size % 4 != 0) {
 		gba_header_ptr[sh->size] = 0;
 		sh->size++;
-		printf("%d\n", sh->size);
 	}
 
 	// restore the backup - just assume we have enough space
