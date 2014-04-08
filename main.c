@@ -111,7 +111,7 @@ void replace(const char* gbafile, const char* gbcfile) {
 	}
 	size_t diff = (char*)sh - gba_data; // find the point in the file where the altered header will go
 	fseek(gba, diff, SEEK_SET);
-	size_t t = fwrite(new_gba_sram, 1, GOOMBA_COLOR_SRAM_SIZE - diff, gba); // Subtract diff from GOOMBA_COLOR_SRAM_SIZE to keep the file at 65536 bytes
+	fwrite(new_gba_sram, 1, GOOMBA_COLOR_SRAM_SIZE - diff, gba); // Subtract diff from GOOMBA_COLOR_SRAM_SIZE to keep the file at 65536 bytes
 	free(gba_data);
 	free(gbc_data);
 }

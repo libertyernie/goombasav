@@ -139,7 +139,7 @@ void* goomba_replace(void* gba_header, const void* gbc_sram, size_t gbc_length) 
 	stateheader* sh = (stateheader*)gba_header_ptr;
 
 	if (gbc_length < sh->uncompressed_size) {
-		fprintf(stderr, "Error: the length of the GBC data (%d) is too short - expected %d bytes.\n",
+		fprintf(stderr, "Error: the length of the GBC data (%u) is too short - expected %u bytes.\n",
 			gbc_length, sh->uncompressed_size);
 		return NULL;
 	} else if (gbc_length - 4 == sh->uncompressed_size) {
@@ -149,7 +149,7 @@ void* goomba_replace(void* gba_header, const void* gbc_sram, size_t gbc_length) 
 	} else if (gbc_length - 48 == sh->uncompressed_size) {
 		fprintf(stderr, "Note: RTC data (new VBA format) will not be copied\n");
 	} else if (gbc_length > sh->uncompressed_size) {
-		fprintf(stderr, "Warning: unknown data at end of GBC save file - last %d bytes will be ignored\n", gbc_length - sh->uncompressed_size);
+		fprintf(stderr, "Warning: unknown data at end of GBC save file - last %u bytes will be ignored\n", gbc_length - sh->uncompressed_size);
 	}
 
 	if (sh->type != GOOMBA_SRAMSAVE) {
