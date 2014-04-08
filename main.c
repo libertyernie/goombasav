@@ -46,7 +46,7 @@ stateheader** stateheader_scan(const void* first_header, size_t max_num_headers)
 	return headers;
 }
 
-stateheader* ask(const void* first_header) {
+stateheader* ask(const void* first_header, const char* prompt) {
 	const char* char_ptr = (const char*)first_header;
 	stateheader** headers = stateheader_scan(char_ptr, 20);
 	if (headers[0] == NULL) {
@@ -62,7 +62,7 @@ stateheader* ask(const void* first_header) {
 	}
 
 	int index;
-	printf("Extract: ");
+	printf("%s", prompt);
 	fflush(stdout);
 	int dump;
 	while (scanf("%d", &index) != 1 || index < 0 || index >= i) {
@@ -76,61 +76,75 @@ stateheader* ask(const void* first_header) {
 	return selected;
 }
 
-void extract(FILE* gba, FILE* gbc) {
+void extract(const char* gbcfile, const char* gbafile) {
+	FILE* gba = (strcmp("-", gbafile) == 0)
+		? stdin
+		: fopen(gbafile, "rb");
+	if (gba == NULL) could_not_open(gbafile);
+
 	char* gba_data = (char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
 	fread(gba_data, 1, GOOMBA_COLOR_SRAM_SIZE, gba);
+	fclose(gba);
 
-	stateheader* sh = ask(gba_data + 4);
+	stateheader* sh = ask(gba_data + 4, "Extract: ");
 	stateheader_print(stderr, sh);
 	uint32_t uncompressed_size = sh->uncompressed_size;
 
 	void* gbc_data = goomba_extract(sh);
-	if (gbc_data != NULL) {
-		fwrite(gbc_data, 1, uncompressed_size, gbc);
-	}
-	free(gbc_data);
 	if (gbc_data == NULL) {
 		exit(EXIT_FAILURE);
 	}
+
+	FILE* gbc = (strcmp("-", gbcfile) == 0)
+		? stdout
+		: fopen(gbcfile, "wb");
+	if (gbc == NULL) could_not_open(gbcfile);
+	fwrite(gbc_data, 1, uncompressed_size, gbc);
+	free(gbc_data);
+	fclose(gbc);
 }
 
-void replace(FILE* gba, FILE* gbc) {
+void replace(const char* gbafile, const char* gbcfile) {
+	FILE* gba = fopen(gbafile, "r+b");
+	if (gba == NULL) could_not_open(gbafile);
+
+	FILE* gbc = fopen(gbcfile, "rb");
+	if (gbc == NULL) could_not_open(gbcfile);
+
 	char* gba_data = (char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
 	fread(gba_data, GOOMBA_COLOR_SRAM_SIZE, 1, gba);
 
-	stateheader* sh = ask(gba_data + 4);
+	stateheader* sh = ask(gba_data + 4, "Replace: ");
 	stateheader_print(stderr, sh);
-
 	fseek(gbc, 0, SEEK_END);
 	size_t gbc_length = ftell(gbc);
 	fseek(gbc, 0, SEEK_SET);
 
 	void* gbc_data = malloc(gbc_length);
 	fread(gbc_data, gbc_length, 1, gbc);
+	fclose(gbc);
 
+	// In the call to goomba_replace, we ignore any data before the header we're editing.
+	// The headers after this one will be moved by goomba_replace.
 	void* new_gba_sram = goomba_replace(sh, gbc_data, gbc_length);
-	if (new_gba_sram != NULL) {
-		size_t diff = (char*)sh - gba_data;
-		fseek(gba, diff, SEEK_SET);
-		fwrite(new_gba_sram, GOOMBA_COLOR_SRAM_SIZE, 1, gba);
-	}
-	free(gba_data);
-	free(gbc_data);
 	if (new_gba_sram == NULL) {
 		exit(EXIT_FAILURE);
 	}
+	size_t diff = (char*)sh - gba_data; // find the point in the file where the altered header will go
+	fseek(gba, diff, SEEK_SET);
+	size_t t = fwrite(new_gba_sram, 1, GOOMBA_COLOR_SRAM_SIZE - diff, gba); // Subtract diff from GOOMBA_COLOR_SRAM_SIZE to keep the file at 65536 bytes
+	free(gba_data);
+	free(gbc_data);
 }
 
 int main(int argc, char** argv) {
 	if (argc != 4 && argc != 2) usage();
 
-	FILE* gba = NULL;
-	FILE* gbc = NULL;
 	if (argc == 2) {
 		if (strcmp("--help", argv[1]) == 0 || strcmp("/?", argv[1]) == 0) {
 			usage();
 		} else {
-			gba = (strcmp("-", argv[1]) == 0)
+			FILE* gba = (strcmp("-", argv[1]) == 0)
 				? stdin
 				: fopen(argv[1], "rb");
 			if (gba == NULL) could_not_open(argv[2]);
@@ -150,31 +164,15 @@ int main(int argc, char** argv) {
 				i++;
 			}
 
+			fclose(gba);
 			exit(EXIT_SUCCESS);
 		}
 	} else if (argv[1][0] == 'x') {
-		gba = (strcmp("-", argv[2]) == 0)
-			? stdin
-			: fopen(argv[2], "rb");
-		if (gba == NULL) could_not_open(argv[2]);
-
-		gbc = (strcmp("-", argv[3]) == 0)
-			? stdin
-			: fopen(argv[3], "wb");
-		if (gbc == NULL) could_not_open(argv[3]);
-
-		extract(gba, gbc);
+		extract(argv[2], argv[3]);
 	} else if (argv[1][0] == 'r') {
-		gba = fopen(argv[2], "r+b");
-		if (gba == NULL) could_not_open(argv[2]);
-		gbc = fopen(argv[3], "rb");
-		if (gbc == NULL) could_not_open(argv[3]);
-
-		replace(gba, gbc);
+		replace(argv[2], argv[3]);
 	} else {
 		usage();
 	}
-	if (gba != NULL) fclose(gba);
-	if (gbc != NULL) fclose(gbc);
 	return 0;
 }
