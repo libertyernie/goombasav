@@ -64,6 +64,27 @@ stateheader* stateheader_advance(const stateheader* sh) {
 }
 
 /**
+* Scans for valid stateheaders and allocates an array to store them. The array
+* will have a capacity of max_num_headers+1, and any difference between that
+* and the number of headers found will be filled with NULL entries. The last
+* entry (array[max_num_headers]) is guaranteed to be NULL.
+*/
+stateheader** stateheader_scan(const void* first_header, size_t max_num_headers) {
+	const size_t psize = sizeof(stateheader*);
+	stateheader** headers = (stateheader**)malloc(psize * (max_num_headers + 1));
+	memset(headers, NULL, psize * (max_num_headers + 1));
+
+	stateheader* sh = (stateheader*)first_header;
+	int i = 0;
+	while (stateheader_plausible(sh)) {
+		headers[i] = sh;
+		i++;
+		sh = stateheader_advance(sh);
+	}
+	return headers;
+}
+
+/**
  * Allocates memory to store the uncompressed GB/GBC save file extracted from
  * the Goomba Color save file stored in header_ptr, or returns NULL if the
  * decompression failed.
@@ -109,8 +130,8 @@ size_t copy_until_invalid_header(void* dest, const void* src) {
 }
 
 /**
- * Modifies the Goomba/Goomba Color SRAM data at gba_header_ptr to contain the
- * save file pointed to by gba_sram. Returns gba_header_ptr on success or NULL
+ * Modifies the Goomba/Goomba Color SRAM data at gba_header to contain the
+ * save file pointed to by gba_sram. Returns gba_header on success or NULL
  * if the operation fails.
  */
 void* goomba_replace(void* gba_header, const void* gbc_sram, size_t gbc_length) {

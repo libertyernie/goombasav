@@ -25,27 +25,6 @@ void could_not_open(const char* filename) {
 	exit(EXIT_FAILURE);
 }
 
-/**
- * Scans for valid stateheaders and allocates an array to store them. The array
- * will have a capacity of max_num_headers+1, and any difference between that
- * and the number of headers found will be filled with NULL entries. The last
- * entry (array[max_num_headers]) is guaranteed to be NULL.
- */
-stateheader** stateheader_scan(const void* first_header, size_t max_num_headers) {
-	const size_t psize = sizeof(stateheader*);
-	stateheader** headers = (stateheader**)malloc(psize * (max_num_headers + 1));
-	memset(headers, NULL, psize * (max_num_headers + 1));
-
-	stateheader* sh = (stateheader*)first_header;
-	int i = 0;
-	while (stateheader_plausible(sh)) {
-		headers[i] = sh;
-		i++;
-		sh = stateheader_advance(sh);
-	}
-	return headers;
-}
-
 stateheader* ask(const void* first_header, const char* prompt) {
 	const char* char_ptr = (const char*)first_header;
 	stateheader** headers = stateheader_scan(char_ptr, 20);
@@ -137,6 +116,30 @@ void replace(const char* gbafile, const char* gbcfile) {
 	free(gbc_data);
 }
 
+void list(const char* gbafile) {
+	FILE* gba = (strcmp("-", gbafile) == 0)
+		? stdin
+		: fopen(gbafile, "rb");
+	if (gba == NULL) could_not_open(gbafile);
+
+	char* gba_data = (char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
+	fread(gba_data, 1, GOOMBA_COLOR_SRAM_SIZE, gba);
+	stateheader** headers = stateheader_scan(gba_data + 4, 20);
+	if (headers[0] == NULL) {
+		fprintf(stderr, "No headers found\n");
+		exit(EXIT_FAILURE);
+	}
+
+	int i = 0;
+	while (headers[i] != NULL) {
+		printf("%d. ", i);
+		stateheader_print_summary(stdout, headers[i]);
+		i++;
+	}
+
+	fclose(gba);
+}
+
 int main(int argc, char** argv) {
 	if (argc != 4 && argc != 2) usage();
 
@@ -144,28 +147,7 @@ int main(int argc, char** argv) {
 		if (strcmp("--help", argv[1]) == 0 || strcmp("/?", argv[1]) == 0) {
 			usage();
 		} else {
-			FILE* gba = (strcmp("-", argv[1]) == 0)
-				? stdin
-				: fopen(argv[1], "rb");
-			if (gba == NULL) could_not_open(argv[2]);
-
-			char* gba_data = (char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
-			fread(gba_data, 1, GOOMBA_COLOR_SRAM_SIZE, gba);
-			stateheader** headers = stateheader_scan(gba_data + 4, 20);
-			if (headers[0] == NULL) {
-				fprintf(stderr, "No headers found\n");
-				exit(EXIT_FAILURE);
-			}
-
-			int i = 0;
-			while (headers[i] != NULL) {
-				printf("%d. ", i);
-				stateheader_print_summary(stdout, headers[i]);
-				i++;
-			}
-
-			fclose(gba);
-			exit(EXIT_SUCCESS);
+			list(argv[1]);
 		}
 	} else if (argv[1][0] == 'x') {
 		extract(argv[2], argv[3]);

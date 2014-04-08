@@ -29,10 +29,11 @@ typedef struct {
 	char title[32];
 } stateheader;
 
-bool stateheader_plausible(stateheader sh);
-stateheader* stateheader_advance(const stateheader* sh);
 void stateheader_print(FILE* stream, const stateheader* sh);
 void stateheader_print_summary(FILE* stream, const stateheader* sh);
+bool stateheader_plausible(const stateheader* sh);
+stateheader* stateheader_advance(const stateheader* sh);
+stateheader** stateheader_scan(const void* first_header, size_t max_num_headers);
 void* goomba_extract(const void* header_ptr);
 void* goomba_replace(void* gba_header, const void* gbc_sram, size_t gbc_length);
 
