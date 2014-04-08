@@ -5,7 +5,7 @@
 #include "goombasav.h"
 #include "minilzo-2.06/minilzo.h"
 
-const char* goomba_typestr(uint16_t type) {
+const char* stateheader_typestr(uint16_t type) {
 	switch (type) {
 	case GOOMBA_STATESAVE:
 		return "Savestate";
@@ -14,13 +14,13 @@ const char* goomba_typestr(uint16_t type) {
 	case GOOMBA_CONFIGSAVE:
 		return "Configuration";
 	default:
-		return "Unknown";
+		return "Unknown"; // Stateheaders with type >2 are rejected by stateheader_plausible
 	}
 }
 
-void goomba_print_stateheader(FILE* stream, const stateheader* sh) {
+void stateheader_print(FILE* stream, const stateheader* sh) {
 	fprintf(stream, "size: %u\n", sh->size);
-	fprintf(stream, "type: %s (%u)\n", goomba_typestr(sh->type), sh->type);
+	fprintf(stream, "type: %s (%u)\n", stateheader_typestr(sh->type), sh->type);
 	if (sh->type == GOOMBA_CONFIGSAVE) {
 		configdata* cd = (configdata*)sh;
 		fprintf(stream, "bordercolor: %u\n", cd->bordercolor);
@@ -37,8 +37,12 @@ void goomba_print_stateheader(FILE* stream, const stateheader* sh) {
 	fprintf(stream, "title: %s\n", sh->title);
 }
 
+void stateheader_print_summary(FILE* stream, const stateheader* sh) {
+	fprintf(stream, "%s: %s (%u b / %u uncomp)\n", stateheader_typestr(sh->type), sh->title, sh->size, sh->uncompressed_size);
+}
+
 bool stateheader_plausible(stateheader sh) {
-	return sh.type < 3 && sh.size >= sizeof(stateheader);
+	return sh.type < 3 && sh.size >= sizeof(stateheader) && (sh.type == GOOMBA_CONFIGSAVE || sh.uncompressed_size > 0);
 }
 
 /**
@@ -88,6 +92,7 @@ void* goomba_extract(const void* header_ptr) {
 	return uncompressed_data;
 }
 
+// probably broken
 size_t copy_until_64bytes0(void* dest, const void* src) {
 	// if you used almost all 64KB earlier for some reason, it will segfault
 	// to prevent this, you could add a zero buffer to the end of the GBA SRAM data when you first read it in
@@ -154,12 +159,13 @@ void* goomba_replace(void* gba_header, const void* gbc_sram, size_t gbc_length) 
 	free(wrkmem);
 
 	sh->size = compressed_size + sizeof(stateheader);
-	// pad to 4 bytes!
+	// pad to 16 bytes!
 	// if I don't do this, goomba color might not load the palette settings, or seemingly 'forget' them later
 	// btw, the settings are stored in the configdata struct defined in goombasav.h
-	while (sh->size % 4 != 0) {
+	while (sh->size % 16 != 0) {
 		gba_header_ptr[sh->size] = 0;
 		sh->size++;
+		printf("%d\n", sh->size);
 	}
 
 	// restore the backup - just assume we have enough space

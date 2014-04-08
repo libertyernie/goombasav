@@ -25,12 +25,63 @@ void could_not_open(const char* filename) {
 	exit(EXIT_FAILURE);
 }
 
+/**
+ * Scans for valid stateheaders and allocates an array to store them. The array
+ * will have a capacity of max_num_headers+1, and any difference between that
+ * and the number of headers found will be filled with NULL entries. The last
+ * entry (array[max_num_headers]) is guaranteed to be NULL.
+ */
+stateheader** stateheader_scan(const void* first_header, size_t max_num_headers) {
+	const size_t psize = sizeof(stateheader*);
+	stateheader** headers = (stateheader**)malloc(psize * (max_num_headers + 1));
+	memset(headers, NULL, psize * (max_num_headers + 1));
+
+	stateheader* sh = (stateheader*)first_header;
+	int i = 0;
+	while (stateheader_plausible(*sh)) {
+		headers[i] = sh;
+		i++;
+		sh = stateheader_advance(sh);
+	}
+	return headers;
+}
+
+stateheader* ask(const void* first_header) {
+	const char* char_ptr = (const char*)first_header;
+	stateheader** headers = stateheader_scan(char_ptr, 20);
+	if (headers[0] == NULL) {
+		fprintf(stderr, "No headers found\n");
+		exit(EXIT_FAILURE);
+	}
+
+	int i = 0;
+	while (headers[i] != NULL) {
+		printf("%d. ", i);
+		stateheader_print_summary(stdout, headers[i]);
+		i++;
+	}
+
+	int index;
+	printf("Extract: ");
+	fflush(stdout);
+	int dump;
+	while (scanf("%d", &index) != 1 || index < 0 || index >= i) {
+		printf("Invalid number entered - try again: ");
+		fflush(stdout);
+		while ((dump = getchar()) != '\n');
+	}
+
+	stateheader* selected = headers[index];
+	free(headers);
+	return selected;
+}
+
 void extract(FILE* gba, FILE* gbc) {
 	char* gba_data = (char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
 	fread(gba_data, 1, GOOMBA_COLOR_SRAM_SIZE, gba);
 
-	stateheader* sh = (stateheader*)(gba_data + 4);
-	goomba_print_stateheader(stderr, sh);
+	stateheader* sh = ask(gba_data + 4);
+	stateheader_print(stderr, sh);
 	uint32_t uncompressed_size = sh->uncompressed_size;
 
 	void* gbc_data = goomba_extract(sh);
@@ -47,7 +98,8 @@ void replace(FILE* gba, FILE* gbc) {
 	char* gba_data = (char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
 	fread(gba_data, GOOMBA_COLOR_SRAM_SIZE, 1, gba);
 
-	goomba_print_stateheader(stderr, (stateheader*)(gba_data + 4));
+	stateheader* sh = ask(gba_data + 4);
+	stateheader_print(stderr, sh);
 
 	fseek(gbc, 0, SEEK_END);
 	size_t gbc_length = ftell(gbc);
@@ -56,9 +108,10 @@ void replace(FILE* gba, FILE* gbc) {
 	void* gbc_data = malloc(gbc_length);
 	fread(gbc_data, gbc_length, 1, gbc);
 
-	void* new_gba_sram = goomba_replace(gba_data + 4, gbc_data, gbc_length);
+	void* new_gba_sram = goomba_replace(sh, gbc_data, gbc_length);
 	if (new_gba_sram != NULL) {
-		fseek(gba, 4, SEEK_SET);
+		size_t diff = (char*)sh - gba_data;
+		fseek(gba, diff, SEEK_SET);
 		fwrite(new_gba_sram, GOOMBA_COLOR_SRAM_SIZE, 1, gba);
 	}
 	free(gba_data);
@@ -85,7 +138,7 @@ int main(int argc, char** argv) {
 			stateheader sh;
 			fread(&sh, 1, 4, gba); // dump
 			fread(&sh, sizeof(stateheader), 1, gba); // read header
-			goomba_print_stateheader(stdout, &sh);
+			stateheader_print(stdout, &sh);
 		}
 	} else if (argv[1][0] == 'x') {
 		gba = (strcmp("-", argv[2]) == 0)
