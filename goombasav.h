@@ -1,6 +1,10 @@
 #ifndef __GOOMBASAV_H
 #define __GOOMBASAV_H
 
+#ifndef __cplusplus
+#include <stdbool.h>
+#endif
+
 #include <stdint.h>
 #define GOOMBA_COLOR_SRAM_SIZE 65536
 #define GOOMBA_STATEID 0x57a731d8
