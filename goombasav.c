@@ -18,7 +18,7 @@ const char* goomba_typestr(uint16_t type) {
 	}
 }
 
-void goomba_print_stateheader(FILE* stream, stateheader* sh) {
+void goomba_print_stateheader(FILE* stream, const stateheader* sh) {
 	fprintf(stream, "size: %d\n", sh->size);
 	fprintf(stream, "type: %s (%d)\n", goomba_typestr(sh->type), sh->type);
 	fprintf(stream, "uncompressed_size: %d\n", sh->uncompressed_size);
@@ -27,17 +27,25 @@ void goomba_print_stateheader(FILE* stream, stateheader* sh) {
 	fprintf(stream, "title: %s\n", sh->title);
 }
 
-bool plausible(stateheader sh) {
+bool stateheader_plausible(stateheader sh) {
 	return sh.type < 3 && sh.size >= sizeof(stateheader);
 }
 
-stateheader* goomba_next(const void* current_header) {
-	stateheader* sh = (stateheader*)current_header;
+///<summary>
+///<para>When given a pointer to a stateheader, returns a pointer to where the
+///next stateheader will be located (if any). Use stateheader_plausible to
+///determine if there really is a header at this location.</para>
+///
+///<para>If stateheader_plausible determines that the input is not a valid
+///stateheader, NULL will be returned.</para>
+///</summary>
+stateheader* stateheader_advance(const stateheader* sh) {
+	if (!stateheader_plausible(*sh)) return NULL;
+
 	uint16_t s = sh->size;
 	char* c = (char*)sh;
 	c += s;
-	sh = (stateheader*)c;
-	return (plausible(*sh) ? sh : NULL);
+	return (stateheader*)c;
 }
 
 /**
