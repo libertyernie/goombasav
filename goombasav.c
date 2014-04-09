@@ -5,6 +5,8 @@
 #include "goombasav.h"
 #include "minilzo-2.06/minilzo.h"
 
+//TODO 256-byte string buffer for print and summary functions
+
 const char* stateheader_typestr(uint16_t type) {
 	switch (type) {
 	case GOOMBA_STATESAVE:
@@ -81,7 +83,6 @@ stateheader** stateheader_scan(const void* first_header, size_t max_num_headers)
 #ifdef GOOMBA_COLOR
 		if (headers[i]->type == GOOMBA_CONFIGSAVE) {
 			configdata* cd = (configdata*)headers[i];
-			printf("%u\n", cd->sram_checksum);
 			if (cd->sram_checksum != 0) {
 				fprintf(stderr, "Goomba Color was not cleanly shut down - CFG->sram_checksum is not empty. Run the rom in an emulator and go to menu->exit.\n");
 				return NULL;
@@ -115,10 +116,9 @@ void* goomba_extract(const void* header_ptr, size_t* size_output) {
 		uncompressed_data, &output_size,
 		(void*)NULL);
 	fprintf(stderr, "Actual uncompressed size: %u\n", output_size);
-	/*if (r == LZO_E_INPUT_NOT_CONSUMED) {
-		fprintf(stderr, "Warning: input not fully used. Double-check the result to make sure it works.\n");
-	} else*/
-	if (r < 0) {
+	if (r == LZO_E_INPUT_NOT_CONSUMED) {
+		//fprintf(stderr, "Warning: input not fully used. Double-check the result to make sure it works.\n");
+	} else if (r < 0) {
 		fprintf(stderr, "LZO error code: %d\nLook this up in lzoconf.h.\n", r);
 		free(uncompressed_data);
 		return NULL;
