@@ -37,6 +37,14 @@ stateheader* ask(const void* first_header, const char* prompt) {
 	while (headers[i] != NULL) {
 		printf("%d. ", i);
 		stateheader_print_summary(stdout, headers[i]);
+		if (headers[i]->type == GOOMBA_CONFIGSAVE) {
+			configdata* cd = (configdata*)headers[i];
+			printf("%u\n", cd->sram_checksum);
+			if (cd->sram_checksum != 0) {
+				fprintf(stderr, "Goomba was not cleanly shut down - CFG->sram_checksum is not empty. Run the rom in an emulator and go to menu->exit.");
+				exit(EXIT_FAILURE);
+			}
+		}
 		i++;
 	}
 
