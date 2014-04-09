@@ -89,7 +89,7 @@ stateheader** stateheader_scan(const void* first_header, size_t max_num_headers)
  * the Goomba Color save file stored in header_ptr, or returns NULL if the
  * decompression failed.
  */
-void* goomba_extract(const void* header_ptr) {
+void* goomba_extract(const void* header_ptr, size_t* size_output) {
 	stateheader* sh = (stateheader*)header_ptr;
 
 	if (sh->type != GOOMBA_SRAMSAVE) {
@@ -98,12 +98,17 @@ void* goomba_extract(const void* header_ptr) {
 	}
 	
 	lzo_uint compressed_size = sh->size - sizeof(stateheader);
+#ifdef GOOMBA_COLOR
 	lzo_uint output_size = sh->uncompressed_size;
+#else
+	lzo_uint output_size = 16384;
+#endif
 	const unsigned char* compressed_data = (unsigned char*)header_ptr + sizeof(stateheader);
-	unsigned char* uncompressed_data = (unsigned char*)malloc(sh->uncompressed_size);
+	unsigned char* uncompressed_data = (unsigned char*)malloc(output_size);
 	int r = lzo1x_decompress_safe(compressed_data, compressed_size,
 		uncompressed_data, &output_size,
 		(void*)NULL);
+	fprintf(stderr, "Actual uncompressed size: %u\n", output_size);
 	if (r == LZO_E_INPUT_NOT_CONSUMED) {
 		fprintf(stderr, "Warning: input not fully consumed. Double-check the result to make sure it works.\n");
 	} else if (r < 0) {
@@ -111,6 +116,7 @@ void* goomba_extract(const void* header_ptr) {
 		free(uncompressed_data);
 		return NULL;
 	}
+	*size_output = output_size;
 	return uncompressed_data;
 }
 
@@ -130,12 +136,12 @@ size_t copy_until_invalid_header(void* dest, const void* src) {
 	return bytes_copied + sizeof(stateheader);
 }
 
-/**
- * Modifies the Goomba/Goomba Color SRAM data at gba_header to contain the
- * save file pointed to by gba_sram. Returns gba_header on success or NULL
- * if the operation fails.
- */
 char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* gbc_sram, size_t gbc_length) {
+#ifndef GOOMBA_COLOR
+	fprintf(stderr, "Save file replacement not working yet for regular Goomba.\n");
+	exit(EXIT_FAILURE);
+#endif
+
 	unsigned char* gba_header_ptr = (unsigned char*)gba_header;
 	stateheader* sh = (stateheader*)gba_header_ptr;
 

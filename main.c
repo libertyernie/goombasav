@@ -5,8 +5,6 @@
 #include <string.h>
 #include "goombasav.h"
 
-#define GOOMBA_COLOR
-
 const char* USAGE = "Usage: goombasav {x/r} [Goomba Color save file] [raw GBC save file]\n"
 "       goombasav [Goomba Color save file]\n"
 "\n"
@@ -79,9 +77,9 @@ void extract(const char* gbafile, const char* gbcfile) {
 
 	stateheader* sh = ask(gba_data + 4, "Extract: ");
 	stateheader_print(stderr, sh);
-	uint32_t uncompressed_size = sh->uncompressed_size;
+	size_t uncompressed_size;
 
-	void* gbc_data = goomba_extract(sh);
+	void* gbc_data = goomba_extract(sh, &uncompressed_size);
 	if (gbc_data == NULL) {
 		exit(EXIT_FAILURE);
 	}
@@ -116,9 +114,9 @@ void replace(const char* gbafile, const char* gbcfile) {
 	fread(gbc_data, gbc_length, 1, gbc);
 	fclose(gbc);
 
+	void* new_gba_sram = goomba_new_sav(gba_data, sh, gbc_data, gbc_length);
 	gba = fopen(gbafile, "wb");
 	if (gba == NULL) could_not_open(gbafile);
-	void* new_gba_sram = goomba_new_sav(gba_data, sh, gbc_data, gbc_length);
 	if (new_gba_sram == NULL) {
 		exit(EXIT_FAILURE);
 	}

@@ -12,6 +12,8 @@
 #define GOOMBA_SRAMSAVE 1
 #define GOOMBA_CONFIGSAVE 2
 
+#define GOOMBA_COLOR
+
 typedef struct {		//(modified stateheader)
 	uint16_t size;
 	uint16_t type;	//=CONFIGSAVE
@@ -38,7 +40,7 @@ void stateheader_print_summary(FILE* stream, const stateheader* sh);
 bool stateheader_plausible(const stateheader* sh);
 stateheader* stateheader_advance(const stateheader* sh);
 stateheader** stateheader_scan(const void* first_header, size_t max_num_headers);
-void* goomba_extract(const void* header_ptr);
+void* goomba_extract(const void* header_ptr, size_t* size_output);
 char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* gbc_sram, size_t gbc_length);
 
 #endif
