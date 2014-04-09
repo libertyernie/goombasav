@@ -84,6 +84,8 @@ void extract(const char* gbafile, const char* gbcfile) {
 		exit(EXIT_FAILURE);
 	}
 
+	free(gba_data);
+
 	FILE* gbc = (strcmp("-", gbcfile) == 0)
 		? stdout
 		: fopen(gbcfile, "wb");
@@ -115,13 +117,15 @@ void replace(const char* gbafile, const char* gbcfile) {
 	fclose(gbc);
 
 	void* new_gba_sram = goomba_new_sav(gba_data, sh, gbc_data, gbc_length);
-	gba = fopen(gbafile, "wb");
 	if (gba == NULL) could_not_open(gbafile);
 	if (new_gba_sram == NULL) {
 		exit(EXIT_FAILURE);
 	}
+	gba = fopen(gbafile, "wb");
 	fseek(gba, 0, SEEK_SET);
 	fwrite(new_gba_sram, 1, GOOMBA_COLOR_SRAM_SIZE, gba); // Subtract diff from GOOMBA_COLOR_SRAM_SIZE to keep the file at 65536 bytes
+	fclose(gba);
+	free(new_gba_sram);
 	free(gba_data);
 	free(gbc_data);
 }
@@ -147,6 +151,7 @@ void list(const char* gbafile) {
 		i++;
 	}
 
+	free(headers);
 	fclose(gba);
 }
 
