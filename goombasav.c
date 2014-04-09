@@ -98,20 +98,17 @@ void* goomba_extract(const void* header_ptr, size_t* size_output) {
 	}
 	
 	lzo_uint compressed_size = sh->size - sizeof(stateheader);
-#ifdef GOOMBA_COLOR
-	lzo_uint output_size = sh->uncompressed_size;
-#else
-	lzo_uint output_size = 16384;
-#endif
+	lzo_uint output_size = 32768;
 	const unsigned char* compressed_data = (unsigned char*)header_ptr + sizeof(stateheader);
 	unsigned char* uncompressed_data = (unsigned char*)malloc(output_size);
 	int r = lzo1x_decompress_safe(compressed_data, compressed_size,
 		uncompressed_data, &output_size,
 		(void*)NULL);
 	fprintf(stderr, "Actual uncompressed size: %u\n", output_size);
-	if (r == LZO_E_INPUT_NOT_CONSUMED) {
-		fprintf(stderr, "Warning: input not fully consumed. Double-check the result to make sure it works.\n");
-	} else if (r < 0) {
+	/*if (r == LZO_E_INPUT_NOT_CONSUMED) {
+		fprintf(stderr, "Warning: input not fully used. Double-check the result to make sure it works.\n");
+	} else*/
+	if (r < 0) {
 		fprintf(stderr, "LZO error code: %d\nLook this up in lzoconf.h.\n", r);
 		free(uncompressed_data);
 		return NULL;

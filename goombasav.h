@@ -12,7 +12,7 @@
 #define GOOMBA_SRAMSAVE 1
 #define GOOMBA_CONFIGSAVE 2
 
-#define GOOMBA_COLO
+#define GOOMBA_COLOR
 
 typedef struct {		//(modified stateheader)
 	uint16_t size;
