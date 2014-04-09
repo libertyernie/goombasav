@@ -5,7 +5,7 @@
 #include "goombasav.h"
 #include "minilzo-2.06/minilzo.h"
 
-//TODO 256-byte string buffer for print and summary functions
+static char goomba_strbuf[256];
 
 const char* stateheader_typestr(uint16_t type) {
 	switch (type) {
@@ -20,27 +20,42 @@ const char* stateheader_typestr(uint16_t type) {
 	}
 }
 
-void stateheader_print(FILE* stream, const stateheader* sh) {
-	fprintf(stream, "size: %u\n", sh->size);
-	fprintf(stream, "type: %s (%u)\n", stateheader_typestr(sh->type), sh->type);
+/**
+ * Returns a multi-line description string that includes all parameters of the
+ * given stateheader or configdata structure.
+ * This string is stored in a static character buffer, and subsequent calls to
+ * stateheader_str or stateheader_summary_str will overwrite this buffer.
+ */
+const char* stateheader_str(const stateheader* sh) {
+	int j = 0;
+	j += sprintf(goomba_strbuf + j, "size: %u\n", sh->size);
+	j += sprintf(goomba_strbuf + j, "type: %s (%u)\n", stateheader_typestr(sh->type), sh->type);
 	if (sh->type == GOOMBA_CONFIGSAVE) {
 		configdata* cd = (configdata*)sh;
-		fprintf(stream, "bordercolor: %u\n", cd->bordercolor);
-		fprintf(stream, "palettebank: %u\n", cd->palettebank);
-		fprintf(stream, "misc: %u\n", cd->misc);
-		fprintf(stream, "reserved3: %u\n", cd->reserved3);
-		fprintf(stream, "sram_checksum: %8X\n", cd->sram_checksum);
-		//fprintf(stream, "zero: %d\n", cd->zero);
+		j += sprintf(goomba_strbuf + j, "bordercolor: %u\n", cd->bordercolor);
+		j += sprintf(goomba_strbuf + j, "palettebank: %u\n", cd->palettebank);
+		j += sprintf(goomba_strbuf + j, "misc: %u\n", cd->misc);
+		j += sprintf(goomba_strbuf + j, "reserved3: %u\n", cd->reserved3);
+		j += sprintf(goomba_strbuf + j, "sram_checksum: %8X\n", cd->sram_checksum);
+		//j += sprintf(goomba_strbuf + j, "zero: %d\n", cd->zero);
 	} else {
-		fprintf(stream, "uncompressed_size: %u\n", sh->uncompressed_size);
-		fprintf(stream, "framecount: %u\n", sh->framecount);
-		fprintf(stream, "checksum: %8X\n", sh->checksum);
+		j += sprintf(goomba_strbuf + j, "uncompressed_size: %u\n", sh->uncompressed_size);
+		j += sprintf(goomba_strbuf + j, "framecount: %u\n", sh->framecount);
+		j += sprintf(goomba_strbuf + j, "checksum: %8X\n", sh->checksum);
 	}
-	fprintf(stream, "title: %s\n", sh->title);
+	j += sprintf(goomba_strbuf + j, "title: %s", sh->title);
+	return goomba_strbuf;
 }
 
-void stateheader_print_summary(FILE* stream, const stateheader* sh) {
-	fprintf(stream, "%s: %s (%u b / %u uncomp)\n", stateheader_typestr(sh->type), sh->title, sh->size, sh->uncompressed_size);
+/**
+* Returns a one-line summary string displaying the size and title of the
+* stateheader or configdata structure.
+* This string is stored in a static character buffer, and subsequent calls to
+* stateheader_str or stateheader_summary_str will overwrite this buffer.
+*/
+const char* stateheader_summary_str(const stateheader* sh) {
+	sprintf(goomba_strbuf, "%s: %s (%u b / %u uncomp)", stateheader_typestr(sh->type), sh->title, sh->size, sh->uncompressed_size);
+	return goomba_strbuf;
 }
 
 bool stateheader_plausible(const stateheader* sh) {

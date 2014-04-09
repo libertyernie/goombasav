@@ -9,11 +9,11 @@ const char* USAGE = "Usage: goombasav {x/r} [Goomba Color save file] [raw GBC sa
 "       goombasav [Goomba Color save file]\n"
 "\n"
 "  x: extract save data from first file -> store in second file\n"
+"     (can be - for stdout)\n"
 "  r: replace data in first file <- read from second file\n"
-"  no argument: view Goomba Color SRAM header\n"
 "\n"
-"When viewing or extracting data, the input and/or output files can be \"-\"\n"
-"for standard input/output.\n";
+"  otherwise: view Goomba Color SRAM header\n"
+"             (file can be - for stdin)\n";
 
 void usage() {
 	fprintf(stderr, USAGE);
@@ -39,18 +39,17 @@ stateheader* ask(const void* first_header, const char* prompt) {
 
 	int i = 0;
 	while (headers[i] != NULL) {
-		printf("%d. ", i);
-		stateheader_print_summary(stdout, headers[i]);
+		fprintf(stderr, "%d. %s\n", i, stateheader_summary_str(headers[i]));
 		i++;
 	}
 
 	int index;
-	printf("%s", prompt);
-	fflush(stdout);
+	fprintf(stderr, "%s", prompt);
+	fflush(stderr);
 	int dump;
 	while (scanf("%d", &index) != 1 || index < 0 || index >= i) {
-		printf("Invalid number entered - try again: ");
-		fflush(stdout);
+		fprintf(stderr, "Invalid number entered - try again: ");
+		fflush(stderr);
 		while ((dump = getchar()) != '\n');
 	}
 
@@ -60,9 +59,7 @@ stateheader* ask(const void* first_header, const char* prompt) {
 }
 
 void extract(const char* gbafile, const char* gbcfile) {
-	FILE* gba = (strcmp("-", gbafile) == 0)
-		? stdin
-		: fopen(gbafile, "rb");
+	FILE* gba = fopen(gbafile, "rb");
 	if (gba == NULL) could_not_open(gbafile);
 
 	char* gba_data = (char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
@@ -70,7 +67,7 @@ void extract(const char* gbafile, const char* gbcfile) {
 	fclose(gba);
 
 	stateheader* sh = ask(gba_data + 4, "Extract: ");
-	stateheader_print(stderr, sh);
+	fprintf(stderr, "%s\n", stateheader_str(sh));
 	size_t uncompressed_size;
 
 	void* gbc_data = goomba_extract(sh, &uncompressed_size);
@@ -101,7 +98,7 @@ void replace(const char* gbafile, const char* gbcfile) {
 	fclose(gba);
 
 	stateheader* sh = ask(gba_data + 4, "Replace: ");
-	stateheader_print(stderr, sh);
+	fprintf(stderr, "%s\n", stateheader_str(sh));
 	fseek(gbc, 0, SEEK_END);
 	size_t gbc_length = ftell(gbc);
 	fseek(gbc, 0, SEEK_SET);
@@ -141,7 +138,7 @@ void list(const char* gbafile) {
 	int i = 0;
 	while (headers[i] != NULL) {
 		printf("%d. ", i);
-		stateheader_print_summary(stdout, headers[i]);
+		printf("%s\n", stateheader_summary_str(headers[i]));
 		i++;
 	}
 

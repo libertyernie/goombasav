@@ -5,7 +5,6 @@
 #include <stdbool.h>
 #endif
 
-#include <stdio.h>
 #include <stdint.h>
 #define GOOMBA_COLOR_SRAM_SIZE 65536
 #define GOOMBA_STATEID 0x57a731d8
@@ -36,8 +35,8 @@ typedef struct {
 	char title[32];
 } stateheader;
 
-void stateheader_print(FILE* stream, const stateheader* sh);
-void stateheader_print_summary(FILE* stream, const stateheader* sh);
+const char* stateheader_str(const stateheader* sh);
+const char* stateheader_summary_str(const stateheader* sh);
 bool stateheader_plausible(const stateheader* sh);
 stateheader* stateheader_advance(const stateheader* sh);
 stateheader** stateheader_scan(const void* first_header, size_t max_num_headers);
