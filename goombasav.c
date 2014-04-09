@@ -84,7 +84,7 @@ stateheader** stateheader_scan(const void* first_header, size_t max_num_headers)
 			printf("%u\n", cd->sram_checksum);
 			if (cd->sram_checksum != 0) {
 				fprintf(stderr, "Goomba Color was not cleanly shut down - CFG->sram_checksum is not empty. Run the rom in an emulator and go to menu->exit.\n");
-				exit(EXIT_FAILURE);
+				return NULL;
 			}
 		}
 #endif

@@ -28,6 +28,10 @@ void could_not_open(const char* filename) {
 stateheader* ask(const void* first_header, const char* prompt) {
 	const char* char_ptr = (const char*)first_header;
 	stateheader** headers = stateheader_scan(char_ptr, 20);
+	if (headers == NULL) {
+		fprintf(stderr, "An error occurred scanning for headers. See the console for more information.");
+		exit(EXIT_FAILURE);
+	}
 	if (headers[0] == NULL) {
 		fprintf(stderr, "No headers found\n");
 		exit(EXIT_FAILURE);
