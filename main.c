@@ -55,7 +55,7 @@ stateheader* ask(const void* first_header, const char* prompt) {
 	return selected;
 }
 
-void extract(const char* gbcfile, const char* gbafile) {
+void extract(const char* gbafile, const char* gbcfile) {
 	FILE* gba = (strcmp("-", gbafile) == 0)
 		? stdin
 		: fopen(gbafile, "rb");
@@ -84,7 +84,7 @@ void extract(const char* gbcfile, const char* gbafile) {
 }
 
 void replace(const char* gbafile, const char* gbcfile) {
-	FILE* gba = fopen(gbafile, "r+b");
+	FILE* gba = fopen(gbafile, "rb");
 	if (gba == NULL) could_not_open(gbafile);
 
 	FILE* gbc = fopen(gbcfile, "rb");
@@ -92,6 +92,7 @@ void replace(const char* gbafile, const char* gbcfile) {
 
 	char* gba_data = (char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
 	fread(gba_data, GOOMBA_COLOR_SRAM_SIZE, 1, gba);
+	fclose(gba);
 
 	stateheader* sh = ask(gba_data + 4, "Replace: ");
 	stateheader_print(stderr, sh);
@@ -103,15 +104,14 @@ void replace(const char* gbafile, const char* gbcfile) {
 	fread(gbc_data, gbc_length, 1, gbc);
 	fclose(gbc);
 
-	// In the call to goomba_replace, we ignore any data before the header we're editing.
-	// The headers after this one will be moved by goomba_replace.
-	void* new_gba_sram = goomba_replace(sh, gbc_data, gbc_length);
+	gba = fopen(gbafile, "wb");
+	if (gba == NULL) could_not_open(gbafile);
+	void* new_gba_sram = goomba_new_sav(gba_data, sh, gbc_data, gbc_length);
 	if (new_gba_sram == NULL) {
 		exit(EXIT_FAILURE);
 	}
-	size_t diff = (char*)sh - gba_data; // find the point in the file where the altered header will go
-	fseek(gba, diff, SEEK_SET);
-	fwrite(new_gba_sram, 1, GOOMBA_COLOR_SRAM_SIZE - diff, gba); // Subtract diff from GOOMBA_COLOR_SRAM_SIZE to keep the file at 65536 bytes
+	fseek(gba, 0, SEEK_SET);
+	fwrite(new_gba_sram, 1, GOOMBA_COLOR_SRAM_SIZE, gba); // Subtract diff from GOOMBA_COLOR_SRAM_SIZE to keep the file at 65536 bytes
 	free(gba_data);
 	free(gbc_data);
 }

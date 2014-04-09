@@ -126,7 +126,8 @@ size_t copy_until_invalid_header(void* dest, const void* src) {
 		dest = (char*)dest + sh->size;
 		bytes_copied += sh->size;
 	}
-	return bytes_copied;
+	memcpy(dest, src, sizeof(stateheader)); // copy "footer"
+	return bytes_copied + sizeof(stateheader);
 }
 
 /**
@@ -134,7 +135,7 @@ size_t copy_until_invalid_header(void* dest, const void* src) {
  * save file pointed to by gba_sram. Returns gba_header on success or NULL
  * if the operation fails.
  */
-void* goomba_replace(void* gba_header, const void* gbc_sram, size_t gbc_length) {
+char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* gbc_sram, size_t gbc_length) {
 	unsigned char* gba_header_ptr = (unsigned char*)gba_header;
 	stateheader* sh = (stateheader*)gba_header_ptr;
 
@@ -157,32 +158,53 @@ void* goomba_replace(void* gba_header, const void* gbc_sram, size_t gbc_length) 
 		return NULL;
 	}
 
+	char* goomba_new_sav = (char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
+	memset(goomba_new_sav, 0, GOOMBA_COLOR_SRAM_SIZE);
+
+	char* working = goomba_new_sav;
+	size_t before_header = (char*)gba_header - (char*)gba_data;
+	// copy anything before stateheader
+	memcpy(goomba_new_sav, gba_data, before_header);
+	printf("Copied start (%u)\n", before_header);
+	working += before_header;
+	// copy stateheader
+	memcpy(working, sh, sizeof(stateheader));
+	printf("Copied new header (%u)\n", sizeof(stateheader));
+	stateheader* new_sh = (stateheader*)working;
+	working += sizeof(stateheader);
+
 	// backup data that comes after this header
 	unsigned char* backup = (unsigned char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
+	//memset(backup, 0, GOOMBA_COLOR_SRAM_SIZE);
 	size_t backup_len = copy_until_invalid_header(backup, gba_header_ptr + sh->size);
 
 	// compress gbc sram
 	lzo_uint compressed_size;
-	unsigned char* dest = gba_header_ptr + sizeof(stateheader);
+	unsigned char* dest = (unsigned char*)working;
 	void* wrkmem = malloc(LZO1X_1_MEM_COMPRESS);
 	lzo1x_1_compress((const unsigned char*)gbc_sram, sh->uncompressed_size,
 		dest, &compressed_size,
 		wrkmem);
 	free(wrkmem);
+	working += compressed_size;
+	printf("Compressed %u bytes (%u)\n", sh->uncompressed_size, compressed_size);
 
-	sh->size = compressed_size + sizeof(stateheader);
+	new_sh->size = compressed_size + sizeof(stateheader);
 	// pad to 4 bytes!
 	// if I don't do this, goomba color might not load the palette settings, or seemingly 'forget' them later
 	// btw, the settings are stored in the configdata struct defined in goombasav.h
-	while (sh->size % 4 != 0) {
-		gba_header_ptr[sh->size] = 0;
-		sh->size++;
+	while (new_sh->size % 4 != 0) {
+		*working = 0;
+		working++;
+		printf("(inc)\n");
+		new_sh->size++;
 	}
 
 	// restore the backup - just assume we have enough space
-	memcpy(gba_header_ptr + sh->size, backup, backup_len);
+	memcpy(working, backup, backup_len);
+	printf("Copied end (%u)\n", backup_len);
 
 	free(backup);
 
-	return gba_header_ptr;
+	return goomba_new_sav;
 }

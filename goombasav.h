@@ -39,6 +39,6 @@ bool stateheader_plausible(const stateheader* sh);
 stateheader* stateheader_advance(const stateheader* sh);
 stateheader** stateheader_scan(const void* first_header, size_t max_num_headers);
 void* goomba_extract(const void* header_ptr);
-void* goomba_replace(void* gba_header, const void* gbc_sram, size_t gbc_length);
+char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* gbc_sram, size_t gbc_length);
 
 #endif
