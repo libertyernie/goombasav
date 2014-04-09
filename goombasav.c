@@ -139,7 +139,7 @@ size_t copy_until_invalid_header(void* dest, const void* src) {
 char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* gbc_sram, size_t gbc_length) {
 #ifndef GOOMBA_COLOR
 	fprintf(stderr, "Save file replacement not working yet for regular Goomba.\n");
-	exit(EXIT_FAILURE);
+	return NULL;
 #endif
 
 	unsigned char* gba_header_ptr = (unsigned char*)gba_header;
