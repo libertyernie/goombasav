@@ -81,6 +81,7 @@
   <ItemGroup>
     <ClCompile Include="..\goombasav.c" />
     <ClCompile Include="..\minilzo-2.06\minilzo.c" />
+    <ClCompile Include="HeaderPtr.cpp" />
     <ClCompile Include="MainForm.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -88,6 +89,7 @@
     <ClInclude Include="..\minilzo-2.06\lzoconf.h" />
     <ClInclude Include="..\minilzo-2.06\lzodefs.h" />
     <ClInclude Include="..\minilzo-2.06\minilzo.h" />
+    <ClInclude Include="HeaderPtr.h" />
     <ClInclude Include="MainForm.h">
       <FileType>CppForm</FileType>
     </ClInclude>

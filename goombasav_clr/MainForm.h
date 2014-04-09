@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <cstring>
 #include "../goombasav.h"
+#include "HeaderPtr.h"
 
 namespace goombasav_clr {
 
@@ -123,7 +124,7 @@ namespace goombasav_clr {
 				MessageBox::Show("An error occurred. See the console for more information.");
 			} else {
 				for (int i = 0; headers[i] != NULL; i++) {
-					listBox1->Items->Add(gcnew IntPtr(headers[i]));
+					listBox1->Items->Add(gcnew HeaderPtr(headers[i]));
 				}
 				free(headers);
 			}
@@ -131,8 +132,8 @@ namespace goombasav_clr {
 	}
 	
 	Void listBox1_SelectedIndexChanged(Object^ sender, EventArgs^ e) {
-		IntPtr^ intptr = (IntPtr^)listBox1->SelectedItem;
-		stateheader* sh = (stateheader*)intptr->ToPointer();
+		HeaderPtr^ p = (HeaderPtr^)listBox1->SelectedItem;
+		stateheader* sh = p->sh_ptr();
 		if (stateheader_plausible(sh)) label1->Text = gcnew String(sh->title);
 	}
 };
