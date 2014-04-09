@@ -127,7 +127,13 @@ void* goomba_extract(const void* header_ptr, size_t* size_output) {
 	return uncompressed_data;
 }
 
-size_t copy_until_invalid_header(void* dest, const void* src) {
+/**
+ * Copies data from the source (which must point to a valid stateheader or
+ * configdata) to dest, up to and including the first 48 bytes that do not
+ * constitute a valid header.
+ */
+size_t copy_until_invalid_header(void* dest, const stateheader* src_param) {
+	const void* src = src_param;
 	size_t bytes_copied = 0;
 	while (true) {
 		const stateheader* sh = (const stateheader*)src;
@@ -152,6 +158,9 @@ char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* g
 	unsigned char* gba_header_ptr = (unsigned char*)gba_header;
 	stateheader* sh = (stateheader*)gba_header_ptr;
 
+	// sh->uncompressed_size is valid for Goomba Color.
+	// For Goomba, it's actually compressed size (and will be less than sh->size).
+	// TODO: in that case, uncompress the data to a temp buffer and see how big it is, then go by that.
 	if (gbc_length < sh->uncompressed_size) {
 		fprintf(stderr, "Error: the length of the GBC data (%u) is too short - expected %u bytes.\n",
 			gbc_length, sh->uncompressed_size);
@@ -171,25 +180,22 @@ char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* g
 		return NULL;
 	}
 
-	char* goomba_new_sav = (char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
+	char* const goomba_new_sav = (char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
 	memset(goomba_new_sav, 0, GOOMBA_COLOR_SRAM_SIZE);
+	char* working = goomba_new_sav; // will be incremented throughout
 
-	char* working = goomba_new_sav;
 	size_t before_header = (char*)gba_header - (char*)gba_data;
 	// copy anything before stateheader
 	memcpy(goomba_new_sav, gba_data, before_header);
-	printf("Copied start (%u)\n", before_header);
 	working += before_header;
 	// copy stateheader
 	memcpy(working, sh, sizeof(stateheader));
-	printf("Copied new header (%u)\n", sizeof(stateheader));
 	stateheader* new_sh = (stateheader*)working;
 	working += sizeof(stateheader);
 
 	// backup data that comes after this header
 	unsigned char* backup = (unsigned char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
-	//memset(backup, 0, GOOMBA_COLOR_SRAM_SIZE);
-	size_t backup_len = copy_until_invalid_header(backup, gba_header_ptr + sh->size);
+	size_t backup_len = copy_until_invalid_header(backup, (stateheader*)(gba_header_ptr + sh->size));
 
 	// compress gbc sram
 	lzo_uint compressed_size;
