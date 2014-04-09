@@ -23,9 +23,7 @@ namespace goombasav_clr {
 		MainForm(void)
 		{
 			InitializeComponent();
-			//
-			//TODO: Add the constructor code here
-			//
+
 			loaded_sram = new unsigned char[GOOMBA_COLOR_SRAM_SIZE];
 		}
 
@@ -35,23 +33,19 @@ namespace goombasav_clr {
 		/// </summary>
 		~MainForm()
 		{
-			if (components)
-			{
-				delete components;
-			}
+			if (components) delete components;
 			delete[] loaded_sram;
 		}
+	private: unsigned char* loaded_sram;
 	private: System::Windows::Forms::ListBox^  listBox1;
 	private: System::Windows::Forms::Button^  button1;
-	protected:
+	private: System::Windows::Forms::Label^  label1;
 
 	private:
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
 		System::ComponentModel::Container ^components;
-	private: System::Windows::Forms::Label^  label1;
-			 unsigned char* loaded_sram;
 
 #pragma region Windows Form Designer generated code
 		/// <summary>
