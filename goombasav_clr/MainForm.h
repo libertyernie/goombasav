@@ -34,7 +34,6 @@ namespace goombasav_clr {
 			InitializeComponent();
 
 			loaded_sram = new unsigned char[GOOMBA_COLOR_SRAM_SIZE];
-			goomba_onerror = show_error_box;
 		}
 
 	protected:
@@ -129,8 +128,7 @@ namespace goombasav_clr {
 			pin_ptr<unsigned char> pin = &arr[0];
 			memcpy(loaded_sram, pin, GOOMBA_COLOR_SRAM_SIZE);
 
-			stateheader* first = (stateheader*)(loaded_sram + 4);
-			stateheader** headers = stateheader_scan(first, 31);
+			stateheader** headers = stateheader_scan(loaded_sram);
 			if (headers != NULL) {
 				listBox1->Items->Clear();
 				for (int i = 0; headers[i] != NULL; i++) {
