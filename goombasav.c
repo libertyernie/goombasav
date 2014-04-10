@@ -1,9 +1,36 @@
 #include <memory.h>
+#include <stdarg.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "goombasav.h"
 #include "minilzo-2.06/minilzo.h"
+
+void(*goomba_onerror)(const char*) = NULL;
+
+/**
+ * Prints an error to standard output.
+ * If the function pointer goomba_onerror is not null, the error message will
+ * be passed to it as well.
+ *
+ * Note: this function only compiles in native code on C++/CLI.
+ */
+void goomba_error(const char* format, ...) {
+	va_list args;
+	va_start(args, format);
+	size_t len = vfprintf(stderr, format, args);
+	va_end(args);
+
+	if (goomba_onerror != NULL) {
+		char* buf = (char*)malloc(len + 1);
+		va_start(args, format);
+		sprintf(buf, format, args);
+		va_end(args);
+		goomba_onerror(buf);
+		free(buf);
+	}
+}
 
 static char goomba_strbuf[256];
 
@@ -58,7 +85,7 @@ const char* stateheader_summary_str(const stateheader* sh) {
 	return goomba_strbuf;
 }
 
-bool stateheader_plausible(const stateheader* sh) {
+int stateheader_plausible(const stateheader* sh) {
 	return sh->type < 3 && sh->size >= sizeof(stateheader) && // check type (0,1,2) and size (at least 48)
 		(sh->type == GOOMBA_CONFIGSAVE || sh->uncompressed_size > 0); // check uncompressed_size, but not for configsave
 }
@@ -117,7 +144,7 @@ stateheader** stateheader_scan(const void* first_header, size_t max_num_headers)
 		sh = stateheader_advance(sh);
 	}
 	if (sram_checksum_not_zero && !using_regular_goomba) {
-		fprintf(stderr, "Goomba Color was not cleanly shut down - CFG->sram_checksum is not empty. Run the rom in an emulator and go to menu->exit.\n");
+		goomba_error("Goomba Color was not cleanly shut down - CFG->sram_checksum is not empty. Run the rom in an emulator and go to menu->exit.\n");
 		return NULL;
 	}
 	return headers;
@@ -132,7 +159,7 @@ void* goomba_extract(const void* header_ptr, size_t* size_output) {
 	stateheader* sh = (stateheader*)header_ptr;
 
 	if (sh->type != GOOMBA_SRAMSAVE) {
-		fprintf(stderr, "Error: this is not SRAM data\n");
+		goomba_error("Error: this is not SRAM data\n");
 		return NULL;
 	}
 	
@@ -143,11 +170,11 @@ void* goomba_extract(const void* header_ptr, size_t* size_output) {
 	int r = lzo1x_decompress_safe(compressed_data, compressed_size,
 		uncompressed_data, &output_size,
 		(void*)NULL);
-	fprintf(stderr, "Actual uncompressed size: %u\n", output_size);
+	goomba_error("Actual uncompressed size: %u\n", output_size);
 	if (r == LZO_E_INPUT_NOT_CONSUMED) {
-		//fprintf(stderr, "Warning: input not fully used. Double-check the result to make sure it works.\n");
+		//goomba_error("Warning: input not fully used. Double-check the result to make sure it works.\n");
 	} else if (r < 0) {
-		fprintf(stderr, "LZO error code: %d\nLook this up in lzoconf.h.\n", r);
+		goomba_error("LZO error code: %d\nLook this up in lzoconf.h.\n", r);
 		free(uncompressed_data);
 		return NULL;
 	}
@@ -182,12 +209,12 @@ char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* g
 	stateheader* sh = (stateheader*)gba_header_ptr;
 
 	if (sh->type != GOOMBA_SRAMSAVE) {
-		fprintf(stderr, "Error - This program cannot replace non-SRAM data.\n");
+		goomba_error("Error - This program cannot replace non-SRAM data.\n");
 		return NULL;
 	}
 
 	if (sh->size > sh->uncompressed_size) {
-		fprintf(stderr, "Error - Save file replacement not working yet for regular Goomba.\n");
+		goomba_error("Error - Save file replacement not working yet for regular Goomba.\n");
 		return NULL;
 	}
 
@@ -195,21 +222,21 @@ char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* g
 	// For Goomba, it's actually compressed size (and will be less than sh->size).
 	// TODO: in that case, uncompress the data to a temp buffer and see how big it is, then go by that.
 	if (gbc_length < sh->uncompressed_size) {
-		fprintf(stderr, "Error: the length of the GBC data (%u) is too short - expected %u bytes.\n",
+		goomba_error("Error: the length of the GBC data (%u) is too short - expected %u bytes.\n",
 			gbc_length, sh->uncompressed_size);
 		return NULL;
 	} else if (gbc_length - 4 == sh->uncompressed_size) {
-		fprintf(stderr, "Note: RTC data (TGB_Dual format) will not be copied\n");
+		goomba_error("Note: RTC data (TGB_Dual format) will not be copied\n");
 	} else if (gbc_length - 44 == sh->uncompressed_size) {
-		fprintf(stderr, "Note: RTC data (old VBA format) will not be copied\n");
+		goomba_error("Note: RTC data (old VBA format) will not be copied\n");
 	} else if (gbc_length - 48 == sh->uncompressed_size) {
-		fprintf(stderr, "Note: RTC data (new VBA format) will not be copied\n");
+		goomba_error("Note: RTC data (new VBA format) will not be copied\n");
 	} else if (gbc_length > sh->uncompressed_size) {
-		fprintf(stderr, "Warning: unknown data at end of GBC save file - last %u bytes will be ignored\n", gbc_length - sh->uncompressed_size);
+		goomba_error("Warning: unknown data at end of GBC save file - last %u bytes will be ignored\n", gbc_length - sh->uncompressed_size);
 	}
 
 	if (sh->type != GOOMBA_SRAMSAVE) {
-		fprintf(stderr, "The data at gba_sram + gba_header_location is not SRAM data.\n");
+		goomba_error("The data at gba_sram + gba_header_location is not SRAM data.\n");
 		return NULL;
 	}
 

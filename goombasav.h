@@ -1,10 +1,6 @@
 #ifndef __GOOMBASAV_H
 #define __GOOMBASAV_H
 
-#ifndef __cplusplus
-#include <stdbool.h>
-#endif
-
 #include <stdint.h>
 #define GOOMBA_COLOR_SRAM_SIZE 65536
 #define GOOMBA_STATEID 0x57a731d8
@@ -33,9 +29,11 @@ typedef struct {
 	char title[32];
 } stateheader;
 
+extern void(*goomba_onerror)(const char*);
+
 const char* stateheader_str(const stateheader* sh);
 const char* stateheader_summary_str(const stateheader* sh);
-bool stateheader_plausible(const stateheader* sh);
+int stateheader_plausible(const stateheader* sh);
 stateheader* stateheader_advance(const stateheader* sh);
 stateheader** stateheader_scan(const void* first_header, size_t max_num_headers);
 void* goomba_extract(const void* header_ptr, size_t* size_output);
