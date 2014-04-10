@@ -6,6 +6,7 @@
 #include "goombasav.h"
 
 const char* USAGE = "Usage: goombasav {x/r} [Goomba Color save file] [raw GBC save file]\n"
+"       goombasav c [input Goomba Color save file] [output Goomba Color save file]\n"
 "       goombasav [Goomba Color save file]\n"
 "\n"
 "  x: extract save data from first file -> store in second file\n"
@@ -13,7 +14,7 @@ const char* USAGE = "Usage: goombasav {x/r} [Goomba Color save file] [raw GBC sa
 "  r: replace data in first file <- read from second file\n"
 "  c: clean sram at 0xE000 in first file -> write to second file (both GBA sram)\n"
 "\n"
-"  otherwise: view Goomba Color SRAM header\n"
+"  otherwise: view Goomba headers\n"
 "             (file can be - for stdin)\n";
 
 void usage() {
