@@ -187,13 +187,12 @@ char* goomba_cleanup(const void* gba_data_param) {
 					cd->sram_checksum = 0; // because we do this here, goomba_new_sav should not complain about an unclean file
 
 					char gbc_data[GOOMBA_COLOR_SRAM_SIZE - GOOMBA_COLOR_AVAILABLE_SIZE];
-					printf("--%d--\n", sizeof(gbc_data));
 					memcpy(gbc_data,
 						gba_data + GOOMBA_COLOR_AVAILABLE_SIZE,
 						sizeof(gbc_data)); // Extract GBC data at 0xe000 to an array
 
 					char* new_gba_data = goomba_new_sav(gba_data, sh, gbc_data, sizeof(gbc_data));
-					memset(new_gba_data + GOOMBA_COLOR_AVAILABLE_SIZE, 0, sizeof(gbc_data));
+					if (new_gba_data != NULL) memset(new_gba_data + GOOMBA_COLOR_AVAILABLE_SIZE, 0, sizeof(gbc_data));
 					return new_gba_data;
 				}
 			}
@@ -275,7 +274,7 @@ char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* g
 		goomba_error("File is unclean - run goomba_cleanup before trying to replace SRAM, or your new data might get overwritten");
 		return NULL;
 	} else if (ck != 0) {
-		fprintf(stderr, "File is unclean, but it shouldn't affect retrieval of the data you asked for\n");
+		fprintf(stderr, "File is unclean, but it shouldn't affect replacement of the data you asked for\n");
 	}
 
 	if (sh->type != GOOMBA_SRAMSAVE) {
@@ -283,30 +282,39 @@ char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* g
 		return NULL;
 	}
 
-	if (sh->size > sh->uncompressed_size) {
-		goomba_error("Error - Save file replacement not working yet for regular Goomba.\n");
-		return NULL;
-	}
-
 	// sh->uncompressed_size is valid for Goomba Color.
 	// For Goomba, it's actually compressed size (and will be less than sh->size).
-	// TODO: in that case, uncompress the data to a temp buffer and see how big it is, then go by that.
-	if (gbc_length < sh->uncompressed_size) {
+	size_t uncompressed_size;
+	if (sh->size > sh->uncompressed_size) {
+		// Uncompress to a temporary location, just so we can see how big it is
+		size_t output;
+		void* dump = goomba_extract(gba_data, sh, &output);
+		if (dump == NULL) {
+			return NULL;
+		}
+		free(dump);
+		uncompressed_size = output;
+	} else {
+		// Goomba Color header - use size from there
+		uncompressed_size = sh->uncompressed_size;
+	}
+	
+	if (gbc_length < uncompressed_size) {
 		goomba_error("Error: the length of the GBC data (%u) is too short - expected %u bytes.\n",
-			gbc_length, sh->uncompressed_size);
+			gbc_length, uncompressed_size);
 		return NULL;
-	} else if (gbc_length - 4 == sh->uncompressed_size) {
+	} else if (gbc_length - 4 == uncompressed_size) {
 		goomba_error("Note: RTC data (TGB_Dual format) will not be copied\n");
-	} else if (gbc_length - 44 == sh->uncompressed_size) {
+	} else if (gbc_length - 44 == uncompressed_size) {
 		goomba_error("Note: RTC data (old VBA format) will not be copied\n");
-	} else if (gbc_length - 48 == sh->uncompressed_size) {
+	} else if (gbc_length - 48 == uncompressed_size) {
 		goomba_error("Note: RTC data (new VBA format) will not be copied\n");
-	} else if (gbc_length > sh->uncompressed_size) {
-		goomba_error("Warning: unknown data at end of GBC save file - last %u bytes will be ignored\n", gbc_length - sh->uncompressed_size);
+	} else if (gbc_length > uncompressed_size) {
+		goomba_error("Warning: unknown data at end of GBC save file - last %u bytes will be ignored\n", gbc_length, uncompressed_size);
 	}
 
 	if (sh->type != GOOMBA_SRAMSAVE) {
-		goomba_error("The data at gba_sram + gba_header_location is not SRAM data.\n");
+		goomba_error("The data at gba_header is not SRAM data.\n");
 		return NULL;
 	}
 
@@ -331,12 +339,17 @@ char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* g
 	lzo_uint compressed_size;
 	unsigned char* dest = (unsigned char*)working;
 	void* wrkmem = malloc(LZO1X_1_MEM_COMPRESS);
-	lzo1x_1_compress((const unsigned char*)gbc_sram, sh->uncompressed_size,
+	lzo1x_1_compress((const unsigned char*)gbc_sram, uncompressed_size,
 		dest, &compressed_size,
 		wrkmem);
 	free(wrkmem);
 	working += compressed_size;
-	printf("Compressed %u bytes (%u)\n", sh->uncompressed_size, compressed_size);
+	printf("Compressed %u bytes (%u)\n", uncompressed_size, compressed_size);
+
+	if (sh->size > sh->uncompressed_size) {
+		// Goomba header (not Goomba Color)
+		sh->uncompressed_size = compressed_size;
+	}
 
 	new_sh->size = compressed_size + sizeof(stateheader);
 	// pad to 4 bytes!
@@ -345,7 +358,6 @@ char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* g
 	while (new_sh->size % 4 != 0) {
 		*working = 0;
 		working++;
-		printf("(inc)\n");
 		new_sh->size++;
 	}
 
@@ -358,14 +370,12 @@ char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* g
 	}
 	// restore the backup - just assume we have enough space
 	memcpy(working, backup, backup_len);
-	printf("Copied end (%u)\n", backup_len);
 	free(backup);
 
 	// restore data from 0xe000 to 0xffff
 	memcpy(goomba_new_sav + GOOMBA_COLOR_AVAILABLE_SIZE,
 		(char*)gba_data + GOOMBA_COLOR_AVAILABLE_SIZE,
 		GOOMBA_COLOR_SRAM_SIZE - GOOMBA_COLOR_AVAILABLE_SIZE);
-	printf("Restored 0xe000-0xffff\n");
 
 	return goomba_new_sav;
 }

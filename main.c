@@ -5,9 +5,9 @@
 #include <string.h>
 #include "goombasav.h"
 
-const char* USAGE = "Usage: goombasav {x/r} [Goomba Color save file] [raw GBC save file]\n"
-"       goombasav c [input Goomba Color save file] [output Goomba Color save file]\n"
-"       goombasav [Goomba Color save file]\n"
+const char* USAGE = "Usage: goombasav {x/r} [Goomba save file] [raw GBC save file]\n"
+"       goombasav c [input Goomba save file] [output Goomba save file]\n"
+"       goombasav [Goomba save file]\n"
 "\n"
 "  x: extract save data from first file -> store in second file\n"
 "     (can be - for stdout)\n"
