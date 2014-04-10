@@ -134,21 +134,25 @@ stateheader** stateheader_scan(const void* first_header, size_t max_num_headers)
 			if (cd->sram_checksum != 0) {
 				sram_checksum_not_zero = true;
 			}
-		} else if (sh->type == GOOMBA_SRAMSAVE) {
-			if (sh->size > sh->uncompressed_size) {
-				using_regular_goomba = true;
-			}
 		}
 		// end check
 		i++;
 		sh = stateheader_advance(sh);
 	}
-	if (sram_checksum_not_zero && !using_regular_goomba) {
+	if (sram_checksum_not_zero) {
 		// SRAM is still stored in 0xe000 - 0xffff, and it could override whatever you are trying to replace
 		goomba_error("Goomba Color was not cleanly shut down - CFG->sram_checksum is not empty. Run the rom in an emulator and go to menu->exit.\n");
 		return NULL;
 	}
 	return headers;
+}
+
+/**
+ * If there is save data in 0xe000-0xffff (as signaled by the configdata),
+ * this function compresses it to where it's supposed to go.
+ */
+void goomba_cleanup(void* gba_data) {
+	
 }
 
 /**
