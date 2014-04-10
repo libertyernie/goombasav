@@ -71,7 +71,7 @@ void extract(const char* gbafile, const char* gbcfile) {
 	fprintf(stderr, "%s\n", stateheader_str(sh));
 	size_t uncompressed_size;
 
-	void* gbc_data = goomba_extract(sh, &uncompressed_size);
+	void* gbc_data = goomba_extract(gba_data, sh, &uncompressed_size);
 	if (gbc_data == NULL) {
 		exit(EXIT_FAILURE);
 	}
@@ -126,9 +126,6 @@ void clean(const char* gbafile, const char* gbcfile) {
 	FILE* gba1 = fopen(gbafile, "rb");
 	if (gba1 == NULL) could_not_open(gbafile);
 
-	FILE* gba2 = fopen(gbcfile, "wb");
-	if (gba2 == NULL) could_not_open(gbcfile);
-
 	char* gba_data = (char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
 	fread(gba_data, GOOMBA_COLOR_SRAM_SIZE, 1, gba1);
 	fclose(gba1);
@@ -137,6 +134,9 @@ void clean(const char* gbafile, const char* gbcfile) {
 	if (new_gba_data == NULL) {
 		exit(EXIT_FAILURE);
 	}
+
+	FILE* gba2 = fopen(gbcfile, "wb");
+	if (gba2 == NULL) could_not_open(gbcfile);
 	fwrite(new_gba_data, 1, GOOMBA_COLOR_SRAM_SIZE, gba2);
 	fclose(gba2);
 }

@@ -139,12 +139,24 @@ stateheader** stateheader_scan(const void* first_header, size_t max_num_headers)
 		i++;
 		sh = stateheader_advance(sh);
 	}
-	if (sram_checksum_not_zero) {
-		// SRAM is still stored in 0xe000 - 0xffff, and it could override whatever you are trying to replace
-		goomba_error("Goomba Color was not cleanly shut down - CFG->sram_checksum is not empty. Run the rom in an emulator and go to menu->exit.\n");
-		//return NULL;
-	}
 	return headers;
+}
+
+int32_t goomba_get_configdata_checksum_field(const void* first_header, size_t max_num_headers) {
+	stateheader** headers = stateheader_scan(first_header, max_num_headers);
+	if (headers == NULL) return NULL;
+
+	for (int i = 0; headers[i] != NULL; i++) {
+		if (headers[i]->type == GOOMBA_CONFIGSAVE) {
+			// found configdata
+			const configdata* cd = (configdata*)headers[i];
+			free(headers);
+			return cd->sram_checksum; // 0 = clean, postitive = unclean
+		}
+	}
+
+	free(headers);
+	return -1; // not sure when this would happen
 }
 
 /**
@@ -161,15 +173,15 @@ char* goomba_cleanup(const void* gba_data_param) {
 	for (int i = 0; headers[i] != NULL; i++) {
 		if (headers[i]->type == GOOMBA_CONFIGSAVE) {
 			// found configdata
-			configdata* const cd = (configdata*)headers[i];
+			configdata* cd = (configdata*)headers[i];
 			const uint32_t checksum = cd->sram_checksum;
 			for (int j = 0; headers[j] != NULL; j++) {
-				stateheader* const sh = headers[j];
+				stateheader* sh = headers[j];
 				if (sh->type == GOOMBA_SRAMSAVE && sh->checksum == checksum) {
 					// found stateheader
-					free(headers); // make sure we return something before the loop goes around again!!
+					free(headers); // so make sure we return something before the loop goes around again!!
 
-					cd->sram_checksum = 0;
+					cd->sram_checksum = 0; // because we do this here, goomba_new_sav should not complain about an unclean file
 
 					char gbc_data[GOOMBA_COLOR_SRAM_SIZE - GOOMBA_COLOR_AVAILABLE_SIZE];
 					printf("--%d--\n", sizeof(gbc_data));
@@ -193,8 +205,14 @@ char* goomba_cleanup(const void* gba_data_param) {
  * the Goomba Color save file stored in header_ptr, or returns NULL if the
  * decompression failed.
  */
-void* goomba_extract(const void* header_ptr, size_t* size_output) {
-	stateheader* sh = (stateheader*)header_ptr;
+void* goomba_extract(const void* gba_data, const stateheader* header_ptr, size_t* size_output) {
+	if (goomba_get_configdata_checksum_field((char*)gba_data + 4, 20) != 0) {
+		// have to clean file
+		goomba_error("File is unclean - run goomba_cleanup before trying to extract SRAM, or you might get old data");
+		return NULL;
+	}
+
+	const stateheader* sh = (const stateheader*)header_ptr;
 
 	if (sh->type != GOOMBA_SRAMSAVE) {
 		goomba_error("Error: this is not SRAM data\n");
@@ -243,6 +261,12 @@ size_t copy_until_invalid_header(void* dest, const stateheader* src_param) {
 }
 
 char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* gbc_sram, size_t gbc_length) {
+	if (goomba_get_configdata_checksum_field((char*)gba_data + 4, 20) != 0) {
+		// have to clean file
+		goomba_error("File is unclean - run goomba_cleanup before trying to replace SRAM, or you might get old data");
+		return NULL;
+	}
+
 	unsigned char* gba_header_ptr = (unsigned char*)gba_header;
 	stateheader* sh = (stateheader*)gba_header_ptr;
 
