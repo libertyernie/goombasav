@@ -28,8 +28,7 @@ void could_not_open(const char* filename) {
 }
 
 stateheader* ask(const void* first_header, const char* prompt) {
-	const char* char_ptr = (const char*)first_header;
-	stateheader** headers = stateheader_scan(char_ptr, 20);
+	stateheader** headers = stateheader_scan(first_header);
 	if (headers == NULL) {
 		fprintf(stderr, "An error occurred scanning for headers. See the console for more information.\n");
 		exit(EXIT_FAILURE);
@@ -150,7 +149,7 @@ void list(const char* gbafile) {
 
 	char* gba_data = (char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
 	fread(gba_data, 1, GOOMBA_COLOR_SRAM_SIZE, gba);
-	stateheader** headers = stateheader_scan(gba_data + 4, 20);
+	stateheader** headers = stateheader_scan(gba_data);
 	if (headers == NULL) {
 		exit(EXIT_FAILURE);
 	}
