@@ -24,9 +24,6 @@
     <ClCompile Include="..\minilzo-2.06\minilzo.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="HeaderPtr.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainForm.h">

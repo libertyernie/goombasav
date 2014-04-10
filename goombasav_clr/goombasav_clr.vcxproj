@@ -81,7 +81,6 @@
   <ItemGroup>
     <ClCompile Include="..\goombasav.c" />
     <ClCompile Include="..\minilzo-2.06\minilzo.c" />
-    <ClCompile Include="HeaderPtr.cpp" />
     <ClCompile Include="MainForm.cpp" />
   </ItemGroup>
   <ItemGroup>

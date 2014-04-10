@@ -50,7 +50,8 @@ namespace goombasav_clr {
 	private: unsigned char* loaded_sram;
 	private: System::Windows::Forms::ListBox^  listBox1;
 	private: System::Windows::Forms::Button^  button1;
-	private: System::Windows::Forms::Label^  label1;
+	private: System::Windows::Forms::PropertyGrid^  propertyGrid1;
+
 
 	private:
 		/// <summary>
@@ -67,13 +68,14 @@ namespace goombasav_clr {
 		{
 			this->listBox1 = (gcnew System::Windows::Forms::ListBox());
 			this->button1 = (gcnew System::Windows::Forms::Button());
-			this->label1 = (gcnew System::Windows::Forms::Label());
+			this->propertyGrid1 = (gcnew System::Windows::Forms::PropertyGrid());
 			this->SuspendLayout();
 			// 
 			// listBox1
 			// 
 			this->listBox1->Dock = System::Windows::Forms::DockStyle::Left;
 			this->listBox1->FormattingEnabled = true;
+			this->listBox1->IntegralHeight = false;
 			this->listBox1->ItemHeight = 16;
 			this->listBox1->Location = System::Drawing::Point(0, 0);
 			this->listBox1->Name = L"listBox1";
@@ -83,7 +85,8 @@ namespace goombasav_clr {
 			// 
 			// button1
 			// 
-			this->button1->Location = System::Drawing::Point(143, 51);
+			this->button1->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
+			this->button1->Location = System::Drawing::Point(126, 218);
 			this->button1->Name = L"button1";
 			this->button1->Size = System::Drawing::Size(75, 23);
 			this->button1->TabIndex = 1;
@@ -91,27 +94,27 @@ namespace goombasav_clr {
 			this->button1->UseVisualStyleBackColor = true;
 			this->button1->Click += gcnew System::EventHandler(this, &MainForm::button1_Click);
 			// 
-			// label1
+			// propertyGrid1
 			// 
-			this->label1->AutoSize = true;
-			this->label1->Location = System::Drawing::Point(143, 105);
-			this->label1->Name = L"label1";
-			this->label1->Size = System::Drawing::Size(46, 17);
-			this->label1->TabIndex = 2;
-			this->label1->Text = L"label1";
+			this->propertyGrid1->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Bottom)
+				| System::Windows::Forms::AnchorStyles::Left)
+				| System::Windows::Forms::AnchorStyles::Right));
+			this->propertyGrid1->Location = System::Drawing::Point(126, 12);
+			this->propertyGrid1->Name = L"propertyGrid1";
+			this->propertyGrid1->Size = System::Drawing::Size(344, 200);
+			this->propertyGrid1->TabIndex = 2;
 			// 
 			// MainForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(282, 253);
-			this->Controls->Add(this->label1);
+			this->ClientSize = System::Drawing::Size(482, 253);
+			this->Controls->Add(this->propertyGrid1);
 			this->Controls->Add(this->button1);
 			this->Controls->Add(this->listBox1);
 			this->Name = L"MainForm";
 			this->Text = L"MainForm";
 			this->ResumeLayout(false);
-			this->PerformLayout();
 
 		}
 #pragma endregion
@@ -126,12 +129,12 @@ namespace goombasav_clr {
 			pin_ptr<unsigned char> pin = &arr[0];
 			memcpy(loaded_sram, pin, GOOMBA_COLOR_SRAM_SIZE);
 
-			stateheader* first = (stateheader*)(pin + 4);
+			stateheader* first = (stateheader*)(loaded_sram + 4);
 			stateheader** headers = stateheader_scan(first, 31);
 			if (headers != NULL) {
 				listBox1->Items->Clear();
 				for (int i = 0; headers[i] != NULL; i++) {
-					listBox1->Items->Add(gcnew HeaderPtr(headers[i]));
+					listBox1->Items->Add(HeaderPtr::FromPtr(headers[i]));
 				}
 				free(headers);
 			}
@@ -146,8 +149,10 @@ namespace goombasav_clr {
 	
 		Void listBox1_SelectedIndexChanged(Object^ sender, EventArgs^ e) {
 			HeaderPtr^ p = (HeaderPtr^)listBox1->SelectedItem;
-			stateheader* sh = p->sh_ptr();
-			if (stateheader_plausible(sh)) label1->Text = gcnew String(sh->title);
+			Console::Write((uint32_t)loaded_sram);
+			Console::Write(" ");
+			Console::WriteLine((uint32_t)p->sh_ptr());
+			propertyGrid1->SelectedObject = p->plausible() ? (Object^)p : this;
 		}
 	};
 }
