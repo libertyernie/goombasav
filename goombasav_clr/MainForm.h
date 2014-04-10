@@ -15,6 +15,14 @@ namespace goombasav_clr {
 	using namespace System::Data;
 	using namespace System::Drawing;
 
+	typedef Windows::Forms::DialogResult DR;
+
+	// Defined outside the class so we can pass a pointer to it.
+	void show_error_box(const char* c) {
+		String^ s = gcnew String(c);
+		MessageBox::Show(s);
+	}
+
 	/// <summary>
 	/// Summary for MainForm
 	/// </summary>
@@ -26,6 +34,7 @@ namespace goombasav_clr {
 			InitializeComponent();
 
 			loaded_sram = new unsigned char[GOOMBA_COLOR_SRAM_SIZE];
+			goomba_onerror = show_error_box;
 		}
 
 	protected:
@@ -37,6 +46,7 @@ namespace goombasav_clr {
 			if (components) delete components;
 			delete[] loaded_sram;
 		}
+
 	private: unsigned char* loaded_sram;
 	private: System::Windows::Forms::ListBox^  listBox1;
 	private: System::Windows::Forms::Button^  button1;
@@ -106,35 +116,38 @@ namespace goombasav_clr {
 		}
 #pragma endregion
 
-	Void button1_Click(Object^ sender, EventArgs^ e) {
-		OpenFileDialog d;
-		if (d.ShowDialog() == Windows::Forms::DialogResult::OK) {
-			array<unsigned char>^ arr = IO::File::ReadAllBytes(d.FileName);
+	private:
+		void load(String^ filename) {
+			array<unsigned char>^ arr = System::IO::File::ReadAllBytes(filename);
 			if (arr->Length != GOOMBA_COLOR_SRAM_SIZE) {
-				MessageBox::Show("Incorrect file size (must be " + GOOMBA_COLOR_SRAM_SIZE + " bytes.)");
+				MessageBox::Show("Incorrect file size: must be " + GOOMBA_COLOR_SRAM_SIZE + " bytes.");
 				return;
 			}
 			pin_ptr<unsigned char> pin = &arr[0];
 			memcpy(loaded_sram, pin, GOOMBA_COLOR_SRAM_SIZE);
 
-			listBox1->Items->Clear();
 			stateheader* first = (stateheader*)(pin + 4);
 			stateheader** headers = stateheader_scan(first, 31);
-			if (headers == NULL) {
-				MessageBox::Show("An error occurred. See the console for more information.");
-			} else {
+			if (headers != NULL) {
+				listBox1->Items->Clear();
 				for (int i = 0; headers[i] != NULL; i++) {
 					listBox1->Items->Add(gcnew HeaderPtr(headers[i]));
 				}
 				free(headers);
 			}
 		}
-	}
+		
+		Void button1_Click(Object^ sender, EventArgs^ e) {
+			OpenFileDialog d;
+			if (d.ShowDialog() == Windows::Forms::DialogResult::OK) {
+				load(d.FileName);
+			}
+		}
 	
-	Void listBox1_SelectedIndexChanged(Object^ sender, EventArgs^ e) {
-		HeaderPtr^ p = (HeaderPtr^)listBox1->SelectedItem;
-		stateheader* sh = p->sh_ptr();
-		if (stateheader_plausible(sh)) label1->Text = gcnew String(sh->title);
-	}
-};
+		Void listBox1_SelectedIndexChanged(Object^ sender, EventArgs^ e) {
+			HeaderPtr^ p = (HeaderPtr^)listBox1->SelectedItem;
+			stateheader* sh = p->sh_ptr();
+			if (stateheader_plausible(sh)) label1->Text = gcnew String(sh->title);
+		}
+	};
 }
