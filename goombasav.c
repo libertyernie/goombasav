@@ -7,32 +7,15 @@
 #include "goombasav.h"
 #include "minilzo-2.06/minilzo.h"
 
-void(*goomba_onerror)(const char*) = NULL;
+#define goomba_error(...) { sprintf(last_error, __VA_ARGS__); }
 
-/**
- * Prints an error to standard output.
- * If the function pointer goomba_onerror is not null, the error message will
- * be passed to it as well.
- *
- * Note: this function only compiles in native code on C++/CLI.
- */
-void goomba_error(const char* format, ...) {
-	va_list args;
-	va_start(args, format);
-	size_t len = vfprintf(stderr, format, args);
-	va_end(args);
-
-	if (goomba_onerror != NULL) {
-		char* buf = (char*)malloc(len + 1);
-		va_start(args, format);
-		sprintf(buf, format, args);
-		va_end(args);
-		goomba_onerror(buf);
-		free(buf);
-	}
-}
+char last_error[256];
 
 static char goomba_strbuf[256];
+
+const char* goomba_last_error() {
+	return (const char*)last_error;
+}
 
 const char* stateheader_typestr(uint16_t type) {
 	switch (type) {
@@ -344,7 +327,6 @@ char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* g
 
 	if (sh->size > sh->uncompressed_size) {
 		// Goomba header (not Goomba Color)
-		fprintf(stderr, "%%%d %d%%\n", new_sh->uncompressed_size, compressed_size);
 		new_sh->uncompressed_size = compressed_size;
 	}
 

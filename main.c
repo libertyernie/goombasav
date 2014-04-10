@@ -30,7 +30,7 @@ void could_not_open(const char* filename) {
 stateheader* ask(const void* first_header, const char* prompt) {
 	stateheader** headers = stateheader_scan(first_header);
 	if (headers == NULL) {
-		fprintf(stderr, "An error occurred scanning for headers. See the console for more information.\n");
+		fprintf(stderr, goomba_last_error());
 		exit(EXIT_FAILURE);
 	}
 	if (headers[0] == NULL) {
@@ -73,6 +73,7 @@ void extract(const char* gbafile, const char* gbcfile) {
 
 	void* gbc_data = goomba_extract(gba_data, sh, &uncompressed_size);
 	if (gbc_data == NULL) {
+		fprintf(stderr, goomba_last_error());
 		exit(EXIT_FAILURE);
 	}
 
@@ -109,8 +110,8 @@ void replace(const char* gbafile, const char* gbcfile) {
 	fclose(gbc);
 
 	void* new_gba_sram = goomba_new_sav(gba_data, sh, gbc_data, gbc_length);
-	if (gba == NULL) could_not_open(gbafile);
 	if (new_gba_sram == NULL) {
+		fprintf(stderr, goomba_last_error());
 		exit(EXIT_FAILURE);
 	}
 	gba = fopen(gbafile, "wb");
@@ -132,6 +133,7 @@ void clean(const char* gbafile, const char* gbcfile) {
 
 	void* new_gba_data = goomba_cleanup(gba_data);
 	if (new_gba_data == NULL) {
+		fprintf(stderr, goomba_last_error());
 		exit(EXIT_FAILURE);
 	}
 
@@ -151,6 +153,7 @@ void list(const char* gbafile) {
 	fread(gba_data, 1, GOOMBA_COLOR_SRAM_SIZE, gba);
 	stateheader** headers = stateheader_scan(gba_data);
 	if (headers == NULL) {
+		fprintf(stderr, goomba_last_error());
 		exit(EXIT_FAILURE);
 	}
 	if (headers[0] == NULL) {

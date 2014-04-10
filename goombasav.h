@@ -30,7 +30,7 @@ typedef struct {
 	char title[32];
 } stateheader;
 
-extern void(*goomba_onerror)(const char*);
+const char* goomba_last_error();
 
 const char* stateheader_str(const stateheader* sh);
 const char* stateheader_summary_str(const stateheader* sh);
