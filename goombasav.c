@@ -144,6 +144,7 @@ stateheader** stateheader_scan(const void* first_header, size_t max_num_headers)
 		sh = stateheader_advance(sh);
 	}
 	if (sram_checksum_not_zero && !using_regular_goomba) {
+		// SRAM is still stored in 0xe000 - 0xffff, and it could override whatever you are trying to replace
 		goomba_error("Goomba Color was not cleanly shut down - CFG->sram_checksum is not empty. Run the rom in an emulator and go to menu->exit.\n");
 		return NULL;
 	}
@@ -279,11 +280,23 @@ char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* g
 		new_sh->size++;
 	}
 
+	size_t used = working - goomba_new_sav;
+	if (used + backup_len > GOOMBA_COLOR_AVAILABLE_SIZE) {
+		goomba_error("Not enough room in file for the new save data (0xe000-0xffff must be kept free, I think)\n");
+		free(backup);
+		free(goomba_new_sav);
+		return NULL;
+	}
 	// restore the backup - just assume we have enough space
 	memcpy(working, backup, backup_len);
 	printf("Copied end (%u)\n", backup_len);
-
 	free(backup);
+
+	// restore data from 0xe000 to 0xffff
+	memcpy(goomba_new_sav + GOOMBA_COLOR_AVAILABLE_SIZE,
+		(char*)gba_data + GOOMBA_COLOR_AVAILABLE_SIZE,
+		GOOMBA_COLOR_SRAM_SIZE - GOOMBA_COLOR_AVAILABLE_SIZE);
+	printf("Restored 0xe000-0xffff\n");
 
 	return goomba_new_sav;
 }
