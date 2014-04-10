@@ -85,6 +85,10 @@ stateheader* stateheader_advance(const stateheader* sh) {
 * will have a capacity of max_num_headers+1, and any difference between that
 * and the number of headers found will be filled with NULL entries. The last
 * entry (array[max_num_headers]) is guaranteed to be NULL.
+*
+* If a Goomba Color save file is detected and the configdata signals that the
+* SRAM has not yet been compressed to its normal location, this method will
+* print an error and return NULL itself.
 */
 stateheader** stateheader_scan(const void* first_header, size_t max_num_headers) {
 	const size_t psize = sizeof(stateheader*);
@@ -92,20 +96,29 @@ stateheader** stateheader_scan(const void* first_header, size_t max_num_headers)
 	memset(headers, NULL, psize * (max_num_headers + 1));
 
 	stateheader* sh = (stateheader*)first_header;
+	bool sram_checksum_not_zero = false;
+	bool using_regular_goomba = false;
 	int i = 0;
 	while (stateheader_plausible(sh)) {
 		headers[i] = sh;
-#ifdef GOOMBA_COLOR
-		if (headers[i]->type == GOOMBA_CONFIGSAVE) {
-			configdata* cd = (configdata*)headers[i];
+		// check things
+		if (sh->type == GOOMBA_CONFIGSAVE) {
+			configdata* cd = (configdata*)sh;
 			if (cd->sram_checksum != 0) {
-				fprintf(stderr, "Goomba Color was not cleanly shut down - CFG->sram_checksum is not empty. Run the rom in an emulator and go to menu->exit.\n");
-				return NULL;
+				sram_checksum_not_zero = true;
+			}
+		} else if (sh->type == GOOMBA_SRAMSAVE) {
+			if (sh->size > sh->uncompressed_size) {
+				using_regular_goomba = true;
 			}
 		}
-#endif
+		// end check
 		i++;
 		sh = stateheader_advance(sh);
+	}
+	if (sram_checksum_not_zero && !using_regular_goomba) {
+		fprintf(stderr, "Goomba Color was not cleanly shut down - CFG->sram_checksum is not empty. Run the rom in an emulator and go to menu->exit.\n");
+		return NULL;
 	}
 	return headers;
 }
@@ -165,13 +178,18 @@ size_t copy_until_invalid_header(void* dest, const stateheader* src_param) {
 }
 
 char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* gbc_sram, size_t gbc_length) {
-#ifndef GOOMBA_COLOR
-	fprintf(stderr, "Save file replacement not working yet for regular Goomba.\n");
-	return NULL;
-#endif
-
 	unsigned char* gba_header_ptr = (unsigned char*)gba_header;
 	stateheader* sh = (stateheader*)gba_header_ptr;
+
+	if (sh->type != GOOMBA_SRAMSAVE) {
+		fprintf(stderr, "Error - This program cannot replace non-SRAM data.\n");
+		return NULL;
+	}
+
+	if (sh->size > sh->uncompressed_size) {
+		fprintf(stderr, "Error - Save file replacement not working yet for regular Goomba.\n");
+		return NULL;
+	}
 
 	// sh->uncompressed_size is valid for Goomba Color.
 	// For Goomba, it's actually compressed size (and will be less than sh->size).

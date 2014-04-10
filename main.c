@@ -130,6 +130,9 @@ void list(const char* gbafile) {
 	char* gba_data = (char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
 	fread(gba_data, 1, GOOMBA_COLOR_SRAM_SIZE, gba);
 	stateheader** headers = stateheader_scan(gba_data + 4, 20);
+	if (headers == NULL) {
+		exit(EXIT_FAILURE);
+	}
 	if (headers[0] == NULL) {
 		fprintf(stderr, "No headers found\n");
 		exit(EXIT_FAILURE);
