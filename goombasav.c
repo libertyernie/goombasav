@@ -126,19 +126,9 @@ stateheader** stateheader_scan(const void* gba_data) {
 	if (*check == GOOMBA_STATEID) check++;
 
 	stateheader* sh = (stateheader*)check;
-	bool sram_checksum_not_zero = false;
-	bool using_regular_goomba = false;
 	int i = 0;
 	while (stateheader_plausible(sh) && i < 64) {
 		headers[i] = sh;
-		// check things
-		if (sh->type == GOOMBA_CONFIGSAVE) {
-			configdata* cd = (configdata*)sh;
-			if (cd->sram_checksum != 0) {
-				sram_checksum_not_zero = true;
-			}
-		}
-		// end check
 		i++;
 		sh = stateheader_advance(sh);
 	}
@@ -147,9 +137,10 @@ stateheader** stateheader_scan(const void* gba_data) {
 
 int32_t goomba_get_configdata_checksum_field(const void* gba_data) {
 	stateheader** headers = stateheader_scan(gba_data);
-	if (headers == NULL) return NULL;
+	if (headers == NULL) return -1;
 
-	for (int i = 0; headers[i] != NULL; i++) {
+	int i;
+	for (i = 0; headers[i] != NULL; i++) {
 		if (headers[i]->type == GOOMBA_CONFIGSAVE) {
 			// found configdata
 			const configdata* cd = (configdata*)headers[i];
@@ -173,12 +164,13 @@ char* goomba_cleanup(const void* gba_data_param) {
 	stateheader** headers = stateheader_scan(gba_data);
 	if (headers == NULL) return NULL;
 
-	for (int i = 0; headers[i] != NULL; i++) {
+	int i, j;
+	for (i = 0; headers[i] != NULL; i++) {
 		if (headers[i]->type == GOOMBA_CONFIGSAVE) {
 			// found configdata
 			configdata* cd = (configdata*)headers[i];
 			const uint32_t checksum = cd->sram_checksum;
-			for (int j = 0; headers[j] != NULL; j++) {
+			for (j = 0; headers[j] != NULL; j++) {
 				stateheader* sh = headers[j];
 				if (sh->type == GOOMBA_SRAMSAVE && sh->checksum == checksum) {
 					// found stateheader
@@ -210,8 +202,10 @@ char* goomba_cleanup(const void* gba_data_param) {
 void* goomba_extract(const void* gba_data, const stateheader* header_ptr, size_t* size_output) {
 	const stateheader* sh = (const stateheader*)header_ptr;
 
-	const uint32_t ck = goomba_get_configdata_checksum_field(gba_data);
-	if (ck == sh->checksum) {
+	const int32_t ck = goomba_get_configdata_checksum_field(gba_data);
+	if (ck < 0) {
+		return NULL;
+	} else if (ck == sh->checksum) {
 		goomba_error("File is unclean - run goomba_cleanup before trying to extract SRAM, or you might get old data\n");
 		return NULL;
 	} else if (ck != 0) {
@@ -269,7 +263,9 @@ char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* g
 	stateheader* sh = (stateheader*)gba_header_ptr;
 
 	int32_t ck = goomba_get_configdata_checksum_field(gba_data);
-	if (ck == sh->checksum) {
+	if (ck < 0) {
+		return NULL;
+	} else if (ck == sh->checksum) {
 		// have to clean file
 		goomba_error("File is unclean - run goomba_cleanup before trying to replace SRAM, or your new data might get overwritten");
 		return NULL;
