@@ -348,7 +348,8 @@ char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* g
 
 	if (sh->size > sh->uncompressed_size) {
 		// Goomba header (not Goomba Color)
-		sh->uncompressed_size = compressed_size;
+		fprintf(stderr, "%%%d %d%%\n", new_sh->uncompressed_size, compressed_size);
+		new_sh->uncompressed_size = compressed_size;
 	}
 
 	new_sh->size = compressed_size + sizeof(stateheader);
