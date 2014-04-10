@@ -11,6 +11,7 @@ const char* USAGE = "Usage: goombasav {x/r} [Goomba Color save file] [raw GBC sa
 "  x: extract save data from first file -> store in second file\n"
 "     (can be - for stdout)\n"
 "  r: replace data in first file <- read from second file\n"
+"  c: clean sram at 0xE000 in first file -> write to second file (both GBA sram)\n"
 "\n"
 "  otherwise: view Goomba Color SRAM header\n"
 "             (file can be - for stdin)\n";
@@ -29,7 +30,7 @@ stateheader* ask(const void* first_header, const char* prompt) {
 	const char* char_ptr = (const char*)first_header;
 	stateheader** headers = stateheader_scan(char_ptr, 20);
 	if (headers == NULL) {
-		fprintf(stderr, "An error occurred scanning for headers. See the console for more information.");
+		fprintf(stderr, "An error occurred scanning for headers. See the console for more information.\n");
 		exit(EXIT_FAILURE);
 	}
 	if (headers[0] == NULL) {
@@ -121,6 +122,25 @@ void replace(const char* gbafile, const char* gbcfile) {
 	free(gbc_data);
 }
 
+void clean(const char* gbafile, const char* gbcfile) {
+	FILE* gba1 = fopen(gbafile, "rb");
+	if (gba1 == NULL) could_not_open(gbafile);
+
+	FILE* gba2 = fopen(gbcfile, "wb");
+	if (gba2 == NULL) could_not_open(gbcfile);
+
+	char* gba_data = (char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
+	fread(gba_data, GOOMBA_COLOR_SRAM_SIZE, 1, gba1);
+	fclose(gba1);
+
+	void* new_gba_data = goomba_cleanup(gba_data);
+	if (new_gba_data == NULL) {
+		exit(EXIT_FAILURE);
+	}
+	fwrite(new_gba_data, 1, GOOMBA_COLOR_SRAM_SIZE, gba2);
+	fclose(gba2);
+}
+
 void list(const char* gbafile) {
 	FILE* gba = (strcmp("-", gbafile) == 0)
 		? stdin
@@ -162,6 +182,8 @@ int main(int argc, char** argv) {
 		extract(argv[2], argv[3]);
 	} else if (argv[1][0] == 'r') {
 		replace(argv[2], argv[3]);
+	} else if (argv[1][0] == 'c') {
+		clean(argv[2], argv[3]);
 	} else {
 		usage();
 	}

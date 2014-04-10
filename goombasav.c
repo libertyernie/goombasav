@@ -142,7 +142,7 @@ stateheader** stateheader_scan(const void* first_header, size_t max_num_headers)
 	if (sram_checksum_not_zero) {
 		// SRAM is still stored in 0xe000 - 0xffff, and it could override whatever you are trying to replace
 		goomba_error("Goomba Color was not cleanly shut down - CFG->sram_checksum is not empty. Run the rom in an emulator and go to menu->exit.\n");
-		return NULL;
+		//return NULL;
 	}
 	return headers;
 }
@@ -151,8 +151,41 @@ stateheader** stateheader_scan(const void* first_header, size_t max_num_headers)
  * If there is save data in 0xe000-0xffff (as signaled by the configdata),
  * this function compresses it to where it's supposed to go.
  */
-void goomba_cleanup(void* gba_data) {
-	
+char* goomba_cleanup(const void* gba_data_param) {
+	char gba_data[GOOMBA_COLOR_SRAM_SIZE]; // on stack - do not need to free
+	memcpy(gba_data, gba_data_param, GOOMBA_COLOR_SRAM_SIZE);
+
+	stateheader** headers = stateheader_scan((char*)gba_data + 4, 20);
+	if (headers == NULL) return NULL;
+
+	for (int i = 0; headers[i] != NULL; i++) {
+		if (headers[i]->type == GOOMBA_CONFIGSAVE) {
+			// found configdata
+			configdata* const cd = (configdata*)headers[i];
+			const uint32_t checksum = cd->sram_checksum;
+			for (int j = 0; headers[j] != NULL; j++) {
+				stateheader* const sh = headers[j];
+				if (sh->type == GOOMBA_SRAMSAVE && sh->checksum == checksum) {
+					// found stateheader
+					free(headers); // make sure we return something before the loop goes around again!!
+
+					cd->sram_checksum = 0;
+
+					char gbc_data[GOOMBA_COLOR_SRAM_SIZE - GOOMBA_COLOR_AVAILABLE_SIZE];
+					printf("--%d--\n", sizeof(gbc_data));
+					memcpy(gbc_data,
+						gba_data + GOOMBA_COLOR_AVAILABLE_SIZE,
+						sizeof(gbc_data)); // Extract GBC data at 0xe000 to an array
+
+					char* new_gba_data = goomba_new_sav(gba_data, sh, gbc_data, sizeof(gbc_data));
+					memset(new_gba_data + GOOMBA_COLOR_AVAILABLE_SIZE, 0, sizeof(gbc_data));
+					return new_gba_data;
+				}
+			}
+		}
+	}
+	goomba_error("File is already clean\n");
+	return NULL;
 }
 
 /**
