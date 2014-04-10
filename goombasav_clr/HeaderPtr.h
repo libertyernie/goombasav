@@ -9,13 +9,17 @@ public:
 	configdata* cd_ptr() {
 		return (configdata*)this->ptr;
 	}
+
 	bool plausible() {
 		return stateheader_plausible(ptr);
 	}
 
 	static HeaderPtr^ FromPtr(void* ptr); // factory method, defined later
 	virtual System::String^ ToString() override {
-		return gcnew System::String(ptr->title);
+		return ptr->type == GOOMBA_CONFIGSAVE ? "Configuration"
+			: GOOMBA_STATESAVE ? ("Savestate (" + gcnew System::String(ptr->title) + ")")
+			: GOOMBA_SRAMSAVE ? ("SRAM (" + gcnew System::String(ptr->title) + ")")
+			: "Unknown";
 	}
 protected:
 	stateheader* ptr;
