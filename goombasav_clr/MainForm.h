@@ -17,11 +17,12 @@ namespace goombasav_clr {
 
 	typedef Windows::Forms::DialogResult DR;
 
-	// Defined outside the class so we can pass a pointer to it.
-	void show_error_box(const char* c) {
-		String^ s = gcnew String(c);
-		MessageBox::Show(s);
-	}
+	char *const sleeptxt[] = { "5min", "10min", "30min", "OFF" };
+	char *const brightxt[] = { "I", "II", "III", "IIII", "IIIII" };
+	char *const bordtxt[] = { "Black", "Grey", "Blue", "None" };
+	char *const paltxt[16] = { "Yellow", "Grey", "Multi1", "Multi2", "Zelda", "Metroid",
+		"AdvIsland", "AdvIsland2", "BaloonKid", "Batman", "BatmanROTJ",
+		"BionicCom", "CV Adv", "Dr.Mario", "Kirby", "DK Land" };
 
 	/// <summary>
 	/// Summary for MainForm
@@ -73,6 +74,23 @@ namespace goombasav_clr {
 
 	private: System::Windows::Forms::Label^  lblTitle;
 	private: System::Windows::Forms::Label^  lblTitleVal;
+	private: System::Windows::Forms::FlowLayoutPanel^  flpConfigdata;
+	private: System::Windows::Forms::Label^  lblBorder;
+	private: System::Windows::Forms::Label^  lblBorderVal;
+
+	private: System::Windows::Forms::Label^  lblPalette;
+	private: System::Windows::Forms::Label^  lblPaletteVal;
+	private: System::Windows::Forms::Label^  lblSleep;
+	private: System::Windows::Forms::Label^  lblSleepVal;
+	private: System::Windows::Forms::Label^  lblAutostate;
+	private: System::Windows::Forms::Label^  lblAutostateVal;
+	private: System::Windows::Forms::Label^  lblGamma;
+	private: System::Windows::Forms::Label^  lblGammaVal;
+
+
+
+
+
 
 
 
@@ -101,6 +119,17 @@ namespace goombasav_clr {
 			this->lblSizeVal = (gcnew System::Windows::Forms::Label());
 			this->lblType = (gcnew System::Windows::Forms::Label());
 			this->lblTypeVal = (gcnew System::Windows::Forms::Label());
+			this->flpConfigdata = (gcnew System::Windows::Forms::FlowLayoutPanel());
+			this->lblBorder = (gcnew System::Windows::Forms::Label());
+			this->lblBorderVal = (gcnew System::Windows::Forms::Label());
+			this->lblPalette = (gcnew System::Windows::Forms::Label());
+			this->lblPaletteVal = (gcnew System::Windows::Forms::Label());
+			this->lblSleep = (gcnew System::Windows::Forms::Label());
+			this->lblSleepVal = (gcnew System::Windows::Forms::Label());
+			this->lblAutostate = (gcnew System::Windows::Forms::Label());
+			this->lblAutostateVal = (gcnew System::Windows::Forms::Label());
+			this->lblGamma = (gcnew System::Windows::Forms::Label());
+			this->lblGammaVal = (gcnew System::Windows::Forms::Label());
 			this->flpStateheader = (gcnew System::Windows::Forms::FlowLayoutPanel());
 			this->lblUncompressedSize = (gcnew System::Windows::Forms::Label());
 			this->lblUncompressedSizeVal = (gcnew System::Windows::Forms::Label());
@@ -122,6 +151,7 @@ namespace goombasav_clr {
 			this->splitContainer1->Panel2->SuspendLayout();
 			this->splitContainer1->SuspendLayout();
 			this->flowLayoutPanel1->SuspendLayout();
+			this->flpConfigdata->SuspendLayout();
 			this->flpStateheader->SuspendLayout();
 			this->menuStrip1->SuspendLayout();
 			this->SuspendLayout();
@@ -134,13 +164,14 @@ namespace goombasav_clr {
 			this->listBox1->ItemHeight = 16;
 			this->listBox1->Location = System::Drawing::Point(0, 0);
 			this->listBox1->Name = L"listBox1";
-			this->listBox1->Size = System::Drawing::Size(160, 225);
+			this->listBox1->Size = System::Drawing::Size(130, 225);
 			this->listBox1->TabIndex = 0;
 			this->listBox1->SelectedIndexChanged += gcnew System::EventHandler(this, &MainForm::listBox1_SelectedIndexChanged);
 			// 
 			// splitContainer1
 			// 
 			this->splitContainer1->Dock = System::Windows::Forms::DockStyle::Fill;
+			this->splitContainer1->FixedPanel = System::Windows::Forms::FixedPanel::Panel1;
 			this->splitContainer1->Location = System::Drawing::Point(0, 28);
 			this->splitContainer1->Name = L"splitContainer1";
 			// 
@@ -152,7 +183,7 @@ namespace goombasav_clr {
 			// 
 			this->splitContainer1->Panel2->Controls->Add(this->flowLayoutPanel1);
 			this->splitContainer1->Size = System::Drawing::Size(482, 225);
-			this->splitContainer1->SplitterDistance = 160;
+			this->splitContainer1->SplitterDistance = 130;
 			this->splitContainer1->TabIndex = 1;
 			// 
 			// flowLayoutPanel1
@@ -161,13 +192,16 @@ namespace goombasav_clr {
 			this->flowLayoutPanel1->Controls->Add(this->lblSizeVal);
 			this->flowLayoutPanel1->Controls->Add(this->lblType);
 			this->flowLayoutPanel1->Controls->Add(this->lblTypeVal);
+			this->flowLayoutPanel1->Controls->Add(this->flpConfigdata);
 			this->flowLayoutPanel1->Controls->Add(this->flpStateheader);
+			this->flowLayoutPanel1->Controls->Add(this->lblChecksum);
+			this->flowLayoutPanel1->Controls->Add(this->lblChecksumVal);
 			this->flowLayoutPanel1->Controls->Add(this->lblTitle);
 			this->flowLayoutPanel1->Controls->Add(this->lblTitleVal);
 			this->flowLayoutPanel1->Dock = System::Windows::Forms::DockStyle::Fill;
 			this->flowLayoutPanel1->Location = System::Drawing::Point(0, 0);
 			this->flowLayoutPanel1->Name = L"flowLayoutPanel1";
-			this->flowLayoutPanel1->Size = System::Drawing::Size(318, 225);
+			this->flowLayoutPanel1->Size = System::Drawing::Size(348, 225);
 			this->flowLayoutPanel1->TabIndex = 5;
 			// 
 			// lblSize
@@ -205,19 +239,125 @@ namespace goombasav_clr {
 			this->lblTypeVal->Size = System::Drawing::Size(100, 23);
 			this->lblTypeVal->TabIndex = 3;
 			// 
+			// flpConfigdata
+			// 
+			this->flpConfigdata->AutoSize = true;
+			this->flpConfigdata->Controls->Add(this->lblBorder);
+			this->flpConfigdata->Controls->Add(this->lblBorderVal);
+			this->flpConfigdata->Controls->Add(this->lblPalette);
+			this->flpConfigdata->Controls->Add(this->lblPaletteVal);
+			this->flpConfigdata->Controls->Add(this->lblSleep);
+			this->flpConfigdata->Controls->Add(this->lblSleepVal);
+			this->flpConfigdata->Controls->Add(this->lblGamma);
+			this->flpConfigdata->Controls->Add(this->lblGammaVal);
+			this->flpConfigdata->Controls->Add(this->lblAutostate);
+			this->flpConfigdata->Controls->Add(this->lblAutostateVal);
+			this->flpConfigdata->Location = System::Drawing::Point(0, 23);
+			this->flpConfigdata->Margin = System::Windows::Forms::Padding(0);
+			this->flpConfigdata->Name = L"flpConfigdata";
+			this->flpConfigdata->Size = System::Drawing::Size(303, 69);
+			this->flpConfigdata->TabIndex = 8;
+			this->flpConfigdata->Visible = false;
+			// 
+			// lblBorder
+			// 
+			this->lblBorder->Location = System::Drawing::Point(0, 0);
+			this->lblBorder->Margin = System::Windows::Forms::Padding(0);
+			this->lblBorder->Name = L"lblBorder";
+			this->lblBorder->Size = System::Drawing::Size(60, 23);
+			this->lblBorder->TabIndex = 0;
+			this->lblBorder->Text = L"Border:";
+			// 
+			// lblBorderVal
+			// 
+			this->lblBorderVal->Location = System::Drawing::Point(60, 0);
+			this->lblBorderVal->Margin = System::Windows::Forms::Padding(0);
+			this->lblBorderVal->Name = L"lblBorderVal";
+			this->lblBorderVal->Size = System::Drawing::Size(65, 23);
+			this->lblBorderVal->TabIndex = 1;
+			// 
+			// lblPalette
+			// 
+			this->lblPalette->Location = System::Drawing::Point(125, 0);
+			this->lblPalette->Margin = System::Windows::Forms::Padding(0);
+			this->lblPalette->Name = L"lblPalette";
+			this->lblPalette->Size = System::Drawing::Size(60, 23);
+			this->lblPalette->TabIndex = 2;
+			this->lblPalette->Text = L"Palette:";
+			// 
+			// lblPaletteVal
+			// 
+			this->flpConfigdata->SetFlowBreak(this->lblPaletteVal, true);
+			this->lblPaletteVal->Location = System::Drawing::Point(185, 0);
+			this->lblPaletteVal->Margin = System::Windows::Forms::Padding(0);
+			this->lblPaletteVal->Name = L"lblPaletteVal";
+			this->lblPaletteVal->Size = System::Drawing::Size(118, 23);
+			this->lblPaletteVal->TabIndex = 3;
+			// 
+			// lblSleep
+			// 
+			this->lblSleep->Location = System::Drawing::Point(0, 23);
+			this->lblSleep->Margin = System::Windows::Forms::Padding(0);
+			this->lblSleep->Name = L"lblSleep";
+			this->lblSleep->Size = System::Drawing::Size(50, 23);
+			this->lblSleep->TabIndex = 9;
+			this->lblSleep->Text = L"Sleep:";
+			// 
+			// lblSleepVal
+			// 
+			this->lblSleepVal->Location = System::Drawing::Point(50, 23);
+			this->lblSleepVal->Margin = System::Windows::Forms::Padding(0);
+			this->lblSleepVal->Name = L"lblSleepVal";
+			this->lblSleepVal->Size = System::Drawing::Size(50, 23);
+			this->lblSleepVal->TabIndex = 10;
+			// 
+			// lblAutostate
+			// 
+			this->lblAutostate->Location = System::Drawing::Point(0, 46);
+			this->lblAutostate->Margin = System::Windows::Forms::Padding(0);
+			this->lblAutostate->Name = L"lblAutostate";
+			this->lblAutostate->Size = System::Drawing::Size(105, 23);
+			this->lblAutostate->TabIndex = 11;
+			this->lblAutostate->Text = L"Autoload state:";
+			// 
+			// lblAutostateVal
+			// 
+			this->flpConfigdata->SetFlowBreak(this->lblAutostateVal, true);
+			this->lblAutostateVal->Location = System::Drawing::Point(105, 46);
+			this->lblAutostateVal->Margin = System::Windows::Forms::Padding(0);
+			this->lblAutostateVal->Name = L"lblAutostateVal";
+			this->lblAutostateVal->Size = System::Drawing::Size(40, 23);
+			this->lblAutostateVal->TabIndex = 12;
+			// 
+			// lblGamma
+			// 
+			this->lblGamma->Location = System::Drawing::Point(100, 23);
+			this->lblGamma->Margin = System::Windows::Forms::Padding(0);
+			this->lblGamma->Name = L"lblGamma";
+			this->lblGamma->Size = System::Drawing::Size(65, 23);
+			this->lblGamma->TabIndex = 13;
+			this->lblGamma->Text = L"Gamma:";
+			// 
+			// lblGammaVal
+			// 
+			this->flpConfigdata->SetFlowBreak(this->lblGammaVal, true);
+			this->lblGammaVal->Location = System::Drawing::Point(165, 23);
+			this->lblGammaVal->Margin = System::Windows::Forms::Padding(0);
+			this->lblGammaVal->Name = L"lblGammaVal";
+			this->lblGammaVal->Size = System::Drawing::Size(60, 23);
+			this->lblGammaVal->TabIndex = 14;
+			// 
 			// flpStateheader
 			// 
 			this->flpStateheader->Controls->Add(this->lblUncompressedSize);
 			this->flpStateheader->Controls->Add(this->lblUncompressedSizeVal);
 			this->flpStateheader->Controls->Add(this->lblFramecount);
 			this->flpStateheader->Controls->Add(this->lblFramecountVal);
-			this->flpStateheader->Controls->Add(this->lblChecksum);
-			this->flpStateheader->Controls->Add(this->lblChecksumVal);
 			this->flowLayoutPanel1->SetFlowBreak(this->flpStateheader, true);
-			this->flpStateheader->Location = System::Drawing::Point(0, 23);
+			this->flpStateheader->Location = System::Drawing::Point(0, 92);
 			this->flpStateheader->Margin = System::Windows::Forms::Padding(0);
 			this->flpStateheader->Name = L"flpStateheader";
-			this->flpStateheader->Size = System::Drawing::Size(265, 69);
+			this->flpStateheader->Size = System::Drawing::Size(265, 46);
 			this->flpStateheader->TabIndex = 5;
 			// 
 			// lblUncompressedSize
@@ -258,7 +398,7 @@ namespace goombasav_clr {
 			// 
 			// lblChecksum
 			// 
-			this->lblChecksum->Location = System::Drawing::Point(0, 46);
+			this->lblChecksum->Location = System::Drawing::Point(0, 138);
 			this->lblChecksum->Margin = System::Windows::Forms::Padding(0);
 			this->lblChecksum->Name = L"lblChecksum";
 			this->lblChecksum->Size = System::Drawing::Size(120, 23);
@@ -267,7 +407,8 @@ namespace goombasav_clr {
 			// 
 			// lblChecksumVal
 			// 
-			this->lblChecksumVal->Location = System::Drawing::Point(120, 46);
+			this->flowLayoutPanel1->SetFlowBreak(this->lblChecksumVal, true);
+			this->lblChecksumVal->Location = System::Drawing::Point(120, 138);
 			this->lblChecksumVal->Margin = System::Windows::Forms::Padding(0);
 			this->lblChecksumVal->Name = L"lblChecksumVal";
 			this->lblChecksumVal->Size = System::Drawing::Size(140, 23);
@@ -275,7 +416,7 @@ namespace goombasav_clr {
 			// 
 			// lblTitle
 			// 
-			this->lblTitle->Location = System::Drawing::Point(0, 92);
+			this->lblTitle->Location = System::Drawing::Point(0, 161);
 			this->lblTitle->Margin = System::Windows::Forms::Padding(0);
 			this->lblTitle->Name = L"lblTitle";
 			this->lblTitle->Size = System::Drawing::Size(45, 23);
@@ -284,7 +425,7 @@ namespace goombasav_clr {
 			// 
 			// lblTitleVal
 			// 
-			this->lblTitleVal->Location = System::Drawing::Point(48, 92);
+			this->lblTitleVal->Location = System::Drawing::Point(48, 161);
 			this->lblTitleVal->Name = L"lblTitleVal";
 			this->lblTitleVal->Size = System::Drawing::Size(247, 23);
 			this->lblTitleVal->TabIndex = 7;
@@ -347,12 +488,14 @@ namespace goombasav_clr {
 			this->Controls->Add(this->menuStrip1);
 			this->MainMenuStrip = this->menuStrip1;
 			this->Name = L"MainForm";
-			this->Text = L"MainForm";
+			this->Text = L"Goomba Save Manager";
 			this->splitContainer1->Panel1->ResumeLayout(false);
 			this->splitContainer1->Panel2->ResumeLayout(false);
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->splitContainer1))->EndInit();
 			this->splitContainer1->ResumeLayout(false);
 			this->flowLayoutPanel1->ResumeLayout(false);
+			this->flowLayoutPanel1->PerformLayout();
+			this->flpConfigdata->ResumeLayout(false);
 			this->flpStateheader->ResumeLayout(false);
 			this->menuStrip1->ResumeLayout(false);
 			this->menuStrip1->PerformLayout();
@@ -400,10 +543,25 @@ namespace goombasav_clr {
 				: sh->type == GOOMBA_SRAMSAVE ? "SRAM"
 				: sh->type == GOOMBA_CONFIGSAVE ? "Settings"
 				: "Unknown";
-			lblUncompressedSize->Text = (sh->uncompressed_size >= sh->size) ? "Uncompressed size:" : "Compressed size:";
-			lblUncompressedSizeVal->Text = sh->uncompressed_size.ToString() + " bytes";
-			lblFramecountVal->Text = sh->framecount.ToString();
-			lblChecksumVal->Text = sh->checksum.ToString("X8");
+			if (sh->type == GOOMBA_CONFIGSAVE) {
+				flpConfigdata->Visible = true;
+				flpStateheader->Visible = false;
+
+				configdata* cd = p->cd_ptr();
+				lblBorderVal->Text = gcnew String(bordtxt[cd->bordercolor]);
+				lblPaletteVal->Text = gcnew String(paltxt[cd->palettebank]);
+				lblSleepVal->Text = gcnew String(sleeptxt[cd->misc & 0x3]);
+				lblAutostateVal->Text = ((cd->misc & 0x10) >> 4) ? "ON" : "OFF";
+				lblGammaVal->Text = gcnew String(brightxt[(cd->misc & 0xE0) >> 5]);
+				lblChecksumVal->Text = cd->sram_checksum.ToString("X8");
+			} else {
+				flpConfigdata->Visible = false;
+				flpStateheader->Visible = true;
+				lblUncompressedSize->Text = (sh->uncompressed_size >= sh->size) ? "Uncompressed size:" : "Compressed size:";
+				lblUncompressedSizeVal->Text = sh->uncompressed_size.ToString() + " bytes";
+				lblFramecountVal->Text = sh->framecount.ToString();
+				lblChecksumVal->Text = sh->checksum.ToString("X8");
+			}
 			lblTitleVal->Text = gcnew String(sh->title);
 		}
 };
