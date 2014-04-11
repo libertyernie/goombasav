@@ -379,7 +379,7 @@ namespace goombasav_clr {
 			if (headers != NULL) {
 				listBox1->Items->Clear();
 				for (int i = 0; headers[i] != NULL; i++) {
-					listBox1->Items->Add(HeaderPtr::FromPtr(headers[i]));
+					listBox1->Items->Add(gcnew HeaderPtr(headers[i]));
 				}
 				free(headers);
 			}
