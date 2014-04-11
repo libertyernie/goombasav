@@ -16,10 +16,12 @@ namespace goombasav_clr {
 	using namespace System::Data;
 	using namespace System::Drawing;
 
+	using msclr::interop::marshal_context;
 	typedef Windows::Forms::DialogResult DR;
 
-	char *const sleeptxt[] = { "5min", "10min", "30min", "OFF" };
-	char *const brightxt[] = { "I", "II", "III", "IIII", "IIIII" };
+	const char* TITLE = "Goomba Save Manager";
+	const char* const sleeptxt[] = { "5min", "10min", "30min", "OFF" };
+	const char* const brightxt[] = { "I", "II", "III", "IIII", "IIIII" };
 
 	/// <summary>
 	/// Summary for MainForm
@@ -27,7 +29,16 @@ namespace goombasav_clr {
 	public ref class MainForm : public System::Windows::Forms::Form
 	{
 
-	private: unsigned char* loaded_sram;
+	private:
+		unsigned char* loaded_sram;
+		String^ _filePath;
+		bool dirty;
+
+		// Update status of Save and Save As items whenever File menu is opened
+		void OnFileDropDownOpening(Object ^sender, EventArgs ^e) {
+			saveToolStripMenuItem->Enabled = (_filePath != nullptr && dirty);
+			saveAsToolStripMenuItem->Enabled = (_filePath != nullptr);
+		}
 
 	public:
 		MainForm(void)
@@ -35,6 +46,8 @@ namespace goombasav_clr {
 			InitializeComponent();
 
 			loaded_sram = new unsigned char[GOOMBA_COLOR_SRAM_SIZE];
+			_filePath = nullptr;
+			fileToolStripMenuItem->DropDownOpening += gcnew System::EventHandler(this, &goombasav_clr::MainForm::OnFileDropDownOpening);
 		}
 
 	protected:
@@ -211,7 +224,7 @@ namespace goombasav_clr {
 				 this->btnExtract->Name = L"btnExtract";
 				 this->btnExtract->Size = System::Drawing::Size(75, 23);
 				 this->btnExtract->TabIndex = 1;
-				 this->btnExtract->Text = L"Extract";
+				 this->btnExtract->Text = L"Export";
 				 this->btnExtract->UseVisualStyleBackColor = true;
 				 this->btnExtract->Click += gcnew System::EventHandler(this, &MainForm::btnExtract_Click);
 				 // 
@@ -546,7 +559,7 @@ namespace goombasav_clr {
 		void load(String^ filename) {
 			array<unsigned char>^ arr = System::IO::File::ReadAllBytes(filename);
 			if (arr->Length != GOOMBA_COLOR_SRAM_SIZE) {
-				MessageBox::Show("Incorrect file size - must be " + GOOMBA_COLOR_SRAM_SIZE + " bytes.");
+				MessageBox::Show("This file has an incorrect size. Valid Goomba save files must be " + GOOMBA_COLOR_SRAM_SIZE + " bytes.");
 				return;
 			}
 			pin_ptr<unsigned char> pin = &arr[0];
@@ -570,7 +583,13 @@ namespace goombasav_clr {
 			}
 
 			stateheader** headers = stateheader_scan(loaded_sram);
-			if (headers != NULL) {
+			if (headers == NULL) {
+				MessageBox::Show(gcnew String(goomba_last_error()), "Error", MessageBoxButtons::OK, MessageBoxIcon::Error);
+			} else {
+				_filePath = filename;
+				this->Text = (filename == nullptr)
+					? gcnew String(TITLE)
+					: gcnew String(TITLE) + " - " + IO::Path::GetFileName(filename);
 				listBox1->Items->Clear();
 				for (int i = 0; headers[i] != NULL; i++) {
 					listBox1->Items->Add(gcnew HeaderPtr(headers[i]));
@@ -581,6 +600,7 @@ namespace goombasav_clr {
 
 		Void openToolStripMenuItem_Click(Object^ sender, EventArgs^ e) {
 			OpenFileDialog d;
+			d.Filter = "Game Boy Advance save data (*.sav)|*.sav|All files (*.*)|*.*";
 			if (d.ShowDialog() == Windows::Forms::DialogResult::OK) {
 				load(d.FileName);
 			}
@@ -629,11 +649,14 @@ namespace goombasav_clr {
 			size_t len;
 			void* data = goomba_extract(loaded_sram, sh, &len);
 			if (data == NULL) {
-				MessageBox::Show(gcnew String(goomba_last_error()));
+				MessageBox::Show(gcnew String(goomba_last_error()), "Error", MessageBoxButtons::OK, MessageBoxIcon::Error);
 			} else {
 				SaveFileDialog d;
+				d.Title = btnExtract->Text;
+				d.Filter = "Game Boy save data (*.sav)|*.sav|All files (*.*)|*.*";
+				d.AddExtension = true;
 				if (d.ShowDialog() == Windows::Forms::DialogResult::OK) {
-					msclr::interop::marshal_context context;
+					marshal_context context;
 					FILE* outfile = fopen(context.marshal_as<const char*>(d.FileName), "wb");
 					if (outfile == NULL) {
 						MessageBox::Show("Could not open file out.sav");
