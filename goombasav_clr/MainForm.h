@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <msclr\marshal.h>
 #include "../goombasav.h"
 #include "HeaderPtr.h"
 
@@ -89,8 +90,12 @@ namespace goombasav_clr {
 	private: System::Windows::Forms::Label^  lblAutostateVal;
 	private: System::Windows::Forms::Label^  lblGamma;
 	private: System::Windows::Forms::Label^  lblGammaVal;
-	private: System::Windows::Forms::StatusStrip^  statusStrip1;
-	private: System::Windows::Forms::ToolStripStatusLabel^  toolStripStatusLabel1;
+
+	private: System::Windows::Forms::Button^  btnExtract;
+	private: System::Windows::Forms::Button^  btnReplace;
+	private: System::Windows::Forms::FlowLayoutPanel^  flpButtons;
+
+
 
 
 	private: System::ComponentModel::IContainer^  components;
@@ -98,6 +103,9 @@ namespace goombasav_clr {
 		{
 				 this->listBox1 = (gcnew System::Windows::Forms::ListBox());
 				 this->splitContainer1 = (gcnew System::Windows::Forms::SplitContainer());
+				 this->flpButtons = (gcnew System::Windows::Forms::FlowLayoutPanel());
+				 this->btnReplace = (gcnew System::Windows::Forms::Button());
+				 this->btnExtract = (gcnew System::Windows::Forms::Button());
 				 this->flowLayoutPanel1 = (gcnew System::Windows::Forms::FlowLayoutPanel());
 				 this->lblSize = (gcnew System::Windows::Forms::Label());
 				 this->lblSizeVal = (gcnew System::Windows::Forms::Label());
@@ -130,17 +138,15 @@ namespace goombasav_clr {
 				 this->saveAsToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 				 this->toolStripMenuItem1 = (gcnew System::Windows::Forms::ToolStripSeparator());
 				 this->exitToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
-				 this->statusStrip1 = (gcnew System::Windows::Forms::StatusStrip());
-				 this->toolStripStatusLabel1 = (gcnew System::Windows::Forms::ToolStripStatusLabel());
 				 (cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->splitContainer1))->BeginInit();
 				 this->splitContainer1->Panel1->SuspendLayout();
 				 this->splitContainer1->Panel2->SuspendLayout();
 				 this->splitContainer1->SuspendLayout();
+				 this->flpButtons->SuspendLayout();
 				 this->flowLayoutPanel1->SuspendLayout();
 				 this->flpConfigdata->SuspendLayout();
 				 this->flpStateheader->SuspendLayout();
 				 this->menuStrip1->SuspendLayout();
-				 this->statusStrip1->SuspendLayout();
 				 this->SuspendLayout();
 				 // 
 				 // listBox1
@@ -149,9 +155,9 @@ namespace goombasav_clr {
 				 this->listBox1->FormattingEnabled = true;
 				 this->listBox1->IntegralHeight = false;
 				 this->listBox1->Location = System::Drawing::Point(0, 0);
-				 this->listBox1->Margin = System::Windows::Forms::Padding(2, 2, 2, 2);
+				 this->listBox1->Margin = System::Windows::Forms::Padding(2);
 				 this->listBox1->Name = L"listBox1";
-				 this->listBox1->Size = System::Drawing::Size(130, 177);
+				 this->listBox1->Size = System::Drawing::Size(130, 182);
 				 this->listBox1->TabIndex = 0;
 				 this->listBox1->SelectedIndexChanged += gcnew System::EventHandler(this, &MainForm::listBox1_SelectedIndexChanged);
 				 // 
@@ -160,7 +166,7 @@ namespace goombasav_clr {
 				 this->splitContainer1->Dock = System::Windows::Forms::DockStyle::Fill;
 				 this->splitContainer1->FixedPanel = System::Windows::Forms::FixedPanel::Panel1;
 				 this->splitContainer1->Location = System::Drawing::Point(0, 24);
-				 this->splitContainer1->Margin = System::Windows::Forms::Padding(2, 2, 2, 2);
+				 this->splitContainer1->Margin = System::Windows::Forms::Padding(2);
 				 this->splitContainer1->Name = L"splitContainer1";
 				 // 
 				 // splitContainer1.Panel1
@@ -169,11 +175,45 @@ namespace goombasav_clr {
 				 // 
 				 // splitContainer1.Panel2
 				 // 
+				 this->splitContainer1->Panel2->Controls->Add(this->flpButtons);
 				 this->splitContainer1->Panel2->Controls->Add(this->flowLayoutPanel1);
-				 this->splitContainer1->Size = System::Drawing::Size(380, 177);
+				 this->splitContainer1->Size = System::Drawing::Size(380, 182);
 				 this->splitContainer1->SplitterDistance = 130;
 				 this->splitContainer1->SplitterWidth = 3;
 				 this->splitContainer1->TabIndex = 1;
+				 // 
+				 // flpButtons
+				 // 
+				 this->flpButtons->AutoSize = true;
+				 this->flpButtons->Controls->Add(this->btnReplace);
+				 this->flpButtons->Controls->Add(this->btnExtract);
+				 this->flpButtons->Dock = System::Windows::Forms::DockStyle::Bottom;
+				 this->flpButtons->Location = System::Drawing::Point(0, 153);
+				 this->flpButtons->Name = L"flpButtons";
+				 this->flpButtons->Size = System::Drawing::Size(247, 29);
+				 this->flpButtons->TabIndex = 9;
+				 // 
+				 // btnReplace
+				 // 
+				 this->btnReplace->Enabled = false;
+				 this->btnReplace->Location = System::Drawing::Point(3, 3);
+				 this->btnReplace->Name = L"btnReplace";
+				 this->btnReplace->Size = System::Drawing::Size(75, 23);
+				 this->btnReplace->TabIndex = 0;
+				 this->btnReplace->Text = L"Replace";
+				 this->btnReplace->UseVisualStyleBackColor = true;
+				 this->btnReplace->Click += gcnew System::EventHandler(this, &MainForm::btnReplace_Click);
+				 // 
+				 // btnExtract
+				 // 
+				 this->btnExtract->Enabled = false;
+				 this->btnExtract->Location = System::Drawing::Point(84, 3);
+				 this->btnExtract->Name = L"btnExtract";
+				 this->btnExtract->Size = System::Drawing::Size(75, 23);
+				 this->btnExtract->TabIndex = 1;
+				 this->btnExtract->Text = L"Extract";
+				 this->btnExtract->UseVisualStyleBackColor = true;
+				 this->btnExtract->Click += gcnew System::EventHandler(this, &MainForm::btnExtract_Click);
 				 // 
 				 // flowLayoutPanel1
 				 // 
@@ -189,9 +229,9 @@ namespace goombasav_clr {
 				 this->flowLayoutPanel1->Controls->Add(this->lblTitleVal);
 				 this->flowLayoutPanel1->Dock = System::Windows::Forms::DockStyle::Fill;
 				 this->flowLayoutPanel1->Location = System::Drawing::Point(0, 0);
-				 this->flowLayoutPanel1->Margin = System::Windows::Forms::Padding(2, 2, 2, 2);
+				 this->flowLayoutPanel1->Margin = System::Windows::Forms::Padding(2);
 				 this->flowLayoutPanel1->Name = L"flowLayoutPanel1";
-				 this->flowLayoutPanel1->Size = System::Drawing::Size(247, 177);
+				 this->flowLayoutPanel1->Size = System::Drawing::Size(247, 182);
 				 this->flowLayoutPanel1->TabIndex = 5;
 				 // 
 				 // lblSize
@@ -444,48 +484,35 @@ namespace goombasav_clr {
 				 // openToolStripMenuItem
 				 // 
 				 this->openToolStripMenuItem->Name = L"openToolStripMenuItem";
-				 this->openToolStripMenuItem->Size = System::Drawing::Size(125, 22);
+				 this->openToolStripMenuItem->Size = System::Drawing::Size(152, 22);
 				 this->openToolStripMenuItem->Text = L"Open";
 				 this->openToolStripMenuItem->Click += gcnew System::EventHandler(this, &MainForm::openToolStripMenuItem_Click);
 				 // 
 				 // saveToolStripMenuItem
 				 // 
+				 this->saveToolStripMenuItem->Enabled = false;
 				 this->saveToolStripMenuItem->Name = L"saveToolStripMenuItem";
-				 this->saveToolStripMenuItem->Size = System::Drawing::Size(125, 22);
+				 this->saveToolStripMenuItem->Size = System::Drawing::Size(152, 22);
 				 this->saveToolStripMenuItem->Text = L"Save";
 				 // 
 				 // saveAsToolStripMenuItem
 				 // 
+				 this->saveAsToolStripMenuItem->Enabled = false;
 				 this->saveAsToolStripMenuItem->Name = L"saveAsToolStripMenuItem";
-				 this->saveAsToolStripMenuItem->Size = System::Drawing::Size(125, 22);
+				 this->saveAsToolStripMenuItem->Size = System::Drawing::Size(152, 22);
 				 this->saveAsToolStripMenuItem->Text = L"Save As...";
 				 // 
 				 // toolStripMenuItem1
 				 // 
 				 this->toolStripMenuItem1->Name = L"toolStripMenuItem1";
-				 this->toolStripMenuItem1->Size = System::Drawing::Size(122, 6);
+				 this->toolStripMenuItem1->Size = System::Drawing::Size(149, 6);
 				 // 
 				 // exitToolStripMenuItem
 				 // 
 				 this->exitToolStripMenuItem->Name = L"exitToolStripMenuItem";
-				 this->exitToolStripMenuItem->Size = System::Drawing::Size(125, 22);
+				 this->exitToolStripMenuItem->Size = System::Drawing::Size(152, 22);
 				 this->exitToolStripMenuItem->Text = L"Exit";
-				 // 
-				 // statusStrip1
-				 // 
-				 this->statusStrip1->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(1) { this->toolStripStatusLabel1 });
-				 this->statusStrip1->LayoutStyle = System::Windows::Forms::ToolStripLayoutStyle::Flow;
-				 this->statusStrip1->Location = System::Drawing::Point(0, 201);
-				 this->statusStrip1->Name = L"statusStrip1";
-				 this->statusStrip1->Padding = System::Windows::Forms::Padding(1, 0, 10, 0);
-				 this->statusStrip1->Size = System::Drawing::Size(380, 5);
-				 this->statusStrip1->TabIndex = 9;
-				 this->statusStrip1->Text = L"statusStrip1";
-				 // 
-				 // toolStripStatusLabel1
-				 // 
-				 this->toolStripStatusLabel1->Name = L"toolStripStatusLabel1";
-				 this->toolStripStatusLabel1->Size = System::Drawing::Size(0, 0);
+				 this->exitToolStripMenuItem->Click += gcnew System::EventHandler(this, &MainForm::exitToolStripMenuItem_Click);
 				 // 
 				 // MainForm
 				 // 
@@ -493,23 +520,22 @@ namespace goombasav_clr {
 				 this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 				 this->ClientSize = System::Drawing::Size(380, 206);
 				 this->Controls->Add(this->splitContainer1);
-				 this->Controls->Add(this->statusStrip1);
 				 this->Controls->Add(this->menuStrip1);
 				 this->MainMenuStrip = this->menuStrip1;
-				 this->Margin = System::Windows::Forms::Padding(2, 2, 2, 2);
+				 this->Margin = System::Windows::Forms::Padding(2);
 				 this->Name = L"MainForm";
 				 this->Text = L"Goomba Save Manager";
 				 this->splitContainer1->Panel1->ResumeLayout(false);
 				 this->splitContainer1->Panel2->ResumeLayout(false);
+				 this->splitContainer1->Panel2->PerformLayout();
 				 (cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->splitContainer1))->EndInit();
 				 this->splitContainer1->ResumeLayout(false);
+				 this->flpButtons->ResumeLayout(false);
 				 this->flowLayoutPanel1->ResumeLayout(false);
 				 this->flpConfigdata->ResumeLayout(false);
 				 this->flpStateheader->ResumeLayout(false);
 				 this->menuStrip1->ResumeLayout(false);
 				 this->menuStrip1->PerformLayout();
-				 this->statusStrip1->ResumeLayout(false);
-				 this->statusStrip1->PerformLayout();
 				 this->ResumeLayout(false);
 				 this->PerformLayout();
 
@@ -553,16 +579,20 @@ namespace goombasav_clr {
 			}
 		}
 
-		Void openToolStripMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
+		Void openToolStripMenuItem_Click(Object^ sender, EventArgs^ e) {
 			OpenFileDialog d;
 			if (d.ShowDialog() == Windows::Forms::DialogResult::OK) {
 				load(d.FileName);
 			}
 		}
+		Void exitToolStripMenuItem_Click(Object^ sender, EventArgs^ e) {
+			this->Close();
+		}
 	
 		Void listBox1_SelectedIndexChanged(Object^ sender, EventArgs^ e) {
 			HeaderPtr^ p = (HeaderPtr^)listBox1->SelectedItem;
 			stateheader* sh = p->sh_ptr();
+			btnExtract->Enabled = sh->type == GOOMBA_SRAMSAVE;
 			lblSizeVal->Text = sh->size.ToString() + " bytes";
 			lblTypeVal->Text = sh->type == GOOMBA_STATESAVE ? "Savestate"
 				: sh->type == GOOMBA_SRAMSAVE ? "SRAM"
@@ -588,6 +618,32 @@ namespace goombasav_clr {
 				lblChecksumVal->Text = sh->checksum.ToString("X8");
 			}
 			lblTitleVal->Text = gcnew String(sh->title);
+		}
+
+		Void btnReplace_Click(Object^ sender, EventArgs^ e) {
+
+		}
+		Void btnExtract_Click(Object^ sender, EventArgs^ e) {
+			HeaderPtr^ p = (HeaderPtr^)listBox1->SelectedItem;
+			stateheader* sh = p->sh_ptr();
+			size_t len;
+			void* data = goomba_extract(loaded_sram, sh, &len);
+			if (data == NULL) {
+				MessageBox::Show(gcnew String(goomba_last_error()));
+			} else {
+				SaveFileDialog d;
+				if (d.ShowDialog() == Windows::Forms::DialogResult::OK) {
+					msclr::interop::marshal_context context;
+					FILE* outfile = fopen(context.marshal_as<const char*>(d.FileName), "wb");
+					if (outfile == NULL) {
+						MessageBox::Show("Could not open file out.sav");
+					} else {
+						fwrite(data, 1, len, outfile);
+						fclose(outfile);
+					}
+				}
+				free(data);
+			}
 		}
 };
 }

@@ -186,6 +186,11 @@ char* goomba_cleanup(const void* gba_data_param) {
 void* goomba_extract(const void* gba_data, const stateheader* header_ptr, size_t* size_output) {
 	const stateheader* sh = (const stateheader*)header_ptr;
 
+	if (sh->type != GOOMBA_SRAMSAVE) {
+		goomba_error("Error: this program can only extract SRAM data.\n");
+		return NULL;
+	}
+
 	const int32_t ck = goomba_get_configdata_checksum_field(gba_data);
 	if (ck < 0) {
 		return NULL;
@@ -194,11 +199,6 @@ void* goomba_extract(const void* gba_data, const stateheader* header_ptr, size_t
 		return NULL;
 	} else if (ck != 0) {
 		fprintf(stderr, "File is unclean, but it shouldn't affect retrieval of the data you asked for\n");
-	}
-
-	if (sh->type != GOOMBA_SRAMSAVE) {
-		goomba_error("Error: this is not SRAM data\n");
-		return NULL;
 	}
 	
 	lzo_uint compressed_size = sh->size - sizeof(stateheader);
