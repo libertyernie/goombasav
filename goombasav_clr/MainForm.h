@@ -19,10 +19,6 @@ namespace goombasav_clr {
 
 	char *const sleeptxt[] = { "5min", "10min", "30min", "OFF" };
 	char *const brightxt[] = { "I", "II", "III", "IIII", "IIIII" };
-	char *const bordtxt[] = { "Black", "Grey", "Blue", "None" };
-	char *const paltxt[16] = { "Yellow", "Grey", "Multi1", "Multi2", "Zelda", "Metroid",
-		"AdvIsland", "AdvIsland2", "BaloonKid", "Batman", "BatmanROTJ",
-		"BionicCom", "CV Adv", "Dr.Mario", "Kirby", "DK Land" };
 
 	/// <summary>
 	/// Summary for MainForm
@@ -86,24 +82,17 @@ namespace goombasav_clr {
 	private: System::Windows::Forms::Label^  lblAutostateVal;
 	private: System::Windows::Forms::Label^  lblGamma;
 	private: System::Windows::Forms::Label^  lblGammaVal;
+	private: System::Windows::Forms::StatusStrip^  statusStrip1;
+	private: System::Windows::Forms::ToolStripStatusLabel^  toolStripStatusLabel1;
 
 
-
-
-
-
-
-
-
-
-
-
+	private: System::ComponentModel::IContainer^  components;
 
 	private:
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
-		System::ComponentModel::Container ^components;
+
 
 #pragma region Windows Form Designer generated code
 		/// <summary>
@@ -126,10 +115,10 @@ namespace goombasav_clr {
 			this->lblPaletteVal = (gcnew System::Windows::Forms::Label());
 			this->lblSleep = (gcnew System::Windows::Forms::Label());
 			this->lblSleepVal = (gcnew System::Windows::Forms::Label());
-			this->lblAutostate = (gcnew System::Windows::Forms::Label());
-			this->lblAutostateVal = (gcnew System::Windows::Forms::Label());
 			this->lblGamma = (gcnew System::Windows::Forms::Label());
 			this->lblGammaVal = (gcnew System::Windows::Forms::Label());
+			this->lblAutostate = (gcnew System::Windows::Forms::Label());
+			this->lblAutostateVal = (gcnew System::Windows::Forms::Label());
 			this->flpStateheader = (gcnew System::Windows::Forms::FlowLayoutPanel());
 			this->lblUncompressedSize = (gcnew System::Windows::Forms::Label());
 			this->lblUncompressedSizeVal = (gcnew System::Windows::Forms::Label());
@@ -146,6 +135,8 @@ namespace goombasav_clr {
 			this->saveAsToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			this->toolStripMenuItem1 = (gcnew System::Windows::Forms::ToolStripSeparator());
 			this->exitToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
+			this->statusStrip1 = (gcnew System::Windows::Forms::StatusStrip());
+			this->toolStripStatusLabel1 = (gcnew System::Windows::Forms::ToolStripStatusLabel());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->splitContainer1))->BeginInit();
 			this->splitContainer1->Panel1->SuspendLayout();
 			this->splitContainer1->Panel2->SuspendLayout();
@@ -154,6 +145,7 @@ namespace goombasav_clr {
 			this->flpConfigdata->SuspendLayout();
 			this->flpStateheader->SuspendLayout();
 			this->menuStrip1->SuspendLayout();
+			this->statusStrip1->SuspendLayout();
 			this->SuspendLayout();
 			// 
 			// listBox1
@@ -164,7 +156,7 @@ namespace goombasav_clr {
 			this->listBox1->ItemHeight = 16;
 			this->listBox1->Location = System::Drawing::Point(0, 0);
 			this->listBox1->Name = L"listBox1";
-			this->listBox1->Size = System::Drawing::Size(130, 225);
+			this->listBox1->Size = System::Drawing::Size(130, 201);
 			this->listBox1->TabIndex = 0;
 			this->listBox1->SelectedIndexChanged += gcnew System::EventHandler(this, &MainForm::listBox1_SelectedIndexChanged);
 			// 
@@ -182,7 +174,7 @@ namespace goombasav_clr {
 			// splitContainer1.Panel2
 			// 
 			this->splitContainer1->Panel2->Controls->Add(this->flowLayoutPanel1);
-			this->splitContainer1->Size = System::Drawing::Size(482, 225);
+			this->splitContainer1->Size = System::Drawing::Size(507, 201);
 			this->splitContainer1->SplitterDistance = 130;
 			this->splitContainer1->TabIndex = 1;
 			// 
@@ -201,7 +193,7 @@ namespace goombasav_clr {
 			this->flowLayoutPanel1->Dock = System::Windows::Forms::DockStyle::Fill;
 			this->flowLayoutPanel1->Location = System::Drawing::Point(0, 0);
 			this->flowLayoutPanel1->Name = L"flowLayoutPanel1";
-			this->flowLayoutPanel1->Size = System::Drawing::Size(348, 225);
+			this->flowLayoutPanel1->Size = System::Drawing::Size(373, 201);
 			this->flowLayoutPanel1->TabIndex = 5;
 			// 
 			// lblSize
@@ -255,7 +247,7 @@ namespace goombasav_clr {
 			this->flpConfigdata->Location = System::Drawing::Point(0, 23);
 			this->flpConfigdata->Margin = System::Windows::Forms::Padding(0);
 			this->flpConfigdata->Name = L"flpConfigdata";
-			this->flpConfigdata->Size = System::Drawing::Size(303, 69);
+			this->flpConfigdata->Size = System::Drawing::Size(280, 47);
 			this->flpConfigdata->TabIndex = 8;
 			this->flpConfigdata->Visible = false;
 			// 
@@ -273,12 +265,13 @@ namespace goombasav_clr {
 			this->lblBorderVal->Location = System::Drawing::Point(60, 0);
 			this->lblBorderVal->Margin = System::Windows::Forms::Padding(0);
 			this->lblBorderVal->Name = L"lblBorderVal";
-			this->lblBorderVal->Size = System::Drawing::Size(65, 23);
+			this->lblBorderVal->Size = System::Drawing::Size(30, 23);
 			this->lblBorderVal->TabIndex = 1;
+			this->lblBorderVal->Text = L"88";
 			// 
 			// lblPalette
 			// 
-			this->lblPalette->Location = System::Drawing::Point(125, 0);
+			this->lblPalette->Location = System::Drawing::Point(90, 0);
 			this->lblPalette->Margin = System::Windows::Forms::Padding(0);
 			this->lblPalette->Name = L"lblPalette";
 			this->lblPalette->Size = System::Drawing::Size(60, 23);
@@ -287,16 +280,16 @@ namespace goombasav_clr {
 			// 
 			// lblPaletteVal
 			// 
-			this->flpConfigdata->SetFlowBreak(this->lblPaletteVal, true);
-			this->lblPaletteVal->Location = System::Drawing::Point(185, 0);
+			this->lblPaletteVal->Location = System::Drawing::Point(150, 0);
 			this->lblPaletteVal->Margin = System::Windows::Forms::Padding(0);
 			this->lblPaletteVal->Name = L"lblPaletteVal";
-			this->lblPaletteVal->Size = System::Drawing::Size(118, 23);
+			this->lblPaletteVal->Size = System::Drawing::Size(30, 23);
 			this->lblPaletteVal->TabIndex = 3;
+			this->lblPaletteVal->Text = L"88";
 			// 
 			// lblSleep
 			// 
-			this->lblSleep->Location = System::Drawing::Point(0, 23);
+			this->lblSleep->Location = System::Drawing::Point(180, 0);
 			this->lblSleep->Margin = System::Windows::Forms::Padding(0);
 			this->lblSleep->Name = L"lblSleep";
 			this->lblSleep->Size = System::Drawing::Size(50, 23);
@@ -305,15 +298,33 @@ namespace goombasav_clr {
 			// 
 			// lblSleepVal
 			// 
-			this->lblSleepVal->Location = System::Drawing::Point(50, 23);
+			this->flpConfigdata->SetFlowBreak(this->lblSleepVal, true);
+			this->lblSleepVal->Location = System::Drawing::Point(230, 0);
 			this->lblSleepVal->Margin = System::Windows::Forms::Padding(0);
 			this->lblSleepVal->Name = L"lblSleepVal";
 			this->lblSleepVal->Size = System::Drawing::Size(50, 23);
 			this->lblSleepVal->TabIndex = 10;
 			// 
+			// lblGamma
+			// 
+			this->lblGamma->Location = System::Drawing::Point(0, 23);
+			this->lblGamma->Margin = System::Windows::Forms::Padding(0);
+			this->lblGamma->Name = L"lblGamma";
+			this->lblGamma->Size = System::Drawing::Size(65, 24);
+			this->lblGamma->TabIndex = 13;
+			this->lblGamma->Text = L"Gamma:";
+			// 
+			// lblGammaVal
+			// 
+			this->lblGammaVal->Location = System::Drawing::Point(65, 23);
+			this->lblGammaVal->Margin = System::Windows::Forms::Padding(0);
+			this->lblGammaVal->Name = L"lblGammaVal";
+			this->lblGammaVal->Size = System::Drawing::Size(60, 23);
+			this->lblGammaVal->TabIndex = 14;
+			// 
 			// lblAutostate
 			// 
-			this->lblAutostate->Location = System::Drawing::Point(0, 46);
+			this->lblAutostate->Location = System::Drawing::Point(125, 23);
 			this->lblAutostate->Margin = System::Windows::Forms::Padding(0);
 			this->lblAutostate->Name = L"lblAutostate";
 			this->lblAutostate->Size = System::Drawing::Size(105, 23);
@@ -323,29 +334,11 @@ namespace goombasav_clr {
 			// lblAutostateVal
 			// 
 			this->flpConfigdata->SetFlowBreak(this->lblAutostateVal, true);
-			this->lblAutostateVal->Location = System::Drawing::Point(105, 46);
+			this->lblAutostateVal->Location = System::Drawing::Point(230, 23);
 			this->lblAutostateVal->Margin = System::Windows::Forms::Padding(0);
 			this->lblAutostateVal->Name = L"lblAutostateVal";
 			this->lblAutostateVal->Size = System::Drawing::Size(40, 23);
 			this->lblAutostateVal->TabIndex = 12;
-			// 
-			// lblGamma
-			// 
-			this->lblGamma->Location = System::Drawing::Point(100, 23);
-			this->lblGamma->Margin = System::Windows::Forms::Padding(0);
-			this->lblGamma->Name = L"lblGamma";
-			this->lblGamma->Size = System::Drawing::Size(65, 23);
-			this->lblGamma->TabIndex = 13;
-			this->lblGamma->Text = L"Gamma:";
-			// 
-			// lblGammaVal
-			// 
-			this->flpConfigdata->SetFlowBreak(this->lblGammaVal, true);
-			this->lblGammaVal->Location = System::Drawing::Point(165, 23);
-			this->lblGammaVal->Margin = System::Windows::Forms::Padding(0);
-			this->lblGammaVal->Name = L"lblGammaVal";
-			this->lblGammaVal->Size = System::Drawing::Size(60, 23);
-			this->lblGammaVal->TabIndex = 14;
 			// 
 			// flpStateheader
 			// 
@@ -354,10 +347,10 @@ namespace goombasav_clr {
 			this->flpStateheader->Controls->Add(this->lblFramecount);
 			this->flpStateheader->Controls->Add(this->lblFramecountVal);
 			this->flowLayoutPanel1->SetFlowBreak(this->flpStateheader, true);
-			this->flpStateheader->Location = System::Drawing::Point(0, 92);
+			this->flpStateheader->Location = System::Drawing::Point(0, 70);
 			this->flpStateheader->Margin = System::Windows::Forms::Padding(0);
 			this->flpStateheader->Name = L"flpStateheader";
-			this->flpStateheader->Size = System::Drawing::Size(265, 46);
+			this->flpStateheader->Size = System::Drawing::Size(295, 46);
 			this->flpStateheader->TabIndex = 5;
 			// 
 			// lblUncompressedSize
@@ -398,7 +391,7 @@ namespace goombasav_clr {
 			// 
 			// lblChecksum
 			// 
-			this->lblChecksum->Location = System::Drawing::Point(0, 138);
+			this->lblChecksum->Location = System::Drawing::Point(0, 116);
 			this->lblChecksum->Margin = System::Windows::Forms::Padding(0);
 			this->lblChecksum->Name = L"lblChecksum";
 			this->lblChecksum->Size = System::Drawing::Size(120, 23);
@@ -408,7 +401,7 @@ namespace goombasav_clr {
 			// lblChecksumVal
 			// 
 			this->flowLayoutPanel1->SetFlowBreak(this->lblChecksumVal, true);
-			this->lblChecksumVal->Location = System::Drawing::Point(120, 138);
+			this->lblChecksumVal->Location = System::Drawing::Point(120, 116);
 			this->lblChecksumVal->Margin = System::Windows::Forms::Padding(0);
 			this->lblChecksumVal->Name = L"lblChecksumVal";
 			this->lblChecksumVal->Size = System::Drawing::Size(140, 23);
@@ -416,7 +409,7 @@ namespace goombasav_clr {
 			// 
 			// lblTitle
 			// 
-			this->lblTitle->Location = System::Drawing::Point(0, 161);
+			this->lblTitle->Location = System::Drawing::Point(0, 139);
 			this->lblTitle->Margin = System::Windows::Forms::Padding(0);
 			this->lblTitle->Name = L"lblTitle";
 			this->lblTitle->Size = System::Drawing::Size(45, 23);
@@ -425,7 +418,8 @@ namespace goombasav_clr {
 			// 
 			// lblTitleVal
 			// 
-			this->lblTitleVal->Location = System::Drawing::Point(48, 161);
+			this->lblTitleVal->Location = System::Drawing::Point(45, 139);
+			this->lblTitleVal->Margin = System::Windows::Forms::Padding(0);
 			this->lblTitleVal->Name = L"lblTitleVal";
 			this->lblTitleVal->Size = System::Drawing::Size(247, 23);
 			this->lblTitleVal->TabIndex = 7;
@@ -435,7 +429,7 @@ namespace goombasav_clr {
 			this->menuStrip1->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(1) { this->fileToolStripMenuItem });
 			this->menuStrip1->Location = System::Drawing::Point(0, 0);
 			this->menuStrip1->Name = L"menuStrip1";
-			this->menuStrip1->Size = System::Drawing::Size(482, 28);
+			this->menuStrip1->Size = System::Drawing::Size(507, 28);
 			this->menuStrip1->TabIndex = 0;
 			this->menuStrip1->Text = L"menuStrip1";
 			// 
@@ -479,12 +473,28 @@ namespace goombasav_clr {
 			this->exitToolStripMenuItem->Size = System::Drawing::Size(138, 24);
 			this->exitToolStripMenuItem->Text = L"Exit";
 			// 
+			// statusStrip1
+			// 
+			this->statusStrip1->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(1) { this->toolStripStatusLabel1 });
+			this->statusStrip1->LayoutStyle = System::Windows::Forms::ToolStripLayoutStyle::Flow;
+			this->statusStrip1->Location = System::Drawing::Point(0, 229);
+			this->statusStrip1->Name = L"statusStrip1";
+			this->statusStrip1->Size = System::Drawing::Size(507, 24);
+			this->statusStrip1->TabIndex = 9;
+			this->statusStrip1->Text = L"statusStrip1";
+			// 
+			// toolStripStatusLabel1
+			// 
+			this->toolStripStatusLabel1->Name = L"toolStripStatusLabel1";
+			this->toolStripStatusLabel1->Size = System::Drawing::Size(0, 0);
+			// 
 			// MainForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(482, 253);
+			this->ClientSize = System::Drawing::Size(507, 253);
 			this->Controls->Add(this->splitContainer1);
+			this->Controls->Add(this->statusStrip1);
 			this->Controls->Add(this->menuStrip1);
 			this->MainMenuStrip = this->menuStrip1;
 			this->Name = L"MainForm";
@@ -499,6 +509,8 @@ namespace goombasav_clr {
 			this->flpStateheader->ResumeLayout(false);
 			this->menuStrip1->ResumeLayout(false);
 			this->menuStrip1->PerformLayout();
+			this->statusStrip1->ResumeLayout(false);
+			this->statusStrip1->PerformLayout();
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
@@ -515,6 +527,11 @@ namespace goombasav_clr {
 			pin_ptr<unsigned char> pin = &arr[0];
 			char* cleaned = goomba_cleanup(pin);
 			if (cleaned != NULL) {
+				if (cleaned != (void*)pin) {
+					toolStripStatusLabel1->Text = "Cleaned 0xE000-0xFFFF. To skip this step, run with --no-clean.";
+				} else {
+					statusStrip1->Text = "SRAM is clean - no data in 0xE000-0xFFFF range";
+				}
 				memcpy(loaded_sram, cleaned, GOOMBA_COLOR_SRAM_SIZE);
 			}
 
@@ -548,8 +565,8 @@ namespace goombasav_clr {
 				flpStateheader->Visible = false;
 
 				configdata* cd = p->cd_ptr();
-				lblBorderVal->Text = gcnew String(bordtxt[cd->bordercolor]);
-				lblPaletteVal->Text = gcnew String(paltxt[cd->palettebank]);
+				lblBorderVal->Text = cd->bordercolor.ToString();
+				lblPaletteVal->Text = cd->palettebank.ToString();
 				lblSleepVal->Text = gcnew String(sleeptxt[cd->misc & 0x3]);
 				lblAutostateVal->Text = ((cd->misc & 0x10) >> 4) ? "ON" : "OFF";
 				lblGammaVal->Text = gcnew String(brightxt[(cd->misc & 0xE0) >> 5]);
