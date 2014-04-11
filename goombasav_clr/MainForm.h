@@ -581,15 +581,22 @@ namespace goombasav_clr {
 			} else {
 				memcpy(loaded_sram, pin, GOOMBA_COLOR_SRAM_SIZE);
 			}
+			
+			_filePath = filename;
+			this->Text = (filename == nullptr)
+				? gcnew String(TITLE)
+				: gcnew String(TITLE) + " - " + IO::Path::GetFileName(filename);
 
+			headerScan();
+		}
+
+		void headerScan() {
 			stateheader** headers = stateheader_scan(loaded_sram);
 			if (headers == NULL) {
 				MessageBox::Show(gcnew String(goomba_last_error()), "Error", MessageBoxButtons::OK, MessageBoxIcon::Error);
+			} else if (headers[0] == NULL) {
+				MessageBox::Show("No headers were found in this file.", "Error", MessageBoxButtons::OK, MessageBoxIcon::Information);
 			} else {
-				_filePath = filename;
-				this->Text = (filename == nullptr)
-					? gcnew String(TITLE)
-					: gcnew String(TITLE) + " - " + IO::Path::GetFileName(filename);
 				listBox1->Items->Clear();
 				for (int i = 0; headers[i] != NULL; i++) {
 					listBox1->Items->Add(gcnew HeaderPtr(headers[i]));
@@ -613,6 +620,7 @@ namespace goombasav_clr {
 			HeaderPtr^ p = (HeaderPtr^)listBox1->SelectedItem;
 			stateheader* sh = p->sh_ptr();
 			btnExtract->Enabled = sh->type == GOOMBA_SRAMSAVE;
+			btnReplace->Enabled = sh->type == GOOMBA_SRAMSAVE;
 			lblSizeVal->Text = sh->size.ToString() + " bytes";
 			lblTypeVal->Text = sh->type == GOOMBA_STATESAVE ? "Savestate"
 				: sh->type == GOOMBA_SRAMSAVE ? "SRAM"
@@ -641,7 +649,23 @@ namespace goombasav_clr {
 		}
 
 		Void btnReplace_Click(Object^ sender, EventArgs^ e) {
-
+			HeaderPtr^ p = (HeaderPtr^)listBox1->SelectedItem;
+			stateheader* sh = p->sh_ptr();
+			OpenFileDialog d;
+			d.Title = btnReplace->Text;
+			d.Filter = "Game Boy save data (*.sav)|*.sav|All files (*.*)|*.*";
+			if (d.ShowDialog() == Windows::Forms::DialogResult::OK) {
+				array<unsigned char>^ gbc_data_arr = System::IO::File::ReadAllBytes(d.FileName);
+				pin_ptr<unsigned char> gbc_data = &gbc_data_arr[0];
+				void* new_data = goomba_new_sav(loaded_sram, sh, gbc_data, gbc_data_arr->Length);
+				if (new_data == NULL) {
+					MessageBox::Show(gcnew String(goomba_last_error()), "Error", MessageBoxButtons::OK, MessageBoxIcon::Error);
+					return;
+				}
+				memcpy(loaded_sram, new_data, GOOMBA_COLOR_SRAM_SIZE);
+				free(new_data);
+				headerScan();
+			}
 		}
 		Void btnExtract_Click(Object^ sender, EventArgs^ e) {
 			HeaderPtr^ p = (HeaderPtr^)listBox1->SelectedItem;
@@ -650,23 +674,23 @@ namespace goombasav_clr {
 			void* data = goomba_extract(loaded_sram, sh, &len);
 			if (data == NULL) {
 				MessageBox::Show(gcnew String(goomba_last_error()), "Error", MessageBoxButtons::OK, MessageBoxIcon::Error);
-			} else {
-				SaveFileDialog d;
-				d.Title = btnExtract->Text;
-				d.Filter = "Game Boy save data (*.sav)|*.sav|All files (*.*)|*.*";
-				d.AddExtension = true;
-				if (d.ShowDialog() == Windows::Forms::DialogResult::OK) {
-					marshal_context context;
-					FILE* outfile = fopen(context.marshal_as<const char*>(d.FileName), "wb");
-					if (outfile == NULL) {
-						MessageBox::Show("Could not open file out.sav");
-					} else {
-						fwrite(data, 1, len, outfile);
-						fclose(outfile);
-					}
-				}
-				free(data);
+				return;
 			}
+			SaveFileDialog d;
+			d.Title = btnExtract->Text;
+			d.Filter = "Game Boy save data (*.sav)|*.sav|All files (*.*)|*.*";
+			d.AddExtension = true;
+			if (d.ShowDialog() == Windows::Forms::DialogResult::OK) {
+				marshal_context context;
+				FILE* outfile = fopen(context.marshal_as<const char*>(d.FileName), "wb");
+				if (outfile == NULL) {
+					MessageBox::Show("Could not open file: " + gcnew String(strerror(errno)), "Error", MessageBoxButtons::OK, MessageBoxIcon::Information);
+				} else {
+					fwrite(data, 1, len, outfile);
+					fclose(outfile);
+				}
+			}
+			free(data);
 		}
 };
 }
