@@ -135,6 +135,8 @@ void clean(const char* gbafile, const char* gbcfile) {
 	if (new_gba_data == NULL) {
 		fprintf(stderr, goomba_last_error());
 		exit(EXIT_FAILURE);
+	} else if (new_gba_data == gba_data) {
+		fprintf(stderr, "File is already clean - copying\n");
 	}
 
 	FILE* gba2 = fopen(gbcfile, "wb");

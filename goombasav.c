@@ -138,7 +138,9 @@ int32_t goomba_get_configdata_checksum_field(const void* gba_data) {
 
 /**
  * If there is save data in 0xe000-0xffff (as signaled by the configdata),
- * this function compresses it to where it's supposed to go.
+ * this function compresses it to where it's supposed to go. In the event that
+ * the data passed in is already clean, the same pointer will be returned.
+ * NULL will be returned if an error occurs.
  */
 char* goomba_cleanup(const void* gba_data_param) {
 	char gba_data[GOOMBA_COLOR_SRAM_SIZE]; // on stack - do not need to free
@@ -173,8 +175,7 @@ char* goomba_cleanup(const void* gba_data_param) {
 			}
 		}
 	}
-	goomba_error("File is already clean\n");
-	return NULL;
+	return (char*)gba_data_param;
 }
 
 /**
