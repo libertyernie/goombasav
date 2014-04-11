@@ -15,6 +15,7 @@ public:
 	}
 
 	HeaderPtr(void* ptr) {
+		if (ptr == NULL) throw gcnew System::NullReferenceException("Null pointer encountered in HeaderPtr constructor");
 		this->ptr = (stateheader*)ptr;
 	}
 
