@@ -135,10 +135,12 @@ namespace goombasav_clr {
 			// 
 			// label2
 			// 
+			this->label2->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Left)
+				| System::Windows::Forms::AnchorStyles::Right));
 			this->label2->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
 			this->label2->Location = System::Drawing::Point(12, 77);
 			this->label2->Name = L"label2";
-			this->label2->Size = System::Drawing::Size(408, 2);
+			this->label2->Size = System::Drawing::Size(433, 2);
 			this->label2->TabIndex = 6;
 			// 
 			// AboutForm
