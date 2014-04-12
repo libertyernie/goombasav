@@ -103,7 +103,7 @@ stateheader** stateheader_scan(const void* gba_data) {
 	// We are casting to non-const pointers so the client gets non-const pointers back.
 	const size_t psize = sizeof(stateheader*);
 	stateheader** headers = (stateheader**)malloc(psize * 64);
-	memset(headers, (int)NULL, psize * 64); // cast to int because memset expects int
+	memset(headers, 0, psize * 64);
 
 	uint32_t* check = (uint32_t*)gba_data;
 	if (*check == GOOMBA_STATEID) check++;
@@ -280,7 +280,7 @@ char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* g
 	}
 	
 	if (gbc_length < uncompressed_size) {
-		goomba_error("Error: the length of the GBC data (%u) is too short - expected %u bytes.\n",
+		goomba_error("Error: the length of the GBC data (%zu) is too short - expected %zu bytes.\n",
 			gbc_length, uncompressed_size);
 		return NULL;
 	} else if (gbc_length - 4 == uncompressed_size) {
@@ -290,7 +290,7 @@ char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* g
 	} else if (gbc_length - 48 == uncompressed_size) {
 		goomba_error("Note: RTC data (new VBA format) will not be copied\n");
 	} else if (gbc_length > uncompressed_size) {
-		goomba_error("Warning: unknown data at end of GBC save file - expected length %u; last %u bytes will be ignored\n", gbc_length, uncompressed_size);
+		goomba_error("Warning: unknown data at end of GBC save file - only first %zu bytes will be used\n", uncompressed_size);
 	}
 
 	if (sh->type != GOOMBA_SRAMSAVE) {
@@ -324,14 +324,14 @@ char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* g
 		wrkmem);
 	free(wrkmem);
 	working += compressed_size;
-	fprintf(stderr, "Compressed %u bytes (compressed size: %lu)\n", uncompressed_size, compressed_size);
+	fprintf(stderr, "Compressed %zu bytes (compressed size: %lu)\n", uncompressed_size, compressed_size);
 
 	if (sh->size > sh->uncompressed_size) {
 		// Goomba header (not Goomba Color)
 		new_sh->uncompressed_size = compressed_size;
 	}
 
-	new_sh->size = compressed_size + sizeof(stateheader);
+	new_sh->size = (uint16_t)(compressed_size + sizeof(stateheader));
 	// pad to 4 bytes!
 	// if I don't do this, goomba color might not load the palette settings, or seemingly 'forget' them later
 	// btw, the settings are stored in the configdata struct defined in goombasav.h
