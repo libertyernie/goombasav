@@ -83,7 +83,6 @@
     <ClCompile Include="..\minilzo-2.06\minilzo.c" />
     <ClCompile Include="AboutForm.cpp" />
     <ClCompile Include="clrmain.cpp" />
-    <ClCompile Include="LicenseForm.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\goombasav.h" />
@@ -94,9 +93,6 @@
       <FileType>CppForm</FileType>
     </ClInclude>
     <ClInclude Include="HeaderPtr.h" />
-    <ClInclude Include="LicenseForm.h">
-      <FileType>CppForm</FileType>
-    </ClInclude>
     <ClInclude Include="MainForm.h">
       <FileType>CppForm</FileType>
     </ClInclude>
@@ -104,9 +100,6 @@
   <ItemGroup>
     <EmbeddedResource Include="AboutForm.resx">
       <DependentUpon>AboutForm.h</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="LicenseForm.resx">
-      <DependentUpon>LicenseForm.h</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.h</DependentUpon>
