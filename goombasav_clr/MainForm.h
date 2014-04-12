@@ -732,7 +732,10 @@ namespace goombasav_clr {
 				memcpy(loaded_sram, new_data, GOOMBA_COLOR_SRAM_SIZE);
 				dirty = true;
 				free(new_data);
+
+				int sel = listBox1->SelectedIndex;
 				headerScan();
+				listBox1->SelectedIndex = sel;
 			}
 		}
 		Void btnExtract_Click(Object^ sender, EventArgs^ e) {
