@@ -178,7 +178,7 @@ int main(int argc, char** argv) {
 	if (argc != 4 && argc != 2) usage();
 
 	if (*(uint16_t *)"\0\xff" < 0x100) {
-		fprintf(stderr, "This program will only run correctly on a little-endian processor.");
+		fprintf(stderr, "This program will only run correctly on a little-endian processor.\n");
 		return 1;
 	}
 

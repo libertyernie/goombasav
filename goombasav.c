@@ -103,7 +103,7 @@ stateheader** stateheader_scan(const void* gba_data) {
 	// We are casting to non-const pointers so the client gets non-const pointers back.
 	const size_t psize = sizeof(stateheader*);
 	stateheader** headers = (stateheader**)malloc(psize * 64);
-	memset(headers, NULL, psize * 64);
+	memset(headers, (int)NULL, psize * 64); // cast to int because memset expects int
 
 	uint32_t* check = (uint32_t*)gba_data;
 	if (*check == GOOMBA_STATEID) check++;
@@ -208,7 +208,7 @@ void* goomba_extract(const void* gba_data, const stateheader* header_ptr, size_t
 	int r = lzo1x_decompress_safe(compressed_data, compressed_size,
 		uncompressed_data, &output_size,
 		(void*)NULL);
-	goomba_error("Actual uncompressed size: %u\n", output_size);
+	goomba_error("Actual uncompressed size: %ul\n", output_size);
 	if (r == LZO_E_INPUT_NOT_CONSUMED) {
 		//goomba_error("Warning: input not fully used. Double-check the result to make sure it works.\n");
 	} else if (r < 0) {
@@ -290,7 +290,7 @@ char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* g
 	} else if (gbc_length - 48 == uncompressed_size) {
 		goomba_error("Note: RTC data (new VBA format) will not be copied\n");
 	} else if (gbc_length > uncompressed_size) {
-		goomba_error("Warning: unknown data at end of GBC save file - last %u bytes will be ignored\n", gbc_length, uncompressed_size);
+		goomba_error("Warning: unknown data at end of GBC save file - expected length %u; last %u bytes will be ignored\n", gbc_length, uncompressed_size);
 	}
 
 	if (sh->type != GOOMBA_SRAMSAVE) {
@@ -324,7 +324,7 @@ char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* g
 		wrkmem);
 	free(wrkmem);
 	working += compressed_size;
-	printf("Compressed %u bytes (%u)\n", uncompressed_size, compressed_size);
+	printf("Compressed %u bytes (%ul)\n", uncompressed_size, compressed_size);
 
 	if (sh->size > sh->uncompressed_size) {
 		// Goomba header (not Goomba Color)
