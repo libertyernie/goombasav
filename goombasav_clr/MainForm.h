@@ -15,6 +15,7 @@ namespace goombasav_clr {
 	using namespace System::Windows::Forms;
 	using namespace System::Data;
 	using namespace System::Drawing;
+	using namespace System::IO;
 
 	using msclr::interop::marshal_context;
 	typedef Windows::Forms::DialogResult DR;
@@ -40,22 +41,34 @@ namespace goombasav_clr {
 			saveAsToolStripMenuItem->Enabled = (_filePath != nullptr);
 		}
 
+		void OnClosing(Object ^sender, CancelEventArgs ^e) {
+			if (_filePath != nullptr && dirty) {
+				DR dr = MessageBox::Show("Save changes to " + Path::GetFileName(_filePath) + "?",
+					gcnew String(TITLE), MessageBoxButtons::YesNoCancel);
+				if (dr == DR::Yes) {
+					save(_filePath);
+				} else if (dr == DR::Cancel) {
+					e->Cancel = true;
+				}
+			}
+		}
+
 	public:
-		MainForm(void)
-		{
+		MainForm(void) {
 			InitializeComponent();
 
 			loaded_sram = new unsigned char[GOOMBA_COLOR_SRAM_SIZE];
 			_filePath = nullptr;
+
 			fileToolStripMenuItem->DropDownOpening += gcnew System::EventHandler(this, &goombasav_clr::MainForm::OnFileDropDownOpening);
+			this->Closing += gcnew System::ComponentModel::CancelEventHandler(this, &goombasav_clr::MainForm::OnClosing);
 		}
 
 	protected:
 		/// <summary>
 		/// Clean up any resources being used.
 		/// </summary>
-		~MainForm()
-		{
+		~MainForm() {
 			if (components) delete components;
 			delete[] loaded_sram;
 		}
@@ -572,7 +585,7 @@ namespace goombasav_clr {
 			if (cleaned == NULL) {
 				return;
 			} else if (cleaned != (void*)pin) {
-				DR r = MessageBox::Show("Uncompressed SRAM found at 0xE000. Would you like to copy it to the standard location?\n(Doing this is required to extract or replace the save data.)",
+				DR r = MessageBox::Show("Uncompressed SRAM found at 0xE000. Would you like to move and compress it to the proper location? (Doing this is required to extract or replace the save data.)",
 					"Clean SRAM", MessageBoxButtons::YesNoCancel);
 				if (r == DR::Yes) {
 					memcpy(loaded_sram, cleaned, GOOMBA_COLOR_SRAM_SIZE);
@@ -633,7 +646,6 @@ namespace goombasav_clr {
 				load(d.FileName);
 			}
 		}
-		// Save loaded_sram to _filePath
 		Void saveToolStripMenuItem_Click(Object^ sender, EventArgs^ e) {
 			save(_filePath);
 		}
@@ -669,7 +681,7 @@ namespace goombasav_clr {
 				lblSleepVal->Text = gcnew String(sleeptxt[cd->misc & 0x3]);
 				lblAutostateVal->Text = ((cd->misc & 0x10) >> 4) ? "ON" : "OFF";
 				lblGammaVal->Text = gcnew String(brightxt[(cd->misc & 0xE0) >> 5]);
-				lblChecksumVal->Text = cd->sram_checksum.ToString("X8");
+				lblChecksumVal->Text = cd->sram_checksum.ToString("X8"); // The SRAM with this ROM checksum value is currently in 0xe000-0xffff
 			} else {
 				flpConfigdata->Visible = false;
 				flpStateheader->Visible = true;
