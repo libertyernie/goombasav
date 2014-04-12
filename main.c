@@ -177,6 +177,11 @@ void list(const char* gbafile) {
 int main(int argc, char** argv) {
 	if (argc != 4 && argc != 2) usage();
 
+	if (*(uint16_t *)"\0\xff" < 0x100) {
+		fprintf(stderr, "This program will only run correctly on a little-endian processor.");
+		return 1;
+	}
+
 	if (argc == 2) {
 		if (strcmp("--help", argv[1]) == 0 || strcmp("/?", argv[1]) == 0) {
 			usage();
