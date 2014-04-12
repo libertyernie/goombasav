@@ -6,6 +6,7 @@
 #include <msclr\marshal.h>
 #include "../goombasav.h"
 #include "HeaderPtr.h"
+#include "AboutForm.h"
 
 namespace goombasav_clr {
 
@@ -33,7 +34,9 @@ namespace goombasav_clr {
 	private:
 		unsigned char* loaded_sram;
 		String^ _filePath;
-		bool dirty;
+	private: System::Windows::Forms::ToolStripMenuItem^  helpToolStripMenuItem;
+	private: System::Windows::Forms::ToolStripMenuItem^  aboutToolStripMenuItem;
+			 bool dirty;
 
 		// Update status of Save and Save As items whenever File menu is opened
 		void OnFileDropDownOpening(Object ^sender, EventArgs ^e) {
@@ -164,6 +167,8 @@ namespace goombasav_clr {
 				 this->saveAsToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 				 this->toolStripMenuItem1 = (gcnew System::Windows::Forms::ToolStripSeparator());
 				 this->exitToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
+				 this->helpToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
+				 this->aboutToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 				 (cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->splitContainer1))->BeginInit();
 				 this->splitContainer1->Panel1->SuspendLayout();
 				 this->splitContainer1->Panel2->SuspendLayout();
@@ -215,7 +220,7 @@ namespace goombasav_clr {
 				 this->flpButtons->Controls->Add(this->btnExtract);
 				 this->flpButtons->Dock = System::Windows::Forms::DockStyle::Bottom;
 				 this->flpButtons->Location = System::Drawing::Point(0, 190);
-				 this->flpButtons->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
+				 this->flpButtons->Margin = System::Windows::Forms::Padding(4);
 				 this->flpButtons->Name = L"flpButtons";
 				 this->flpButtons->Size = System::Drawing::Size(373, 36);
 				 this->flpButtons->TabIndex = 9;
@@ -224,7 +229,7 @@ namespace goombasav_clr {
 				 // 
 				 this->btnReplace->Enabled = false;
 				 this->btnReplace->Location = System::Drawing::Point(4, 4);
-				 this->btnReplace->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
+				 this->btnReplace->Margin = System::Windows::Forms::Padding(4);
 				 this->btnReplace->Name = L"btnReplace";
 				 this->btnReplace->Size = System::Drawing::Size(100, 28);
 				 this->btnReplace->TabIndex = 0;
@@ -236,7 +241,7 @@ namespace goombasav_clr {
 				 // 
 				 this->btnExtract->Enabled = false;
 				 this->btnExtract->Location = System::Drawing::Point(112, 4);
-				 this->btnExtract->Margin = System::Windows::Forms::Padding(4, 4, 4, 4);
+				 this->btnExtract->Margin = System::Windows::Forms::Padding(4);
 				 this->btnExtract->Name = L"btnExtract";
 				 this->btnExtract->Size = System::Drawing::Size(100, 28);
 				 this->btnExtract->TabIndex = 1;
@@ -492,7 +497,10 @@ namespace goombasav_clr {
 				 // 
 				 // menuStrip1
 				 // 
-				 this->menuStrip1->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(1) { this->fileToolStripMenuItem });
+				 this->menuStrip1->Items->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(2) {
+					 this->fileToolStripMenuItem,
+						 this->helpToolStripMenuItem
+				 });
 				 this->menuStrip1->Location = System::Drawing::Point(0, 0);
 				 this->menuStrip1->Name = L"menuStrip1";
 				 this->menuStrip1->Padding = System::Windows::Forms::Padding(5, 2, 0, 2);
@@ -544,6 +552,20 @@ namespace goombasav_clr {
 				 this->exitToolStripMenuItem->Size = System::Drawing::Size(175, 24);
 				 this->exitToolStripMenuItem->Text = L"Exit";
 				 this->exitToolStripMenuItem->Click += gcnew System::EventHandler(this, &MainForm::exitToolStripMenuItem_Click);
+				 // 
+				 // helpToolStripMenuItem
+				 // 
+				 this->helpToolStripMenuItem->DropDownItems->AddRange(gcnew cli::array< System::Windows::Forms::ToolStripItem^  >(1) { this->aboutToolStripMenuItem });
+				 this->helpToolStripMenuItem->Name = L"helpToolStripMenuItem";
+				 this->helpToolStripMenuItem->Size = System::Drawing::Size(53, 24);
+				 this->helpToolStripMenuItem->Text = L"Help";
+				 // 
+				 // aboutToolStripMenuItem
+				 // 
+				 this->aboutToolStripMenuItem->Name = L"aboutToolStripMenuItem";
+				 this->aboutToolStripMenuItem->Size = System::Drawing::Size(175, 24);
+				 this->aboutToolStripMenuItem->Text = L"About";
+				 this->aboutToolStripMenuItem->Click += gcnew System::EventHandler(this, &MainForm::aboutToolStripMenuItem_Click);
 				 // 
 				 // MainForm
 				 // 
@@ -737,6 +759,11 @@ namespace goombasav_clr {
 				}
 			}
 			free(data);
+		}
+
+		Void aboutToolStripMenuItem_Click(Object^ sender, EventArgs^ e) {
+			AboutForm a;
+			a.ShowDialog();
 		}
 };
 }
