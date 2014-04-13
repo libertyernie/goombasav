@@ -1,5 +1,8 @@
 #pragma once
 
+// A header file to detect some common platforms and architectures.
+// Helps tell if an executable is 32-bit or 64-bit, and whether it's compiled on Cygwin or not.
+
 #if defined(__CYGWIN__) && !defined(_WIN32)
 #define PLATFORM_NAME "Cygwin"
 #elif defined(__MINGW32__)

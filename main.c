@@ -161,6 +161,7 @@ void replace(const char* gbafile, const char* gbcfile) {
 	free(gbc_data);
 }
 
+// infile and outfile are not open at the same time, so they can be the same file path.
 void clean(const char* infile, const char* outfile) {
 	FILE* gba1 = fopen(infile, "rb");
 	if (gba1 == NULL) could_not_open(infile);
