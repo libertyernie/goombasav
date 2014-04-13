@@ -41,6 +41,7 @@ namespace goombasav_clr {
 	private: System::Windows::Forms::Label^  lblCopyright;
 	private: System::Windows::Forms::Button^  button1;
 	private: System::Windows::Forms::Label^  label2;
+	private: System::Windows::Forms::Label^  label3;
 
 	protected:
 
@@ -67,6 +68,7 @@ namespace goombasav_clr {
 			this->lblCopyright = (gcnew System::Windows::Forms::Label());
 			this->button1 = (gcnew System::Windows::Forms::Button());
 			this->label2 = (gcnew System::Windows::Forms::Label());
+			this->label3 = (gcnew System::Windows::Forms::Label());
 			this->SuspendLayout();
 			// 
 			// lblName
@@ -94,10 +96,9 @@ namespace goombasav_clr {
 			this->label1->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Bottom)
 				| System::Windows::Forms::AnchorStyles::Left)
 				| System::Windows::Forms::AnchorStyles::Right));
-			this->label1->Location = System::Drawing::Point(12, 88);
-			this->label1->Margin = System::Windows::Forms::Padding(3, 9, 3, 9);
+			this->label1->Location = System::Drawing::Point(12, 108);
 			this->label1->Name = L"label1";
-			this->label1->Size = System::Drawing::Size(433, 164);
+			this->label1->Size = System::Drawing::Size(433, 158);
 			this->label1->TabIndex = 2;
 			this->label1->Text = resources->GetString(L"label1.Text");
 			// 
@@ -105,7 +106,7 @@ namespace goombasav_clr {
 			// 
 			this->btnLicense->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
 			this->btnLicense->AutoSize = true;
-			this->btnLicense->Location = System::Drawing::Point(12, 264);
+			this->btnLicense->Location = System::Drawing::Point(12, 269);
 			this->btnLicense->Name = L"btnLicense";
 			this->btnLicense->Size = System::Drawing::Size(79, 27);
 			this->btnLicense->TabIndex = 3;
@@ -125,7 +126,7 @@ namespace goombasav_clr {
 			// button1
 			// 
 			this->button1->AutoSize = true;
-			this->button1->Location = System::Drawing::Point(157, 41);
+			this->button1->Location = System::Drawing::Point(157, 37);
 			this->button1->Name = L"button1";
 			this->button1->Size = System::Drawing::Size(115, 27);
 			this->button1->TabIndex = 5;
@@ -138,16 +139,27 @@ namespace goombasav_clr {
 			this->label2->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Left)
 				| System::Windows::Forms::AnchorStyles::Right));
 			this->label2->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
-			this->label2->Location = System::Drawing::Point(12, 77);
+			this->label2->Location = System::Drawing::Point(12, 97);
+			this->label2->Margin = System::Windows::Forms::Padding(3, 9, 3, 9);
 			this->label2->Name = L"label2";
 			this->label2->Size = System::Drawing::Size(433, 2);
 			this->label2->TabIndex = 6;
+			// 
+			// label3
+			// 
+			this->label3->AutoSize = true;
+			this->label3->Location = System::Drawing::Point(14, 71);
+			this->label3->Name = L"label3";
+			this->label3->Size = System::Drawing::Size(334, 17);
+			this->label3->TabIndex = 7;
+			this->label3->Text = L"Written in C++/CLI with backend code in standard C.";
 			// 
 			// AboutForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(457, 303);
+			this->ClientSize = System::Drawing::Size(457, 308);
+			this->Controls->Add(this->label3);
 			this->Controls->Add(this->label2);
 			this->Controls->Add(this->button1);
 			this->Controls->Add(this->lblCopyright);
