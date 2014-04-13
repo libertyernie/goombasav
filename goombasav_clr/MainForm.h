@@ -61,12 +61,7 @@ namespace goombasav_clr {
 				if (arr->Length == 1) {
 					String^ pathname = arr[0];
 					if (pathname->EndsWith(".sav", StringComparison::InvariantCultureIgnoreCase)) {
-						FileInfo fi(pathname);
-						if (fi.Length >= 64 * 1024) {
-							e->Effect = DragDropEffects::Link;
-						} else if (fi.Length <= 32*1024 && _filePath != nullptr) {
-							e->Effect = DragDropEffects::Copy;
-						}
+						e->Effect = DragDropEffects::Link;
 					}
 				}
 			}
@@ -74,11 +69,17 @@ namespace goombasav_clr {
 
 
 		void OnDragDrop(Object ^sender, DragEventArgs ^e) {
-			if (e->Effect == DragDropEffects::Link) {
+			array<String^>^ arr = (array<String^>^)e->Data->GetData(DataFormats::FileDrop);
+			uint32_t first;
+			marshal_context context;
+			FILE* f = fopen(context.marshal_as<const char*>(arr[0]), "rb");
+			fread(&first, 4, 1, f);
+			fclose(f);
+			if (first == GOOMBA_STATEID) {
 				// try open file
 				array<String^>^ arr = (array<String^>^)e->Data->GetData(DataFormats::FileDrop);
 				load(arr[0]);
-			} else if (e->Effect == DragDropEffects::Copy) {
+			} else {
 				// try replace
 				array<String^>^ arr = (array<String^>^)e->Data->GetData(DataFormats::FileDrop);
 				replace(arr[0]);
