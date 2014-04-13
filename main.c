@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "goombasav.h"
+#include "platformname.h"
 
 const char* USAGE = "Usage: goombasav {x/extract} gba.sav gbc.sav\n"
 "       goombasav {r/replace} gba.sav gbc.sav\n"
@@ -17,10 +18,38 @@ const char* USAGE = "Usage: goombasav {x/extract} gba.sav gbc.sav\n"
 "     replace first file otherwise (second file can be - for stdout)\n"
 "\n"
 "  one argument: view Goomba headers\n"
-"                (file can be - for stdin)\n";
+"                (file can be - for stdin)\n"
+"\n"
+"  -L: license information\n"
+"  /? or --help: print this message\n";
+
+const char* GPL_NOTICE = "goombasav - extract and replace Goomba/Goomba Color save files\n"
+"Copyright (C) 2014 libertyernie\n"
+"https://github.com/libertyernie/goombasav\n"
+"\n"
+"This program is free software: you can redistribute it and/or modify\n"
+"it under the terms of the GNU General Public License as published by\n"
+"the Free Software Foundation, either version 3 of the License, or\n"
+"(at your option) any later version.\n"
+"\n"
+"This program is distributed in the hope that it will be useful,\n"
+"but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
+"MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the\n"
+"GNU General Public License for more details.\n"
+"\n"
+"You should have received a copy of the GNU General Public License\n"
+"along with this program. If not, see <http://www.gnu.org/licenses/>.\n";
 
 void usage() {
 	fprintf(stderr, USAGE);
+	exit(EXIT_FAILURE);
+}
+
+void license() {
+	fprintf(stdout, GPL_NOTICE);
+#ifdef PLATFORM_NAME
+	fprintf(stdout, "\nCompiled for %s\n", PLATFORM_NAME);
+#endif
 	exit(EXIT_FAILURE);
 }
 
@@ -189,6 +218,8 @@ int main(int argc, char** argv) {
 	if (argc == 2) {
 		if (strcmp("--help", argv[1]) == 0 || strcmp("/?", argv[1]) == 0) {
 			usage();
+		} else if (strcmp("-L", argv[1]) == 0) {
+			license();
 		} else {
 			list(argv[1]);
 		}
