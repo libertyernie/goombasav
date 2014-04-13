@@ -8,6 +8,8 @@
 #include "HeaderPtr.h"
 #include "AboutForm.h"
 
+#undef ExtractAssociatedIcon
+
 namespace goombasav_clr {
 
 	using namespace System;
@@ -57,6 +59,7 @@ namespace goombasav_clr {
 	public:
 		MainForm(void) {
 			InitializeComponent();
+			this->Icon = System::Drawing::Icon::ExtractAssociatedIcon(Application::ExecutablePath);
 
 			loaded_sram = new unsigned char[GOOMBA_COLOR_SRAM_SIZE];
 			_filePath = nullptr;
