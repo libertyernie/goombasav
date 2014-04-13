@@ -57,10 +57,6 @@ namespace goombasav_clr {
 	public:
 		MainForm(void) {
 			InitializeComponent();
-			
-			/*marshal_context context;
-			HICON hicon = ExtractIconW(GetModuleHandle(NULL), context.marshal_as<LPCTSTR>(Application::ExecutablePath), 0);
-			this->Icon = Drawing::Icon::FromHandle(IntPtr(hicon));*/
 
 			loaded_sram = new unsigned char[GOOMBA_COLOR_SRAM_SIZE];
 			_filePath = nullptr;
@@ -576,7 +572,6 @@ namespace goombasav_clr {
 				 this->ClientSize = System::Drawing::Size(507, 254);
 				 this->Controls->Add(this->splitContainer1);
 				 this->Controls->Add(this->menuStrip1);
-				 this->Icon = (cli::safe_cast<System::Drawing::Icon^>(resources->GetObject(L"$this.Icon")));
 				 this->MainMenuStrip = this->menuStrip1;
 				 this->Margin = System::Windows::Forms::Padding(3, 2, 3, 2);
 				 this->Name = L"MainForm";
