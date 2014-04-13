@@ -3,6 +3,8 @@ Goomba Save Manager
 
 This repo contains two programs designed to edit the SRAM data of the Goomba and Goomba Color emulators. It can extract and replace the compressed Game Boy / Game Boy Color SRAM data. It can't edit savestate data (yet).
 
+.exe files are located in the "Release Binaries" folder.
+
 Make sure you back up your save data first, just in case.
 
 goombasav
