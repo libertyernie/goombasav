@@ -140,6 +140,10 @@ int32_t goomba_get_configdata_checksum_field(const void* gba_data) {
  * this function compresses it to where it's supposed to go. In the event that
  * the data passed in is already clean, the same pointer will be returned.
  * NULL will be returned if an error occurs.
+ *
+ * The given pointer must be at least GOOMBA_COLOR_SRAM_SIZE bytes in length.
+ * If it is longer, any information after GOOMBA_COLOR_SRAM_SIZE bytes will be
+ * ignored.
  */
 char* goomba_cleanup(const void* gba_data_param) {
 	char gba_data[GOOMBA_COLOR_SRAM_SIZE]; // on stack - do not need to free

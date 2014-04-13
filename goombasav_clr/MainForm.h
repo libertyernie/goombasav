@@ -596,9 +596,13 @@ namespace goombasav_clr {
 	private:
 		void load(String^ filename) {
 			array<unsigned char>^ arr = System::IO::File::ReadAllBytes(filename);
-			if (arr->Length != GOOMBA_COLOR_SRAM_SIZE) {
-				MessageBox::Show("This file has an incorrect size. Valid Goomba save files must be " + GOOMBA_COLOR_SRAM_SIZE + " bytes.");
+			if (arr->Length < GOOMBA_COLOR_SRAM_SIZE) {
+				MessageBox::Show("This file has an incorrect size. Valid Goomba save files must be at least " + GOOMBA_COLOR_SRAM_SIZE + " bytes.");
 				return;
+			} else if (arr->Length > GOOMBA_COLOR_SRAM_SIZE) {
+				MessageBox::Show("This file is more than " + GOOMBA_COLOR_SRAM_SIZE +
+					" bytes. If you overwrite the file, the last " + (arr->Length - GOOMBA_COLOR_SRAM_SIZE) +
+					" bytes will be discarded.", "Note", MessageBoxButtons::OK, MessageBoxIcon::Information);
 			}
 			pin_ptr<unsigned char> pin = &arr[0];
 			char* cleaned = goomba_cleanup(pin);
@@ -649,6 +653,7 @@ namespace goombasav_clr {
 			if (headers == NULL) {
 				MessageBox::Show(gcnew String(goomba_last_error()), "Error", MessageBoxButtons::OK, MessageBoxIcon::Error);
 			} else if (headers[0] == NULL) {
+				listBox1->Items->Clear();
 				MessageBox::Show("No headers were found in this file.", "Error", MessageBoxButtons::OK, MessageBoxIcon::Information);
 			} else {
 				listBox1->Items->Clear();
