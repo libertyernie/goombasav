@@ -54,6 +54,37 @@ namespace goombasav_clr {
 			}
 		}
 
+		void OnDragEnter(Object ^sender, DragEventArgs ^e) {
+			e->Effect = DragDropEffects::None;
+			if (e->Data->GetDataPresent(DataFormats::FileDrop)) {
+				array<String^>^ arr = (array<String^>^)e->Data->GetData(DataFormats::FileDrop);
+				if (arr->Length == 1) {
+					String^ pathname = arr[0];
+					if (pathname->EndsWith(".sav", StringComparison::InvariantCultureIgnoreCase)) {
+						FileInfo fi(pathname);
+						if (fi.Length >= 64 * 1024) {
+							e->Effect = DragDropEffects::Link;
+						} else if (fi.Length <= 32*1024 && _filePath != nullptr) {
+							e->Effect = DragDropEffects::Copy;
+						}
+					}
+				}
+			}
+		}
+
+
+		void OnDragDrop(Object ^sender, DragEventArgs ^e) {
+			if (e->Effect == DragDropEffects::Link) {
+				// try open file
+				array<String^>^ arr = (array<String^>^)e->Data->GetData(DataFormats::FileDrop);
+				load(arr[0]);
+			} else if (e->Effect == DragDropEffects::Copy) {
+				// try replace
+				array<String^>^ arr = (array<String^>^)e->Data->GetData(DataFormats::FileDrop);
+				replace(arr[0]);
+			}
+		}
+
 	public:
 		MainForm(void) {
 			InitializeComponent();
@@ -63,6 +94,9 @@ namespace goombasav_clr {
 
 			fileToolStripMenuItem->DropDownOpening += gcnew System::EventHandler(this, &goombasav_clr::MainForm::OnFileDropDownOpening);
 			this->Closing += gcnew System::ComponentModel::CancelEventHandler(this, &goombasav_clr::MainForm::OnClosing);
+			splitContainer1->Panel2->DragEnter += gcnew System::Windows::Forms::DragEventHandler(this, &goombasav_clr::MainForm::OnDragEnter);
+			splitContainer1->Panel2->DragDrop += gcnew System::Windows::Forms::DragEventHandler(this, &goombasav_clr::MainForm::OnDragDrop);
+			splitContainer1->Panel2->AllowDrop = true;
 		}
 
 	protected:
@@ -718,27 +752,35 @@ namespace goombasav_clr {
 			lblTitleVal->Text = gcnew String(sh->title);
 		}
 
-		Void btnReplace_Click(Object^ sender, EventArgs^ e) {
+		void replace(String^ filename) {
+			array<unsigned char>^ gbc_data_arr = System::IO::File::ReadAllBytes(filename);
+			pin_ptr<unsigned char> gbc_data = &gbc_data_arr[0];
 			HeaderPtr^ p = (HeaderPtr^)listBox1->SelectedItem;
+			if (p == nullptr) {
+				MessageBox::Show("No item is selected.", "Error", MessageBoxButtons::OK, MessageBoxIcon::Error);
+				return;
+			}
 			stateheader* sh = p->sh_ptr();
+			void* new_data = goomba_new_sav(loaded_sram, sh, gbc_data, gbc_data_arr->Length);
+			if (new_data == NULL) {
+				MessageBox::Show(gcnew String(goomba_last_error()), "Error", MessageBoxButtons::OK, MessageBoxIcon::Error);
+				return;
+			}
+			memcpy(loaded_sram, new_data, GOOMBA_COLOR_SRAM_SIZE);
+			dirty = true;
+			free(new_data);
+
+			int sel = listBox1->SelectedIndex;
+			headerScan();
+			listBox1->SelectedIndex = sel;
+		}
+
+		Void btnReplace_Click(Object^ sender, EventArgs^ e) {
 			OpenFileDialog d;
 			d.Title = btnReplace->Text;
 			d.Filter = "Game Boy save data (*.sav)|*.sav|All files (*.*)|*.*";
 			if (d.ShowDialog() == Windows::Forms::DialogResult::OK) {
-				array<unsigned char>^ gbc_data_arr = System::IO::File::ReadAllBytes(d.FileName);
-				pin_ptr<unsigned char> gbc_data = &gbc_data_arr[0];
-				void* new_data = goomba_new_sav(loaded_sram, sh, gbc_data, gbc_data_arr->Length);
-				if (new_data == NULL) {
-					MessageBox::Show(gcnew String(goomba_last_error()), "Error", MessageBoxButtons::OK, MessageBoxIcon::Error);
-					return;
-				}
-				memcpy(loaded_sram, new_data, GOOMBA_COLOR_SRAM_SIZE);
-				dirty = true;
-				free(new_data);
-
-				int sel = listBox1->SelectedIndex;
-				headerScan();
-				listBox1->SelectedIndex = sel;
+				replace(d.FileName);
 			}
 		}
 		Void btnExtract_Click(Object^ sender, EventArgs^ e) {
