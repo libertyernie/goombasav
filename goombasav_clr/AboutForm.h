@@ -98,7 +98,7 @@ namespace goombasav_clr {
 				| System::Windows::Forms::AnchorStyles::Right));
 			this->label1->Location = System::Drawing::Point(12, 108);
 			this->label1->Name = L"label1";
-			this->label1->Size = System::Drawing::Size(433, 158);
+			this->label1->Size = System::Drawing::Size(433, 228);
 			this->label1->TabIndex = 2;
 			this->label1->Text = resources->GetString(L"label1.Text");
 			// 
@@ -106,7 +106,7 @@ namespace goombasav_clr {
 			// 
 			this->btnLicense->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
 			this->btnLicense->AutoSize = true;
-			this->btnLicense->Location = System::Drawing::Point(12, 269);
+			this->btnLicense->Location = System::Drawing::Point(12, 339);
 			this->btnLicense->Name = L"btnLicense";
 			this->btnLicense->Size = System::Drawing::Size(79, 27);
 			this->btnLicense->TabIndex = 3;
@@ -158,7 +158,7 @@ namespace goombasav_clr {
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(457, 308);
+			this->ClientSize = System::Drawing::Size(457, 378);
 			this->Controls->Add(this->label3);
 			this->Controls->Add(this->label2);
 			this->Controls->Add(this->button1);
