@@ -5,17 +5,19 @@
 #include <string.h>
 #include "goombasav.h"
 
-const char* USAGE = "Usage: goombasav {x/r} [Goomba save file] [raw GBC save file]\n"
-"       goombasav c [input Goomba save file] [output Goomba save file]\n"
-"       goombasav [Goomba save file]\n"
+const char* USAGE = "Usage: goombasav {x/extract} gba.sav gbc.sav\n"
+"       goombasav {r/replace} gba.sav gbc.sav\n"
+"       goombasav {c/clean} gba.sav [output.sav]\n"
+"       goombasav gba.sav\n"
 "\n"
 "  x: extract save data from first file -> store in second file\n"
-"     (can be - for stdout)\n"
+"     (\"gbc.sav\" can be - for stdout)\n"
 "  r: replace data in first file <- read from second file\n"
-"  c: clean sram at 0xE000 in first file -> write to second file (both GBA sram)\n"
+"  c: clean sram at 0xE000 in first file -> write to second file if specified,\n"
+"     replace first file otherwise (second file can be - for stdout)\n"
 "\n"
-"  otherwise: view Goomba headers\n"
-"             (file can be - for stdin)\n";
+"  one argument: view Goomba headers\n"
+"                (file can be - for stdin)\n";
 
 void usage() {
 	fprintf(stderr, USAGE);
@@ -30,7 +32,7 @@ void could_not_open(const char* filename) {
 stateheader* ask(const void* first_header, const char* prompt) {
 	stateheader** headers = stateheader_scan(first_header);
 	if (headers == NULL) {
-		fprintf(stderr, goomba_last_error());
+		fprintf(stderr, "Error: %s", goomba_last_error());
 		exit(EXIT_FAILURE);
 	}
 	if (headers[0] == NULL) {
@@ -73,7 +75,7 @@ void extract(const char* gbafile, const char* gbcfile) {
 
 	void* gbc_data = goomba_extract(gba_data, sh, &uncompressed_size);
 	if (gbc_data == NULL) {
-		fprintf(stderr, goomba_last_error());
+		fprintf(stderr, "Error: %s", goomba_last_error());
 		exit(EXIT_FAILURE);
 	}
 
@@ -85,7 +87,7 @@ void extract(const char* gbafile, const char* gbcfile) {
 	if (gbc == NULL) could_not_open(gbcfile);
 	fwrite(gbc_data, 1, uncompressed_size, gbc);
 	free(gbc_data);
-	fclose(gbc);
+	if (gbc != stdout) fclose(gbc);
 }
 
 void replace(const char* gbafile, const char* gbcfile) {
@@ -111,7 +113,7 @@ void replace(const char* gbafile, const char* gbcfile) {
 
 	void* new_gba_sram = goomba_new_sav(gba_data, sh, gbc_data, gbc_length);
 	if (new_gba_sram == NULL) {
-		fprintf(stderr, goomba_last_error());
+		fprintf(stderr, "Error: %s", goomba_last_error());
 		exit(EXIT_FAILURE);
 	}
 	gba = fopen(gbafile, "wb");
@@ -123,9 +125,9 @@ void replace(const char* gbafile, const char* gbcfile) {
 	free(gbc_data);
 }
 
-void clean(const char* gbafile, const char* gbcfile) {
-	FILE* gba1 = fopen(gbafile, "rb");
-	if (gba1 == NULL) could_not_open(gbafile);
+void clean(const char* infile, const char* outfile) {
+	FILE* gba1 = fopen(infile, "rb");
+	if (gba1 == NULL) could_not_open(infile);
 
 	char* gba_data = (char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
 	fread(gba_data, GOOMBA_COLOR_SRAM_SIZE, 1, gba1);
@@ -133,16 +135,18 @@ void clean(const char* gbafile, const char* gbcfile) {
 
 	void* new_gba_data = goomba_cleanup(gba_data);
 	if (new_gba_data == NULL) {
-		fprintf(stderr, goomba_last_error());
+		fprintf(stderr, "Error: %s", goomba_last_error());
 		exit(EXIT_FAILURE);
 	} else if (new_gba_data == gba_data) {
 		fprintf(stderr, "File is already clean - copying\n");
 	}
 
-	FILE* gba2 = fopen(gbcfile, "wb");
-	if (gba2 == NULL) could_not_open(gbcfile);
+	FILE* gba2 = strcmp("-", outfile) == 0
+		? stdout
+		: fopen(outfile, "wb");
+	if (gba2 == NULL) could_not_open(outfile);
 	fwrite(new_gba_data, 1, GOOMBA_COLOR_SRAM_SIZE, gba2);
-	fclose(gba2);
+	if (gba2 != stdout) fclose(gba2);
 }
 
 void list(const char* gbafile) {
@@ -155,7 +159,7 @@ void list(const char* gbafile) {
 	fread(gba_data, 1, GOOMBA_COLOR_SRAM_SIZE, gba);
 	stateheader** headers = stateheader_scan(gba_data);
 	if (headers == NULL) {
-		fprintf(stderr, goomba_last_error());
+		fprintf(stderr, "Error: %s", goomba_last_error());
 		exit(EXIT_FAILURE);
 	}
 	if (headers[0] == NULL) {
@@ -171,11 +175,11 @@ void list(const char* gbafile) {
 	}
 
 	free(headers);
-	fclose(gba);
+	if (gba != stdin) fclose(gba);
 }
 
 int main(int argc, char** argv) {
-	if (argc != 4 && argc != 2) usage();
+	if (argc > 4 || argc < 2) usage();
 
 	if (*(uint16_t *)"\0\xff" < 0x100) {
 		fprintf(stderr, "This program will only run correctly on a little-endian processor.\n");
@@ -188,11 +192,17 @@ int main(int argc, char** argv) {
 		} else {
 			list(argv[1]);
 		}
-	} else if (argv[1][0] == 'x') {
+	} else if (argc == 3) {
+		if (strcmp("c", argv[1]) == 0 || strcmp("clean", argv[1]) == 0) {
+			clean(argv[2], argv[2]);
+		} else {
+			usage();
+		}
+	} else if (strcmp("x", argv[1]) == 0 || strcmp("extract", argv[1]) == 0) {
 		extract(argv[2], argv[3]);
-	} else if (argv[1][0] == 'r') {
+	} else if (strcmp("r", argv[1]) == 0 || strcmp("replace", argv[1]) == 0) {
 		replace(argv[2], argv[3]);
-	} else if (argv[1][0] == 'c') {
+	} else if (strcmp("c", argv[1]) == 0 || strcmp("clean", argv[1]) == 0) {
 		clean(argv[2], argv[3]);
 	} else {
 		usage();
