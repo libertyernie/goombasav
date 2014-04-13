@@ -55,7 +55,7 @@ void license() {
 	fprintf(stdout, "\nCompiled for %s\n", PLATFORM_NAME);
 #endif
 #ifdef ARCH_NAME
-	fprintf(stdout, "Arch: %s", ARCH_NAME);
+	fprintf(stdout, "Arch: %s\n", ARCH_NAME);
 #endif
 	exit(EXIT_FAILURE);
 }
