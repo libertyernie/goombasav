@@ -10,7 +10,8 @@
 #include "goombasav.h"
 #include "platformname.h"
 
-const char* USAGE = "Usage: goombasav {x/extract} gba.sav gbc.sav\n"
+const char* USAGE = "goombasav (2014-04-13)\n"
+"Usage: goombasav {x/extract} gba.sav gbc.sav\n"
 "       goombasav {r/replace} gba.sav gbc.sav\n"
 "       goombasav {c/clean} gba.sav [output.sav]\n"
 "       goombasav gba.sav\n"

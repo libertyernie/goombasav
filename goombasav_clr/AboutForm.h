@@ -89,7 +89,7 @@ namespace goombasav_clr {
 			this->lblVersion->Name = L"lblVersion";
 			this->lblVersion->Size = System::Drawing::Size(82, 17);
 			this->lblVersion->TabIndex = 1;
-			this->lblVersion->Text = L"2014-04-11";
+			this->lblVersion->Text = L"2014-04-13";
 			// 
 			// label1
 			// 
