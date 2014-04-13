@@ -25,9 +25,6 @@ namespace goombasav_clr {
 	const char* const sleeptxt[] = { "5min", "10min", "30min", "OFF" };
 	const char* const brightxt[] = { "I", "II", "III", "IIII", "IIIII" };
 
-	/// <summary>
-	/// Summary for MainForm
-	/// </summary>
 	public ref class MainForm : public System::Windows::Forms::Form
 	{
 
@@ -43,15 +40,7 @@ namespace goombasav_clr {
 		}
 
 		void OnClosing(Object ^sender, CancelEventArgs ^e) {
-			if (_filePath != nullptr && dirty) {
-				DR dr = MessageBox::Show("Save changes to " + Path::GetFileName(_filePath) + "?",
-					gcnew String(TITLE), MessageBoxButtons::YesNoCancel);
-				if (dr == DR::Yes) {
-					save(_filePath);
-				} else if (dr == DR::Cancel) {
-					e->Cancel = true;
-				}
-			}
+			e->Cancel = !okToClose();
 		}
 
 		void OnDragEnter(Object ^sender, DragEventArgs ^e) {
@@ -95,9 +84,9 @@ namespace goombasav_clr {
 
 			fileToolStripMenuItem->DropDownOpening += gcnew System::EventHandler(this, &goombasav_clr::MainForm::OnFileDropDownOpening);
 			this->Closing += gcnew System::ComponentModel::CancelEventHandler(this, &goombasav_clr::MainForm::OnClosing);
-			splitContainer1->Panel2->DragEnter += gcnew System::Windows::Forms::DragEventHandler(this, &goombasav_clr::MainForm::OnDragEnter);
-			splitContainer1->Panel2->DragDrop += gcnew System::Windows::Forms::DragEventHandler(this, &goombasav_clr::MainForm::OnDragDrop);
-			splitContainer1->Panel2->AllowDrop = true;
+			this->DragEnter += gcnew System::Windows::Forms::DragEventHandler(this, &goombasav_clr::MainForm::OnDragEnter);
+			this->DragDrop += gcnew System::Windows::Forms::DragEventHandler(this, &goombasav_clr::MainForm::OnDragDrop);
+			this->AllowDrop = true;
 		}
 
 	protected:
@@ -629,7 +618,21 @@ namespace goombasav_clr {
 #pragma endregion
 
 	private:
+		bool okToClose() {
+			if (_filePath != nullptr && dirty) {
+				DR dr = MessageBox::Show("Save changes to " + Path::GetFileName(_filePath) + "?",
+					gcnew String(TITLE), MessageBoxButtons::YesNoCancel);
+				if (dr == DR::Yes) {
+					save(_filePath);
+				} else if (dr == DR::Cancel) {
+					return false;
+				}
+			}
+			return true;
+		}
+
 		void load(String^ filename) {
+			if (!okToClose()) return;
 			array<unsigned char>^ arr = System::IO::File::ReadAllBytes(filename);
 			if (arr->Length < GOOMBA_COLOR_SRAM_SIZE) {
 				MessageBox::Show("This file has an incorrect size. Valid Goomba save files must be at least " + GOOMBA_COLOR_SRAM_SIZE + " bytes.");
@@ -689,9 +692,11 @@ namespace goombasav_clr {
 				MessageBox::Show(gcnew String(goomba_last_error()), "Error", MessageBoxButtons::OK, MessageBoxIcon::Error);
 			} else if (headers[0] == NULL) {
 				listBox1->Items->Clear();
+				resetDescriptionPanel();
 				MessageBox::Show("No headers were found in this file.", "Error", MessageBoxButtons::OK, MessageBoxIcon::Information);
 			} else {
 				listBox1->Items->Clear();
+				resetDescriptionPanel();
 				for (int i = 0; headers[i] != NULL; i++) {
 					listBox1->Items->Add(gcnew HeaderPtr(headers[i]));
 				}
@@ -719,6 +724,20 @@ namespace goombasav_clr {
 		}
 		Void exitToolStripMenuItem_Click(Object^ sender, EventArgs^ e) {
 			this->Close();
+		}
+
+		void resetDescriptionPanel() {
+			btnExtract->Enabled = false;
+			btnReplace->Enabled = false;
+			lblSizeVal->Text = "";
+			lblTypeVal->Text = "";
+			flpConfigdata->Visible = false;
+			flpStateheader->Visible = true;
+			lblUncompressedSize->Text = "Uncompressed size:";
+			lblUncompressedSizeVal->Text = "";
+			lblFramecountVal->Text = "";
+			lblChecksumVal->Text = "";
+			lblTitleVal->Text = "";
 		}
 	
 		Void listBox1_SelectedIndexChanged(Object^ sender, EventArgs^ e) {
