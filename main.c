@@ -1,4 +1,8 @@
-// goombasav command line version. Compiles with Visual Studio 2013 (use /TP compiler option) and gcc 4.8.2 on cygwin.
+// goombasav command line version.
+// Tested and working with:
+// * Visual Studio 2013 (use /TP compiler option)
+// * gcc 4.8.2 on Cygwin (64-bit)
+// * gcc 4.7.2 on Debian (32-bit)
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -49,6 +53,9 @@ void license() {
 	fprintf(stdout, GPL_NOTICE);
 #ifdef PLATFORM_NAME
 	fprintf(stdout, "\nCompiled for %s\n", PLATFORM_NAME);
+#endif
+#ifdef ARCH_NAME
+	fprintf(stdout, "Arch: %s", ARCH_NAME);
 #endif
 	exit(EXIT_FAILURE);
 }

@@ -15,3 +15,9 @@
 #elif defined(__APPLE__) && defined(__MACH__)
 #define PLATFORM_NAME "Mac OS X / iOS"
 #endif
+
+#if defined(__amd64) || defined(_M_AMD64)
+#define ARCH_NAME "x86_64"
+#elif defined(__i386) || defined(_M_IX86) || defined(_X86_)
+#define ARCH_NAME "x86"
+#endif
