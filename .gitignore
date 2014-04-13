@@ -1,6 +1,6 @@
 Debug
 Release
-goombasav.exe
+/goombasav.exe
 *.sdf
 *.opensdf
 *.suo

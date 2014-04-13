@@ -14,12 +14,15 @@ goombasav is written in C and compiles in gcc and Visual Studio (although for th
 
 Usage:
 
-	goombasav c PokemonYellow.sav <i>(reads PokemonYellow.sav, cleans it, and writes to the same file)</i>
-	goombasav c PokemonYellow.sav cleaned.sav <i>(reads PokemonYellow.sav, cleans it, and writes to cleaned.sav)</i>
-	goombasav x PokemonYellow.sav yellow_gbc.sav <i>(extract save file)</i>
+	goombasav c PokemonYellow.sav *(reads PokemonYellow.sav, cleans it, and writes to the same file)*
+
+	goombasav c PokemonYellow.sav cleaned.sav *(reads PokemonYellow.sav, cleans it, and writes to cleaned.sav)*
+
+	goombasav x PokemonYellow.sav yellow_gbc.sav *(extract save file)*
 	  0. SRAM: POKEMON YELLOW (2312 b / 32768 uncomp)
 	  1. Configuration: CFG (48 b / 4196096 uncomp)
-	  Extract: <i>(enter 0 and press Enter)</i>
+	  Extract:
+    *(enter 0 and press Enter)*
 	  size: 2312
 	  type: SRAM (1)
 	  uncompressed_size: 32768
@@ -27,10 +30,12 @@ Usage:
 	  checksum: BE706244
 	  title: POKEMON YELLOW
 	  Actual uncompressed size: 32768
-	goombasav r PokemonYellow.sav yellow_gbc.sav <i>(replace save file)</i>
+
+	goombasav r PokemonYellow.sav yellow_gbc.sav *(replace save file)*
 	  0. SRAM: POKEMON YELLOW (2312 b / 32768 uncomp)
 	  1. Configuration: CFG (48 b / 4196096 uncomp)
-	  Replace: <i>(enter 0 and press Enter)</i>
+	  Replace:
+    *(enter 0 and press Enter)*
 	  size: 2312
 	  type: SRAM (1)
 	  uncompressed_size: 32768
@@ -38,3 +43,10 @@ Usage:
 	  checksum: BE706244
 	  title: POKEMON YELLOW
 	  Compressed 32768 bytes (compressed size: 2271)
+
+Goomba Save Manager (goombasav_clr)
+-----------------------------------
+
+Goomba Save Manager (goombasav_clr.exe) wraps the backend code (goombasav.c) in a Windows Forms interface with C++/CLI. It runs on Windows XP and newer, uses .NET Framework 4 and requires the Visual C++ 2013 redistributable packages.
+
+Use the Open and Save/Save As options from the File menu to open Goomba / Goomba Color save files, and use the Extract and Replace buttons to edit the SRAM. If the file needs to be "cleaned" (see above), the program will let you know when you open it. (If you clean the file, the changes won't be saved until you choose Save or Save As.)
