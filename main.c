@@ -71,7 +71,7 @@ void extract(const char* gbafile, const char* gbcfile) {
 
 	stateheader* sh = ask(gba_data + 4, "Extract: ");
 	fprintf(stderr, "%s\n", stateheader_str(sh));
-	size_t uncompressed_size;
+	goomba_size_t uncompressed_size;
 
 	void* gbc_data = goomba_extract(gba_data, sh, &uncompressed_size);
 	if (gbc_data == NULL) {

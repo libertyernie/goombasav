@@ -9,6 +9,8 @@
 #define GOOMBA_SRAMSAVE 1
 #define GOOMBA_CONFIGSAVE 2
 
+typedef uint32_t goomba_size_t; // want a consistent size for printf. This is an alias for uint32_t, but this makes it clear that we're counting the size of something.
+
 typedef struct {		//(modified stateheader)
 	uint16_t size;
 	uint16_t type;	//=CONFIGSAVE
@@ -38,7 +40,7 @@ int stateheader_plausible(const stateheader* sh);
 stateheader* stateheader_advance(const stateheader* sh);
 stateheader** stateheader_scan(const void* gba_data);
 char* goomba_cleanup(const void* gba_data_param);
-void* goomba_extract(const void* gba_data, const stateheader* header_ptr, size_t* size_output);
-char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* gbc_sram, size_t gbc_length);
+void* goomba_extract(const void* gba_data, const stateheader* header_ptr, goomba_size_t* size_output);
+char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* gbc_sram, goomba_size_t gbc_length);
 
 #endif
