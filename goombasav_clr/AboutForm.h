@@ -18,9 +18,7 @@ namespace goombasav_clr {
 		AboutForm(void)
 		{
 			InitializeComponent();
-			//
-			//TODO: Add the constructor code here
-			//
+			lblNETVersion->Text = ".NET Framework " + System::Environment::Version->ToString();
 		}
 
 	protected:
@@ -42,6 +40,7 @@ namespace goombasav_clr {
 	private: System::Windows::Forms::Button^  button1;
 	private: System::Windows::Forms::Label^  label2;
 	private: System::Windows::Forms::Label^  label3;
+	private: System::Windows::Forms::Label^  lblNETVersion;
 
 	protected:
 
@@ -69,6 +68,7 @@ namespace goombasav_clr {
 			this->button1 = (gcnew System::Windows::Forms::Button());
 			this->label2 = (gcnew System::Windows::Forms::Label());
 			this->label3 = (gcnew System::Windows::Forms::Label());
+			this->lblNETVersion = (gcnew System::Windows::Forms::Label());
 			this->SuspendLayout();
 			// 
 			// lblName
@@ -154,11 +154,24 @@ namespace goombasav_clr {
 			this->label3->TabIndex = 7;
 			this->label3->Text = L"Written in C++/CLI with backend code in standard C.";
 			// 
+			// lblNETVersion
+			// 
+			this->lblNETVersion->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left)
+				| System::Windows::Forms::AnchorStyles::Right));
+			this->lblNETVersion->ForeColor = System::Drawing::SystemColors::ControlDark;
+			this->lblNETVersion->Location = System::Drawing::Point(97, 339);
+			this->lblNETVersion->Name = L"lblNETVersion";
+			this->lblNETVersion->Size = System::Drawing::Size(348, 27);
+			this->lblNETVersion->TabIndex = 8;
+			this->lblNETVersion->Text = L"label4";
+			this->lblNETVersion->TextAlign = System::Drawing::ContentAlignment::BottomRight;
+			// 
 			// AboutForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(457, 378);
+			this->Controls->Add(this->lblNETVersion);
 			this->Controls->Add(this->label3);
 			this->Controls->Add(this->label2);
 			this->Controls->Add(this->button1);
