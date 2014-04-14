@@ -6,6 +6,6 @@ using namespace goombasav_clr; //the project name in your header file
 int main(array<String ^> ^args) {
 	Application::EnableVisualStyles();
 	Application::SetCompatibleTextRenderingDefault(false);
-	Application::Run(gcnew MainForm());
+	Application::Run(gcnew MainForm(args));
 	return 0;
 }

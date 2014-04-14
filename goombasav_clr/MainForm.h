@@ -76,7 +76,7 @@ namespace goombasav_clr {
 		}
 
 	public:
-		MainForm(void) {
+		MainForm(array<String^>^ args) {
 			InitializeComponent();
 
 			loaded_sram = new unsigned char[GOOMBA_COLOR_SRAM_SIZE];
@@ -87,6 +87,10 @@ namespace goombasav_clr {
 			this->DragEnter += gcnew System::Windows::Forms::DragEventHandler(this, &goombasav_clr::MainForm::OnDragEnter);
 			this->DragDrop += gcnew System::Windows::Forms::DragEventHandler(this, &goombasav_clr::MainForm::OnDragDrop);
 			this->AllowDrop = true;
+
+			if (args->Length > 0) {
+				load(args[0]);
+			}
 		}
 
 	protected:
