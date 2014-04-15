@@ -21,6 +21,11 @@ static GtkWidget* lblUncompSize;
 static GtkWidget* lblBorder;
 static GtkWidget* lblPalette;
 static GtkWidget* lblSleep;
+static GtkWidget* lblFramecount;
+static GtkWidget* lblGamma;
+static GtkWidget* lblAutostate;
+static GtkWidget* lblChecksum;
+static GtkWidget* lblTitle;
 
 static void show_standard_rows() {
 	for (int i=0; i<5; i++) {
@@ -84,6 +89,9 @@ static void selection_changed(GtkWidget* widget, gpointer data) {
 			: ptr->type == GOOMBA_CONFIGSAVE ? "Type: Configuration"
 			: "Type:");
 
+		sprintf(buf, "Title: %.32s", ptr->title);
+		gtk_label_set_text(GTK_LABEL(lblTitle), buf);
+
 		if (ptr->type == GOOMBA_CONFIGSAVE) {
 			show_configuration_rows();
 
@@ -94,6 +102,13 @@ static void selection_changed(GtkWidget* widget, gpointer data) {
 			gtk_label_set_text(GTK_LABEL(lblPalette), buf);
 			sprintf(buf, "Sleep: %s", sleeptxt[cd->misc & 0x3]);
 			gtk_label_set_text(GTK_LABEL(lblSleep), buf);
+			sprintf(buf, "Gamma: %s", brightxt[(cd->misc & 0xE0) >> 5]);
+			gtk_label_set_text(GTK_LABEL(lblGamma), buf);
+			sprintf(buf, "Autoload state: %s", ((cd->misc & 0x10) >> 4) ? "ON" : "OFF");
+			gtk_label_set_text(GTK_LABEL(lblAutostate), buf);
+
+			sprintf(buf, "ROM checksum: %8X", cd->sram_checksum);
+			gtk_label_set_text(GTK_LABEL(lblChecksum), buf);
 		} else {
 			show_standard_rows();
 
@@ -101,6 +116,12 @@ static void selection_changed(GtkWidget* widget, gpointer data) {
 				ptr->uncompressed_size < ptr->size ? "C" : "Unc",
 				ptr->uncompressed_size);
 			gtk_label_set_text(GTK_LABEL(lblUncompSize), buf);
+
+			sprintf(buf, "Frame count: %u", ptr->framecount);
+			gtk_label_set_text(GTK_LABEL(lblFramecount), buf);
+
+			sprintf(buf, "ROM checksum: %8X", ptr->checksum);
+			gtk_label_set_text(GTK_LABEL(lblChecksum), buf);
 		}
 	}
 }
@@ -111,6 +132,13 @@ static gboolean delete_event(GtkWidget* widget, GdkEvent* event, gpointer data) 
 
 static void destroy(GtkWidget* widget, gpointer data) {
     gtk_main_quit();
+}
+
+static void lblset(GtkWidget** variable, const char* initial_text, GtkWidget* box) {
+	*variable = gtk_label_new(initial_text);
+	gtk_widget_show(*variable);
+	gtk_misc_set_alignment(GTK_MISC(*variable), 0, 0.5);
+	gtk_box_pack_start(GTK_BOX(box), *variable, TRUE, TRUE, 0);
 }
 
 int main(int argc, char **argv) {
@@ -168,31 +196,27 @@ int main(int argc, char **argv) {
 	}
 
 	// row 1
-	lblSize = gtk_label_new("Size:");
-	gtk_widget_show(lblSize);
-	gtk_misc_set_alignment(GTK_MISC(lblSize), 0, 0.5);
-	gtk_box_pack_start(GTK_BOX(normal_rows[0]), lblSize, TRUE, TRUE, 0);
-	lblType = gtk_label_new("Type:");
-	gtk_widget_show(lblType);
-	gtk_misc_set_alignment(GTK_MISC(lblType), 0, 0.5);
-	gtk_box_pack_start(GTK_BOX(normal_rows[0]), lblType, TRUE, TRUE, 0);
+	lblset(&lblSize, "Size:", normal_rows[0]);
+	lblset(&lblType, "Type:", normal_rows[0]);
 
 	// row 2 (normal)
-	lblUncompSize = gtk_label_new("Uncompressed size:");
-	gtk_widget_show(lblUncompSize);
-	gtk_misc_set_alignment(GTK_MISC(lblUncompSize), 0, 0.5);
-	gtk_box_pack_start(GTK_BOX(normal_rows[1]), lblUncompSize, TRUE, TRUE, 0);
+	lblset(&lblUncompSize, "Uncompressed size:", normal_rows[1]);
 
 	// row 2 (config)
-	lblBorder = gtk_label_new("Border:");
-	lblPalette = gtk_label_new("Palette:");
-	lblSleep = gtk_label_new("Sleep:");
-	GtkWidget* arr[3] = { lblBorder, lblPalette, lblSleep };
-	for (int i=0; i<3; i++) {
-		gtk_widget_show(arr[i]);
-		gtk_misc_set_alignment(GTK_MISC(arr[i]), 0, 0.5);
-		gtk_box_pack_start(GTK_BOX(cfg_rows[1]), arr[i], TRUE, TRUE, 0);
-	}
+	lblset(&lblBorder, "Border:", cfg_rows[1]);
+	lblset(&lblPalette, "Palette:", cfg_rows[1]);
+	lblset(&lblSleep, "Sleep:", cfg_rows[1]);
+
+	// row 3 (normal)
+	lblset(&lblFramecount, "Frame count:", normal_rows[2]);
+
+	// row 3 (config)
+	lblset(&lblGamma, "Gamma:", cfg_rows[2]);
+	lblset(&lblAutostate, "Autoload state:", cfg_rows[2]);
+
+	// rows 4 and 5
+	lblset(&lblChecksum, "ROM checksum:", normal_rows[3]);
+	lblset(&lblTitle, "Title:", normal_rows[4]);
 
 	// construct/add button for testing
 	GtkWidget* button1 = gtk_button_new_with_label("Read regular.sav");
