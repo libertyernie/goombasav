@@ -4,6 +4,10 @@
 
 #define error_msg(...) { GtkWidget* dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, __VA_ARGS__); gtk_dialog_run(GTK_DIALOG(dialog)); gtk_widget_destroy(dialog); }
 
+const char* TITLE = "Goomba Save Manager";
+const char* const sleeptxt[] = { "5min", "10min", "30min", "OFF" };
+const char* const brightxt[] = { "I", "II", "III", "IIII", "IIIII" };
+
 static char loaded_data[GOOMBA_COLOR_SRAM_SIZE];
 static stateheader** headers = NULL;
 
@@ -14,6 +18,9 @@ static GtkWidget* cfg_rows[5]; // some hboxes will be in both arrays
 static GtkWidget* lblSize;
 static GtkWidget* lblType;
 static GtkWidget* lblUncompSize;
+static GtkWidget* lblBorder;
+static GtkWidget* lblPalette;
+static GtkWidget* lblSleep;
 
 static void show_standard_rows() {
 	for (int i=0; i<5; i++) {
@@ -66,15 +73,9 @@ static void selection_changed(GtkWidget* widget, gpointer data) {
 	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(widget), NULL, &iter)) {
 		gtk_tree_model_get(GTK_TREE_MODEL(listStore), &iter, 1, &ptr, -1);
 
-		if (ptr->type == GOOMBA_CONFIGSAVE) {
-			show_configuration_rows();
-		} else {
-			show_standard_rows();
-		}
-
 		char buf[256];
 
-		sprintf(buf, "Size: %d bytes    ", ptr->size);
+		sprintf(buf, "Size: %u bytes    ", ptr->size);
 		gtk_label_set_text(GTK_LABEL(lblSize), buf);
 
 		gtk_label_set_text(GTK_LABEL(lblType),
@@ -83,10 +84,24 @@ static void selection_changed(GtkWidget* widget, gpointer data) {
 			: ptr->type == GOOMBA_CONFIGSAVE ? "Type: Configuration"
 			: "Type:");
 
-		sprintf(buf, "%sompressed size: %d bytes",
-			ptr->uncompressed_size < ptr->size ? "C" : "Unc",
-			ptr->uncompressed_size);
-		gtk_label_set_text(GTK_LABEL(lblUncompSize), buf);
+		if (ptr->type == GOOMBA_CONFIGSAVE) {
+			show_configuration_rows();
+
+			configdata* cd = (configdata*)ptr;
+			sprintf(buf, "Border: %u", cd->bordercolor);
+			gtk_label_set_text(GTK_LABEL(lblBorder), buf);
+			sprintf(buf, "Palette: %u", cd->palettebank);
+			gtk_label_set_text(GTK_LABEL(lblPalette), buf);
+			sprintf(buf, "Sleep: %s", sleeptxt[cd->misc & 0x3]);
+			gtk_label_set_text(GTK_LABEL(lblSleep), buf);
+		} else {
+			show_standard_rows();
+
+			sprintf(buf, "%sompressed size: %u bytes",
+				ptr->uncompressed_size < ptr->size ? "C" : "Unc",
+				ptr->uncompressed_size);
+			gtk_label_set_text(GTK_LABEL(lblUncompSize), buf);
+		}
 	}
 }
 
@@ -162,11 +177,22 @@ int main(int argc, char **argv) {
 	gtk_misc_set_alignment(GTK_MISC(lblType), 0, 0.5);
 	gtk_box_pack_start(GTK_BOX(normal_rows[0]), lblType, TRUE, TRUE, 0);
 
-	// row 2
+	// row 2 (normal)
 	lblUncompSize = gtk_label_new("Uncompressed size:");
 	gtk_widget_show(lblUncompSize);
 	gtk_misc_set_alignment(GTK_MISC(lblUncompSize), 0, 0.5);
 	gtk_box_pack_start(GTK_BOX(normal_rows[1]), lblUncompSize, TRUE, TRUE, 0);
+
+	// row 2 (config)
+	lblBorder = gtk_label_new("Border:");
+	lblPalette = gtk_label_new("Palette:");
+	lblSleep = gtk_label_new("Sleep:");
+	GtkWidget* arr[3] = { lblBorder, lblPalette, lblSleep };
+	for (int i=0; i<3; i++) {
+		gtk_widget_show(arr[i]);
+		gtk_misc_set_alignment(GTK_MISC(arr[i]), 0, 0.5);
+		gtk_box_pack_start(GTK_BOX(cfg_rows[1]), arr[i], TRUE, TRUE, 0);
+	}
 
 	// construct/add button for testing
 	GtkWidget* button1 = gtk_button_new_with_label("Read regular.sav");
