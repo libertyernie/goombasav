@@ -270,10 +270,11 @@ int main(int argc, char **argv) {
 	gtk_widget_show(vbox2);
 	gtk_widget_show(hbox1);
 	gtk_widget_show(vbox1);
-    gtk_widget_show(window);
+	gtk_widget_set_size_request(window, 425, 225);
+	gtk_widget_show(window);
 	show_standard_rows();
-    
-    gtk_main();
-    
-    return 0;
+
+	gtk_main();
+
+	return 0;
 }
