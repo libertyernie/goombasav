@@ -41,10 +41,48 @@ static void show_configuration_rows() {
 	}
 }
 
-static void click(GtkWidget* widget, gpointer data) {
-	FILE* f = fopen("regular.sav", "rb");
+static void lblset(GtkWidget** variable, const char* initial_text, GtkWidget* box) {
+	if (*variable == NULL) {
+		*variable = gtk_label_new(initial_text);
+		gtk_widget_show(*variable);
+		gtk_misc_set_alignment(GTK_MISC(*variable), 0, 0.5);
+		gtk_box_pack_start(GTK_BOX(box), *variable, TRUE, TRUE, 0);
+	} else {
+		gtk_label_set_text(GTK_LABEL(*variable), initial_text);
+	}
+}
+
+static void set_all_labels() {
+	lblset(&lblSize, "Size:", normal_rows[0]);
+	lblset(&lblType, "Type:", normal_rows[0]);
+
+	lblset(&lblUncompSize, "Uncompressed size:", normal_rows[1]);
+
+	lblset(&lblBorder, "Border:", cfg_rows[1]);
+	lblset(&lblPalette, "Palette:", cfg_rows[1]);
+	lblset(&lblSleep, "Sleep:", cfg_rows[1]);
+
+	lblset(&lblFramecount, "Frame count:", normal_rows[2]);
+
+	lblset(&lblGamma, "Gamma:", cfg_rows[2]);
+	lblset(&lblAutostate, "Autoload state:", cfg_rows[2]);
+
+	lblset(&lblChecksum, "ROM checksum:", normal_rows[3]);
+
+	lblset(&lblTitle, "Title:", normal_rows[4]);
+}
+
+static void open_click(GtkWidget* widget, gpointer data) {
+	GtkWidget* dialog = gtk_file_chooser_dialog_new("Open", GTK_WINDOW(data), GTK_FILE_CHOOSER_ACTION_OPEN, "Cancel", GTK_RESPONSE_CANCEL, "Open", GTK_RESPONSE_ACCEPT, NULL);
+	gint res = gtk_dialog_run(GTK_DIALOG(dialog));
+	if (res != GTK_RESPONSE_ACCEPT) return;
+
+	char* path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+	FILE* f = fopen(path, "rb");
+	gtk_widget_destroy(dialog);
+
 	if (f == NULL) {
-		error_msg("Could not open file %s", "regular.sav");
+		error_msg("Could not open file %s", path);
 		return;
 	}
 	size_t total_bytes_read = 0;
@@ -52,11 +90,12 @@ static void click(GtkWidget* widget, gpointer data) {
 		size_t bytes_read = fread(loaded_data, 1, GOOMBA_COLOR_SRAM_SIZE-total_bytes_read, f);
 		total_bytes_read += bytes_read;
 		if (bytes_read <= 0) {
-			error_msg("Could only read %lu bytes from %s", (unsigned long)total_bytes_read, "regular.sav");
+			error_msg("Could only read %lu bytes from %s", (unsigned long)total_bytes_read, path);
 			return;
 		}
 	}
 	fclose(f);
+	g_free(path);
 
 	gtk_list_store_clear(listStore);
 	GtkTreeIter iter;
@@ -70,6 +109,7 @@ static void click(GtkWidget* widget, gpointer data) {
 		gtk_list_store_append(listStore, &iter);
 		gtk_list_store_set(listStore, &iter, 0, stateheader_summary_str(headers[i]), 1, headers[i], -1);
 	}
+	set_all_labels();
 }
 
 static void selection_changed(GtkWidget* widget, gpointer data) {
@@ -134,13 +174,6 @@ static void destroy(GtkWidget* widget, gpointer data) {
     gtk_main_quit();
 }
 
-static void lblset(GtkWidget** variable, const char* initial_text, GtkWidget* box) {
-	*variable = gtk_label_new(initial_text);
-	gtk_widget_show(*variable);
-	gtk_misc_set_alignment(GTK_MISC(*variable), 0, 0.5);
-	gtk_box_pack_start(GTK_BOX(box), *variable, TRUE, TRUE, 0);
-}
-
 int main(int argc, char **argv) {
     gtk_init(&argc, &argv);
     
@@ -192,46 +225,18 @@ int main(int argc, char **argv) {
 	cfg_rows[4] = normal_rows[4];
 	for (int i=0; i<5; i++) {
 		gtk_box_pack_start(GTK_BOX(vbox), normal_rows[i], FALSE, FALSE, 4);
-		gtk_box_pack_start(GTK_BOX(vbox), cfg_rows[i], FALSE, FALSE, 4);
+		if (normal_rows[i] != cfg_rows[i]) {
+			gtk_box_pack_start(GTK_BOX(vbox), cfg_rows[i], FALSE, FALSE, 4);
+		}
 	}
 
-	// row 1
-	lblset(&lblSize, "Size:", normal_rows[0]);
-	lblset(&lblType, "Type:", normal_rows[0]);
-
-	// row 2 (normal)
-	lblset(&lblUncompSize, "Uncompressed size:", normal_rows[1]);
-
-	// row 2 (config)
-	lblset(&lblBorder, "Border:", cfg_rows[1]);
-	lblset(&lblPalette, "Palette:", cfg_rows[1]);
-	lblset(&lblSleep, "Sleep:", cfg_rows[1]);
-
-	// row 3 (normal)
-	lblset(&lblFramecount, "Frame count:", normal_rows[2]);
-
-	// row 3 (config)
-	lblset(&lblGamma, "Gamma:", cfg_rows[2]);
-	lblset(&lblAutostate, "Autoload state:", cfg_rows[2]);
-
-	// rows 4 and 5
-	lblset(&lblChecksum, "ROM checksum:", normal_rows[3]);
-	lblset(&lblTitle, "Title:", normal_rows[4]);
+	set_all_labels();
 
 	// construct/add button for testing
 	GtkWidget* button1 = gtk_button_new_with_label("Read regular.sav");
-	g_signal_connect(button1, "clicked", G_CALLBACK(click), NULL);
+	g_signal_connect(button1, "clicked", G_CALLBACK(open_click), window);
 	gtk_box_pack_end(GTK_BOX(vbox), button1, FALSE, FALSE, 8);
 	gtk_widget_show(button1);
-
-	/*GtkWidget* button2 = gtk_button_new_with_label("regular");
-	g_signal_connect(button2, "clicked", G_CALLBACK(show_standard_rows), NULL);
-	gtk_box_pack_end(GTK_BOX(vbox), button2, FALSE, FALSE, 8);
-	gtk_widget_show(button2);
-	GtkWidget* button3 = gtk_button_new_with_label("cfg");
-	g_signal_connect(button3, "clicked", G_CALLBACK(show_configuration_rows), NULL);
-	gtk_box_pack_end(GTK_BOX(vbox), button3, FALSE, FALSE, 8);
-	gtk_widget_show(button3);*/
 
 	// show things
 	gtk_widget_show(vbox);
