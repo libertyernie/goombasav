@@ -147,7 +147,7 @@ static void selection_changed(GtkWidget* widget, gpointer data) {
 			sprintf(buf, "Autoload state: %s", ((cd->misc & 0x10) >> 4) ? "ON" : "OFF");
 			gtk_label_set_text(GTK_LABEL(lblAutostate), buf);
 
-			sprintf(buf, "ROM checksum: %8X", cd->sram_checksum);
+			sprintf(buf, "ROM checksum: %08X", cd->sram_checksum);
 			gtk_label_set_text(GTK_LABEL(lblChecksum), buf);
 		} else {
 			show_standard_rows();
@@ -184,20 +184,34 @@ int main(int argc, char **argv) {
 	g_signal_connect(window, "delete-event", G_CALLBACK(delete_event), NULL);
 	g_signal_connect(window, "destroy", G_CALLBACK(destroy), NULL);
 
+	GtkWidget* vbox1 = gtk_vbox_new(FALSE, 0);
+	gtk_container_add(GTK_CONTAINER(window), vbox1);
+
+	// construct menubar
+	GtkWidget* menubar = gtk_menu_bar_new();
+	GtkWidget* file_item = gtk_menu_item_new_with_label("File");
+	gtk_menu_shell_append(GTK_MENU_SHELL(menubar), file_item);
+
+	GtkWidget* file_menu = gtk_menu_new();
+	gtk_menu_item_set_submenu(GTK_MENU_ITEM(file_item), file_menu);
+	GtkWidget* open_item = gtk_menu_item_new_with_label("Open");
+	gtk_menu_shell_append(GTK_MENU_SHELL(file_menu), open_item);
+	g_signal_connect(open_item, "activate", G_CALLBACK(open_click), NULL);
+
+	gtk_box_pack_start(GTK_BOX(vbox1), menubar, FALSE, FALSE, 0);
+	gtk_widget_show_all(menubar);
+
 	// construct/add top container, with list box and one other element
 	GtkWidget* hbox1 = gtk_hbox_new(FALSE, 0);
-	gtk_container_add(GTK_CONTAINER(window), hbox1);
+	gtk_box_pack_end(GTK_BOX(vbox1), hbox1, TRUE, TRUE, 0);
 
 	// construct list
 	listStore = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_POINTER);
-	GtkTreeIter iter;
-	gtk_list_store_append(listStore, &iter);
-	gtk_list_store_set(listStore, &iter, 0, "First row", 1, "Second row", -1);
 
 	GtkWidget* treeView = gtk_tree_view_new();
 	GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
 	gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeView), -1, "Header", renderer, "text", 0, NULL);
-
+	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(treeView), FALSE);
 	gtk_tree_view_set_model(GTK_TREE_VIEW(treeView), GTK_TREE_MODEL(listStore));
 
 	GtkTreeSelection* selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeView));
@@ -209,8 +223,8 @@ int main(int argc, char **argv) {
 	gtk_widget_show(treeView);
 
 	// construct vbox for right/main section
-	GtkWidget* vbox = gtk_vbox_new(FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(hbox1), vbox, TRUE, TRUE, 8);
+	GtkWidget* vbox2 = gtk_vbox_new(FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(hbox1), vbox2, TRUE, TRUE, 8);
 
 	// put together both sets of rows
 	normal_rows[0] = gtk_hbox_new(TRUE, 0);
@@ -224,23 +238,38 @@ int main(int argc, char **argv) {
 	cfg_rows[3] = normal_rows[3];
 	cfg_rows[4] = normal_rows[4];
 	for (int i=0; i<5; i++) {
-		gtk_box_pack_start(GTK_BOX(vbox), normal_rows[i], FALSE, FALSE, 4);
+		gtk_box_pack_start(GTK_BOX(vbox2), normal_rows[i], FALSE, FALSE, 4);
 		if (normal_rows[i] != cfg_rows[i]) {
-			gtk_box_pack_start(GTK_BOX(vbox), cfg_rows[i], FALSE, FALSE, 4);
+			gtk_box_pack_start(GTK_BOX(vbox2), cfg_rows[i], FALSE, FALSE, 4);
 		}
 	}
 
 	set_all_labels();
 
+	// bottom row for buttons
+	GtkWidget* button_hbox = gtk_hbox_new(FALSE, 8);
+	gtk_box_pack_end(GTK_BOX(vbox2), button_hbox, FALSE, FALSE, 0);
+	gtk_widget_show(button_hbox);
+
+	GtkWidget* btnReplace = gtk_button_new_with_label("Replace");
+	gtk_widget_set_size_request(btnReplace, 80, -1);
+	gtk_box_pack_start(GTK_BOX(button_hbox), btnReplace, FALSE, FALSE, 0);
+	gtk_widget_show(btnReplace);
+	GtkWidget* btnExport = gtk_button_new_with_label("Export");
+	gtk_widget_set_size_request(btnExport, 80, -1);
+	gtk_box_pack_start(GTK_BOX(button_hbox), btnExport, FALSE, FALSE, 0);
+	gtk_widget_show(btnExport);
+
 	// construct/add button for testing
-	GtkWidget* button1 = gtk_button_new_with_label("Read regular.sav");
+	/*GtkWidget* button1 = gtk_button_new_with_label("Read regular.sav");
 	g_signal_connect(button1, "clicked", G_CALLBACK(open_click), window);
 	gtk_box_pack_end(GTK_BOX(vbox), button1, FALSE, FALSE, 8);
-	gtk_widget_show(button1);
+	gtk_widget_show(button1);*/
 
 	// show things
-	gtk_widget_show(vbox);
+	gtk_widget_show(vbox2);
 	gtk_widget_show(hbox1);
+	gtk_widget_show(vbox1);
     gtk_widget_show(window);
 	show_standard_rows();
     
