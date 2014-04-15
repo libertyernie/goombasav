@@ -12,6 +12,7 @@ static void click(GtkWidget* widget, gpointer data) {
 	if (f == NULL) {
 		GtkWidget* dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Could not open file %s", "pokemon.sav");
 		gtk_dialog_run(GTK_DIALOG(dialog));
+		gtk_widget_destroy(dialog);
 		return;
 	}
 	size_t total_bytes_read = 0;
@@ -22,6 +23,7 @@ static void click(GtkWidget* widget, gpointer data) {
 		if (bytes_read <= 0) {
 			GtkWidget* dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Could only read %lu bytes from %s", (unsigned long)total_bytes_read, "pokemon.sav");
 			gtk_dialog_run(GTK_DIALOG(dialog));
+		gtk_widget_destroy(dialog);
 			return;
 		}
 	}
@@ -41,7 +43,6 @@ static void click(GtkWidget* widget, gpointer data) {
 	}
 }
 static gboolean delete_event(GtkWidget* widget, GdkEvent* event, gpointer data) {
-    g_print("delete event occurred\n");
     return FALSE;
 }
 
@@ -77,16 +78,21 @@ int main(int argc, char **argv) {
 
 	// add list to hbox1
 	gtk_widget_set_size_request(treeView, 256, -1);
-	gtk_box_pack_start(GTK_BOX(hbox1), treeView, FALSE, FALSE, 8);
+	gtk_box_pack_start(GTK_BOX(hbox1), treeView, FALSE, FALSE, 0);
 	gtk_widget_show(treeView);
+
+	// construct vbox for right/main section
+	GtkWidget* vbox = gtk_vbox_new(FALSE, 0);
+	gtk_box_pack_end(GTK_BOX(hbox1), vbox, FALSE, TRUE, 8);
 
 	// construct/add button for testing
 	GtkWidget* button1 = gtk_button_new_with_label("Read pokemon.sav");
 	g_signal_connect(button1, "clicked", G_CALLBACK(click), NULL);
-	gtk_container_add(GTK_CONTAINER(hbox1), button1);
+	gtk_box_pack_end(GTK_BOX(vbox), button1, FALSE, FALSE, 8);
 	gtk_widget_show(button1);
 
 	// show things
+	gtk_widget_show(vbox);
 	gtk_widget_show(hbox1);
     gtk_widget_show(window);
     
