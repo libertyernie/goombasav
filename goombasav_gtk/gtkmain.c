@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #include <gtk/gtk.h>
 #include "../goombasav.h"
 
