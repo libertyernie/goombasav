@@ -11,6 +11,7 @@ const char* const sleeptxt[] = { "5min", "10min", "30min", "OFF" };
 const char* const brightxt[] = { "I", "II", "III", "IIII", "IIIII" };
 
 static char loaded_data[GOOMBA_COLOR_SRAM_SIZE];
+static char* _filePath = NULL;
 static bool dirty;
 static stateheader** headers = NULL;
 
@@ -75,6 +76,20 @@ static void set_all_labels() {
 	lblset(&lblTitle, "Title:", normal_rows[4]);
 }
 
+static void update_titlebar(GtkWindow* window) {
+	if (_filePath == NULL) {
+		gtk_window_set_title(window, TITLE);
+		return;
+	}
+	char* i1 = strrchr(_filePath, '/') + 1;
+	char* i2 = strrchr(_filePath, '\\') + 1;
+	char* filename = i1 > i2 ? i1 : i2;
+	char* buf = (char*)malloc(strlen(TITLE) + 3 + strlen(filename) + 1);
+	sprintf(buf, "%s - %s", TITLE, filename);
+	gtk_window_set_title(window, buf);
+	free(buf);
+}
+
 static void open_click(GtkWidget* widget, gpointer data) {
 	GtkWidget* dialog = gtk_file_chooser_dialog_new("Open", GTK_WINDOW(data), GTK_FILE_CHOOSER_ACTION_OPEN, "Cancel", GTK_RESPONSE_CANCEL, "Open", GTK_RESPONSE_ACCEPT, NULL);
 	gint res = gtk_dialog_run(GTK_DIALOG(dialog));
@@ -107,33 +122,41 @@ static void open_click(GtkWidget* widget, gpointer data) {
 		gtk_dialog_run(GTK_DIALOG(dialog));
 		gtk_widget_destroy(dialog);
 	}
-	g_free(path);
 
 	char* cleaned = goomba_cleanup(loaded_data);
 	if (cleaned == NULL) {
 		// this should not happen
 		error_msg(goomba_last_error());
+		g_free(path);
 		return;
 	} else if (cleaned != loaded_data) {
 		GtkWidget* dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_NONE,
 			"Uncompressed SRAM found at 0xE000. Would you like to move and compress it to the proper location? (Doing this is required to extract or replace the save data.)");
-		gtk_dialog_add_button(GTK_DIALOG(dialog), "Cancel", 'C');
-		gtk_dialog_add_button(GTK_DIALOG(dialog), "Skip", 'N');
-		gtk_dialog_add_button(GTK_DIALOG(dialog), "Clean", 'Y');
-		gtk_dialog_set_default_response(GTK_DIALOG(dialog), 'Y');
+		gtk_dialog_add_button(GTK_DIALOG(dialog), "Cancel", GTK_RESPONSE_CANCEL);
+		gtk_dialog_add_button(GTK_DIALOG(dialog), "Skip", GTK_RESPONSE_NO);
+		gtk_dialog_add_button(GTK_DIALOG(dialog), "Clean", GTK_RESPONSE_YES);
+		gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_YES);
 		gint res = gtk_dialog_run(GTK_DIALOG(dialog));
 		gtk_widget_destroy(dialog);
-		if (res == 'Y') {
+		if (res == GTK_RESPONSE_YES) {
 			memcpy(loaded_data, cleaned, GOOMBA_COLOR_SRAM_SIZE);
 			dirty = true;
 		}
 		free(cleaned);
-		if (res == 'C') {
+		if (res == GTK_RESPONSE_CANCEL) {
+			g_free(path);
 			return;
 		}
 	} else {
 		dirty = false;
 	}
+
+	if (_filePath != NULL) free(_filePath);
+	_filePath = (char*)malloc(strlen(path) + 1);
+	strcpy(_filePath, path);
+	g_free(path);
+
+	update_titlebar(GTK_WINDOW(data));
 
 	gtk_list_store_clear(listStore);
 	GtkTreeIter iter;
@@ -233,7 +256,7 @@ int main(int argc, char **argv) {
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(file_item), file_menu);
 	GtkWidget* open_item = gtk_menu_item_new_with_label("Open");
 	gtk_menu_shell_append(GTK_MENU_SHELL(file_menu), open_item);
-	g_signal_connect(open_item, "activate", G_CALLBACK(open_click), NULL);
+	g_signal_connect(open_item, "activate", G_CALLBACK(open_click), window);
 
 	gtk_box_pack_start(GTK_BOX(vbox1), menubar, FALSE, FALSE, 0);
 	gtk_widget_show_all(menubar);
@@ -309,6 +332,8 @@ int main(int argc, char **argv) {
 	gtk_widget_show(vbox1);
 	gtk_widget_set_size_request(window, 425, 225);
 	gtk_widget_show(window);
+
+	update_titlebar(GTK_WINDOW(window));
 	show_standard_rows();
 
 	gtk_main();
