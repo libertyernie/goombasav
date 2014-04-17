@@ -235,12 +235,9 @@ static void destroy(GtkWidget* widget, gpointer data) {
     gtk_main_quit();
 }
 
-int main(int argc, char **argv) {
-    gtk_init(&argc, &argv);
-    
-	// construct window
-    GtkWidget* window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_widget_show(window);
+GtkWidget* build_window() {
+	GtkWidget* window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	gtk_widget_show(window);
 
 	g_signal_connect(window, "delete-event", G_CALLBACK(delete_event), NULL);
 	g_signal_connect(window, "destroy", G_CALLBACK(destroy), NULL);
@@ -321,17 +318,19 @@ int main(int argc, char **argv) {
 	gtk_box_pack_start(GTK_BOX(button_hbox), btnExport, FALSE, FALSE, 0);
 	gtk_widget_show(btnExport);
 
-	// construct/add button for testing
-	/*GtkWidget* button1 = gtk_button_new_with_label("Read regular.sav");
-	g_signal_connect(button1, "clicked", G_CALLBACK(open_click), window);
-	gtk_box_pack_end(GTK_BOX(vbox), button1, FALSE, FALSE, 8);
-	gtk_widget_show(button1);*/
-
 	// show things
 	gtk_widget_show(vbox2);
 	gtk_widget_show(hbox1);
 	gtk_widget_show(vbox1);
 	gtk_widget_set_size_request(window, 425, 225);
+	return window;
+}
+
+int main(int argc, char **argv) {
+    gtk_init(&argc, &argv);
+    
+	// construct window
+	GtkWidget* window = build_window();
 	gtk_widget_show(window);
 
 	update_titlebar(GTK_WINDOW(window));
