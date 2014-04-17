@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include <gtk/gtk.h>
 #include "../goombasav.h"
 
@@ -10,6 +11,7 @@ const char* const sleeptxt[] = { "5min", "10min", "30min", "OFF" };
 const char* const brightxt[] = { "I", "II", "III", "IIII", "IIIII" };
 
 static char loaded_data[GOOMBA_COLOR_SRAM_SIZE];
+static bool dirty;
 static stateheader** headers = NULL;
 
 static GtkListStore* listStore;
@@ -107,11 +109,36 @@ static void open_click(GtkWidget* widget, gpointer data) {
 	}
 	g_free(path);
 
+	char* cleaned = goomba_cleanup(loaded_data);
+	if (cleaned == NULL) {
+		// this should not happen
+		error_msg(goomba_last_error());
+		return;
+	} else if (cleaned != loaded_data) {
+		GtkWidget* dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_NONE,
+			"Uncompressed SRAM found at 0xE000. Would you like to move and compress it to the proper location? (Doing this is required to extract or replace the save data.)");
+		gtk_dialog_add_button(GTK_DIALOG(dialog), "Cancel", 'C');
+		gtk_dialog_add_button(GTK_DIALOG(dialog), "Skip", 'N');
+		gtk_dialog_add_button(GTK_DIALOG(dialog), "Clean", 'Y');
+		gtk_dialog_set_default_response(GTK_DIALOG(dialog), 'Y');
+		gint res = gtk_dialog_run(GTK_DIALOG(dialog));
+		gtk_widget_destroy(dialog);
+		if (res == 'Y') {
+			memcpy(loaded_data, cleaned, GOOMBA_COLOR_SRAM_SIZE);
+			dirty = true;
+		}
+		free(cleaned);
+		if (res == 'C') {
+			return;
+		}
+	} else {
+		dirty = false;
+	}
+
 	gtk_list_store_clear(listStore);
 	GtkTreeIter iter;
 	if (headers != NULL) {
 		free(headers);
-		printf("freed headers\n");
 	}
 	headers = stateheader_scan(loaded_data);
 	int i;
