@@ -173,6 +173,18 @@ static void open_click(GtkWidget* widget, gpointer data) {
 	set_all_labels();
 }
 
+static void export_click(GtkWidget* widget, gpointer data) {
+	if (_filePath != NULL) {
+		note_msg("%s\n", _filePath);
+	}
+	GtkTreeIter iter;
+	stateheader* ptr;
+	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(gtk_tree_view_get_selection(GTK_TREE_VIEW(data))), NULL, &iter)) {
+		gtk_tree_model_get(GTK_TREE_MODEL(listStore), &iter, 1, &ptr, -1);
+		note_msg("%s\n", stateheader_summary_str(ptr));
+	}
+}
+
 static void selection_changed(GtkWidget* widget, gpointer data) {
 	GtkTreeIter iter;
 	stateheader* ptr;
@@ -317,6 +329,7 @@ GtkWidget* build_window() {
 	gtk_widget_set_size_request(btnExport, 80, -1);
 	gtk_box_pack_start(GTK_BOX(button_hbox), btnExport, FALSE, FALSE, 0);
 	gtk_widget_show(btnExport);
+	g_signal_connect(btnExport, "clicked", G_CALLBACK(export_click), treeView);
 
 	// show things
 	gtk_widget_show(vbox2);
