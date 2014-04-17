@@ -178,6 +178,7 @@ char* goomba_cleanup(const void* gba_data_param) {
 			}
 		}
 	}
+	free(headers);
 	return (char*)gba_data_param;
 }
 
