@@ -3,6 +3,7 @@
 #include "../goombasav.h"
 
 #define error_msg(...) { GtkWidget* dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, __VA_ARGS__); gtk_dialog_run(GTK_DIALOG(dialog)); gtk_widget_destroy(dialog); }
+#define note_msg(...) { GtkWidget* dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_CLOSE, __VA_ARGS__); gtk_dialog_run(GTK_DIALOG(dialog)); gtk_widget_destroy(dialog); }
 
 const char* TITLE = "Goomba Save Manager";
 const char* const sleeptxt[] = { "5min", "10min", "30min", "OFF" };
@@ -94,7 +95,16 @@ static void open_click(GtkWidget* widget, gpointer data) {
 			return;
 		}
 	}
+	fseek(f, 0, SEEK_END);
+	uint32_t filesize = (uint32_t)ftell(f);
 	fclose(f);
+	if (filesize > GOOMBA_COLOR_SRAM_SIZE) {
+		GtkWidget* dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_CLOSE,
+			"This file is more than %u bytes. If you overwrite the file, the last %u bytes will be discarded.",
+			GOOMBA_COLOR_SRAM_SIZE, filesize - GOOMBA_COLOR_SRAM_SIZE);
+		gtk_dialog_run(GTK_DIALOG(dialog));
+		gtk_widget_destroy(dialog);
+	}
 	g_free(path);
 
 	gtk_list_store_clear(listStore);
@@ -160,7 +170,7 @@ static void selection_changed(GtkWidget* widget, gpointer data) {
 			sprintf(buf, "Frame count: %u", ptr->framecount);
 			gtk_label_set_text(GTK_LABEL(lblFramecount), buf);
 
-			sprintf(buf, "ROM checksum: %8X", ptr->checksum);
+			sprintf(buf, "ROM checksum: %08X", ptr->checksum);
 			gtk_label_set_text(GTK_LABEL(lblChecksum), buf);
 		}
 	}
