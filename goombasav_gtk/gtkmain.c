@@ -11,7 +11,7 @@ const char* TITLE = "Goomba Save Manager";
 const char* const sleeptxt[] = { "5min", "10min", "30min", "OFF" };
 const char* const brightxt[] = { "I", "II", "III", "IIII", "IIIII" };
 
-static char loaded_data[GOOMBA_COLOR_SRAM_SIZE];
+static char loaded_sram[GOOMBA_COLOR_SRAM_SIZE];
 static char* _filePath = NULL;
 static bool dirty;
 static stateheader** headers = NULL;
@@ -106,7 +106,7 @@ static void open_click(GtkWidget* widget, gpointer data) {
 	}
 	size_t total_bytes_read = 0;
 	while (total_bytes_read < GOOMBA_COLOR_SRAM_SIZE) {
-		size_t bytes_read = fread(loaded_data, 1, GOOMBA_COLOR_SRAM_SIZE-total_bytes_read, f);
+		size_t bytes_read = fread(loaded_sram, 1, GOOMBA_COLOR_SRAM_SIZE-total_bytes_read, f);
 		total_bytes_read += bytes_read;
 		if (bytes_read <= 0) {
 			error_msg("Could only read %lu bytes from %s", (unsigned long)total_bytes_read, path);
@@ -124,13 +124,13 @@ static void open_click(GtkWidget* widget, gpointer data) {
 		gtk_widget_destroy(dialog);
 	}
 
-	char* cleaned = goomba_cleanup(loaded_data);
+	char* cleaned = goomba_cleanup(loaded_sram);
 	if (cleaned == NULL) {
 		// this should not happen
 		error_msg(goomba_last_error());
 		g_free(path);
 		return;
-	} else if (cleaned != loaded_data) {
+	} else if (cleaned != loaded_sram) {
 		GtkWidget* dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_NONE,
 			"Uncompressed SRAM found at 0xE000. Would you like to move and compress it to the proper location? (Doing this is required to extract or replace the save data.)");
 		gtk_dialog_add_button(GTK_DIALOG(dialog), "Cancel", GTK_RESPONSE_CANCEL);
@@ -140,7 +140,7 @@ static void open_click(GtkWidget* widget, gpointer data) {
 		gint res = gtk_dialog_run(GTK_DIALOG(dialog));
 		gtk_widget_destroy(dialog);
 		if (res == GTK_RESPONSE_YES) {
-			memcpy(loaded_data, cleaned, GOOMBA_COLOR_SRAM_SIZE);
+			memcpy(loaded_sram, cleaned, GOOMBA_COLOR_SRAM_SIZE);
 			dirty = true;
 		}
 		free(cleaned);
@@ -164,7 +164,7 @@ static void open_click(GtkWidget* widget, gpointer data) {
 	if (headers != NULL) {
 		free(headers);
 	}
-	headers = stateheader_scan(loaded_data);
+	headers = stateheader_scan(loaded_sram);
 	int i;
 	for (i = 0; headers[i] != NULL; i++) {
 		gtk_list_store_append(listStore, &iter);
@@ -174,14 +174,11 @@ static void open_click(GtkWidget* widget, gpointer data) {
 }
 
 static void export_click(GtkWidget* widget, gpointer data) {
-	if (_filePath != NULL) {
-		note_msg("%s\n", _filePath);
-	}
 	GtkTreeIter iter;
-	stateheader* ptr;
-	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(gtk_tree_view_get_selection(GTK_TREE_VIEW(data))), NULL, &iter)) {
-		gtk_tree_model_get(GTK_TREE_MODEL(listStore), &iter, 1, &ptr, -1);
-		note_msg("%s\n", stateheader_summary_str(ptr));
+	stateheader* sh;
+	if (_filePath != NULL && gtk_tree_selection_get_selected(GTK_TREE_SELECTION(data), NULL, &iter)) {
+		gtk_tree_model_get(GTK_TREE_MODEL(listStore), &iter, 1, &sh, -1);
+		note_msg("%s\n", stateheader_summary_str(sh));
 	}
 }
 
@@ -329,7 +326,7 @@ GtkWidget* build_window() {
 	gtk_widget_set_size_request(btnExport, 80, -1);
 	gtk_box_pack_start(GTK_BOX(button_hbox), btnExport, FALSE, FALSE, 0);
 	gtk_widget_show(btnExport);
-	g_signal_connect(btnExport, "clicked", G_CALLBACK(export_click), treeView);
+	g_signal_connect(btnExport, "clicked", G_CALLBACK(export_click), selection);
 
 	// show things
 	gtk_widget_show(vbox2);
