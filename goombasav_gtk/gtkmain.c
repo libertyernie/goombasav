@@ -16,7 +16,9 @@ static char* _filePath = NULL;
 static bool dirty;
 static stateheader** headers = NULL;
 
+static GtkWidget* window;
 static GtkListStore* listStore;
+static GtkTreeSelection* selection;
 static GtkWidget* normal_rows[5];
 static GtkWidget* cfg_rows[5]; // some hboxes will be in both arrays
 
@@ -92,7 +94,7 @@ static void update_titlebar(GtkWindow* window) {
 }
 
 static void open_click(GtkWidget* widget, gpointer data) {
-	GtkWidget* dialog = gtk_file_chooser_dialog_new("Open", GTK_WINDOW(data), GTK_FILE_CHOOSER_ACTION_OPEN, "Cancel", GTK_RESPONSE_CANCEL, "Open", GTK_RESPONSE_ACCEPT, NULL);
+	GtkWidget* dialog = gtk_file_chooser_dialog_new("Open", GTK_WINDOW(window), GTK_FILE_CHOOSER_ACTION_OPEN, "Cancel", GTK_RESPONSE_CANCEL, "Open", GTK_RESPONSE_ACCEPT, NULL);
 	gint res = gtk_dialog_run(GTK_DIALOG(dialog));
 	if (res != GTK_RESPONSE_ACCEPT) return;
 
@@ -157,7 +159,7 @@ static void open_click(GtkWidget* widget, gpointer data) {
 	strcpy(_filePath, path);
 	g_free(path);
 
-	update_titlebar(GTK_WINDOW(data));
+	update_titlebar(GTK_WINDOW(window));
 
 	gtk_list_store_clear(listStore);
 	GtkTreeIter iter;
@@ -176,9 +178,30 @@ static void open_click(GtkWidget* widget, gpointer data) {
 static void export_click(GtkWidget* widget, gpointer data) {
 	GtkTreeIter iter;
 	stateheader* sh;
-	if (_filePath != NULL && gtk_tree_selection_get_selected(GTK_TREE_SELECTION(data), NULL, &iter)) {
+	if (_filePath != NULL && gtk_tree_selection_get_selected(GTK_TREE_SELECTION(selection), NULL, &iter)) {
 		gtk_tree_model_get(GTK_TREE_MODEL(listStore), &iter, 1, &sh, -1);
-		note_msg("%s\n", stateheader_summary_str(sh));
+		goomba_size_t len;
+		void* gbcsav = goomba_extract(loaded_sram, sh, &len);
+		if (gbcsav == NULL) {
+			error_msg("Error: %s", goomba_last_error());
+			return;
+		}
+
+		GtkWidget* dialog = gtk_file_chooser_dialog_new("Export", GTK_WINDOW(window), GTK_FILE_CHOOSER_ACTION_SAVE, "Cancel", GTK_RESPONSE_CANCEL, "Open", GTK_RESPONSE_ACCEPT, NULL);
+		gint res = gtk_dialog_run(GTK_DIALOG(dialog));
+
+		if (res == GTK_RESPONSE_ACCEPT) {
+			char* path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+			FILE* outfile = fopen(path, "wb");
+			if (outfile == NULL) {
+				error_msg("Could not open file: %s", strerror(errno));
+			} else {
+				fwrite(gbcsav, 1, len, outfile);
+				fclose(outfile);
+			}
+		}
+		gtk_widget_destroy(dialog);
+		free(gbcsav);
 	}
 }
 
@@ -245,7 +268,7 @@ static void destroy(GtkWidget* widget, gpointer data) {
 }
 
 GtkWidget* build_window() {
-	GtkWidget* window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_widget_show(window);
 
 	g_signal_connect(window, "delete-event", G_CALLBACK(delete_event), NULL);
@@ -263,7 +286,7 @@ GtkWidget* build_window() {
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(file_item), file_menu);
 	GtkWidget* open_item = gtk_menu_item_new_with_label("Open");
 	gtk_menu_shell_append(GTK_MENU_SHELL(file_menu), open_item);
-	g_signal_connect(open_item, "activate", G_CALLBACK(open_click), window);
+	g_signal_connect(open_item, "activate", G_CALLBACK(open_click), NULL);
 
 	gtk_box_pack_start(GTK_BOX(vbox1), menubar, FALSE, FALSE, 0);
 	gtk_widget_show_all(menubar);
@@ -281,7 +304,7 @@ GtkWidget* build_window() {
 	gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(treeView), FALSE);
 	gtk_tree_view_set_model(GTK_TREE_VIEW(treeView), GTK_TREE_MODEL(listStore));
 
-	GtkTreeSelection* selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeView));
+	selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeView));
 	g_signal_connect(selection, "changed", G_CALLBACK(selection_changed), NULL);
 
 	// add list to hbox1
@@ -326,7 +349,7 @@ GtkWidget* build_window() {
 	gtk_widget_set_size_request(btnExport, 80, -1);
 	gtk_box_pack_start(GTK_BOX(button_hbox), btnExport, FALSE, FALSE, 0);
 	gtk_widget_show(btnExport);
-	g_signal_connect(btnExport, "clicked", G_CALLBACK(export_click), selection);
+	g_signal_connect(btnExport, "clicked", G_CALLBACK(export_click), NULL);
 
 	// show things
 	gtk_widget_show(vbox2);
