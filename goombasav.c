@@ -117,7 +117,13 @@ stateheader** stateheader_scan(const void* gba_data) {
 	return headers;
 }
 
-int32_t goomba_get_configdata_checksum_field(const void* gba_data) {
+/**
+ * Returns the 32-bit checksum (unsigned) in the configdata header, or -1 if
+ * stateheader_scan returns NULL due to an error. When using this function,
+ * first check if the value is less than 0, then (if not) cast to uint32_t.
+ */
+int64_t goomba_get_configdata_checksum_field(const void* gba_data) {
+	// todo fix
 	stateheader** headers = stateheader_scan(gba_data);
 	if (headers == NULL) return -1;
 
@@ -195,7 +201,7 @@ void* goomba_extract(const void* gba_data, const stateheader* header_ptr, goomba
 		return NULL;
 	}
 
-	const int32_t ck = goomba_get_configdata_checksum_field(gba_data);
+	const int64_t ck = goomba_get_configdata_checksum_field(gba_data);
 	if (ck < 0) {
 		return NULL;
 	} else if (ck == sh->checksum) {
@@ -250,7 +256,7 @@ char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* g
 	unsigned char* gba_header_ptr = (unsigned char*)gba_header;
 	stateheader* sh = (stateheader*)gba_header_ptr;
 
-	int32_t ck = goomba_get_configdata_checksum_field(gba_data);
+	int64_t ck = goomba_get_configdata_checksum_field(gba_data);
 	if (ck < 0) {
 		return NULL;
 	} else if (ck == sh->checksum) {
