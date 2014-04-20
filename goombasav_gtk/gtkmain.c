@@ -22,6 +22,9 @@ static GtkTreeSelection* selection;
 static GtkWidget* normal_rows[5];
 static GtkWidget* cfg_rows[5]; // some hboxes will be in both arrays
 
+static GtkWidget* open_item;
+static GtkWidget* save_item;
+
 static GtkWidget* lblSize;
 static GtkWidget* lblType;
 static GtkWidget* lblUncompSize;
@@ -91,6 +94,28 @@ static void update_titlebar(GtkWindow* window) {
 	sprintf(buf, "%s - %s", TITLE, filename);
 	gtk_window_set_title(window, buf);
 	free(buf);
+}
+
+static void save(const char* path) {
+	FILE* f = fopen(path, "wb");
+	if (f == NULL) {
+		error_msg("Could not open file: %s", strerror(errno));
+		return;
+	}
+	fwrite(loaded_sram, 1, GOOMBA_COLOR_SRAM_SIZE, f);
+	fclose(f);
+	if (path != _filePath) {
+		g_free(_filePath);
+		_filePath = (char*)g_malloc(strlen(path) + 1);
+		strcpy(_filePath, path);
+	}
+	dirty = false;
+}
+
+// Update status of Save and Save As items whenever File menu is opened
+static void file_click(GtkWidget* widget, gpointer data) {
+	gtk_widget_set_sensitive(save_item, (_filePath != nullptr && dirty));
+	//gtk_widget_set_sensitive(save_as_item, (_filePath != nullptr));
 }
 
 static void open_click(GtkWidget* widget, gpointer data) {
@@ -175,6 +200,10 @@ static void open_click(GtkWidget* widget, gpointer data) {
 	set_all_labels();
 }
 
+static void save_click(GtkWidget* widget, gpointer data) {
+	save(_filePath);
+}
+
 static void export_click(GtkWidget* widget, gpointer data) {
 	GtkTreeIter iter;
 	stateheader* sh;
@@ -183,7 +212,7 @@ static void export_click(GtkWidget* widget, gpointer data) {
 		goomba_size_t len;
 		void* gbcsav = goomba_extract(loaded_sram, sh, &len);
 		if (gbcsav == NULL) {
-			error_msg("Error: %s", goomba_last_error());
+			error_msg("%s", goomba_last_error());
 			return;
 		}
 
@@ -281,12 +310,16 @@ GtkWidget* build_window() {
 	GtkWidget* menubar = gtk_menu_bar_new();
 	GtkWidget* file_item = gtk_menu_item_new_with_label("File");
 	gtk_menu_shell_append(GTK_MENU_SHELL(menubar), file_item);
+	g_signal_connect(file_item, "activate", G_CALLBACK(file_click), NULL);
 
 	GtkWidget* file_menu = gtk_menu_new();
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(file_item), file_menu);
-	GtkWidget* open_item = gtk_menu_item_new_with_label("Open");
+	open_item = gtk_menu_item_new_with_label("Open");
 	gtk_menu_shell_append(GTK_MENU_SHELL(file_menu), open_item);
 	g_signal_connect(open_item, "activate", G_CALLBACK(open_click), NULL);
+	save_item = gtk_menu_item_new_with_label("Save");
+	gtk_menu_shell_append(GTK_MENU_SHELL(file_menu), save_item);
+	g_signal_connect(save_item, "activate", G_CALLBACK(save_click), NULL);
 
 	gtk_box_pack_start(GTK_BOX(vbox1), menubar, FALSE, FALSE, 0);
 	gtk_widget_show_all(menubar);
