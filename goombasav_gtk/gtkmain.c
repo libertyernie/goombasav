@@ -118,11 +118,11 @@ static void save(const char* path) {
 // Update status of Save and Save As items whenever File menu is opened
 static void file_click(GtkWidget* widget, gpointer data) {
 	gtk_widget_set_sensitive(save_item, (_filePath != nullptr && dirty));
-	//gtk_widget_set_sensitive(save_as_item, (_filePath != nullptr));
+	gtk_widget_set_sensitive(save_as_item, (_filePath != nullptr));
 }
 
 static void open_click(GtkWidget* widget, gpointer data) {
-	GtkWidget* dialog = gtk_file_chooser_dialog_new("Open", GTK_WINDOW(window), GTK_FILE_CHOOSER_ACTION_OPEN, "Cancel", GTK_RESPONSE_CANCEL, "Open", GTK_RESPONSE_ACCEPT, NULL);
+	GtkWidget* dialog = gtk_file_chooser_dialog_new("Open", GTK_WINDOW(window), GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
 	gint res = gtk_dialog_run(GTK_DIALOG(dialog));
 	if (res != GTK_RESPONSE_ACCEPT) return;
 
@@ -208,7 +208,7 @@ static void save_click(GtkWidget* widget, gpointer data) {
 }
 
 static void save_as_click(GtkWidget* widget, gpointer data) {
-	GtkWidget* dialog = gtk_file_chooser_dialog_new("Save As", GTK_WINDOW(window), GTK_FILE_CHOOSER_ACTION_SAVE, "Cancel", GTK_RESPONSE_CANCEL, "Save", GTK_RESPONSE_ACCEPT, NULL);
+	GtkWidget* dialog = gtk_file_chooser_dialog_new("Save As", GTK_WINDOW(window), GTK_FILE_CHOOSER_ACTION_SAVE, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, NULL);
 	gint res = gtk_dialog_run(GTK_DIALOG(dialog));
 
 	if (res == GTK_RESPONSE_ACCEPT) {
@@ -231,7 +231,7 @@ static void export_click(GtkWidget* widget, gpointer data) {
 			return;
 		}
 
-		GtkWidget* dialog = gtk_file_chooser_dialog_new("Export", GTK_WINDOW(window), GTK_FILE_CHOOSER_ACTION_SAVE, "Cancel", GTK_RESPONSE_CANCEL, "Export", GTK_RESPONSE_ACCEPT, NULL);
+		GtkWidget* dialog = gtk_file_chooser_dialog_new("Export", GTK_WINDOW(window), GTK_FILE_CHOOSER_ACTION_SAVE, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, NULL);
 		gint res = gtk_dialog_run(GTK_DIALOG(dialog));
 
 		if (res == GTK_RESPONSE_ACCEPT) {
