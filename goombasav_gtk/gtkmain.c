@@ -25,6 +25,7 @@ static GtkWidget* cfg_rows[5]; // some hboxes will be in both arrays
 
 static GtkWidget* open_item;
 static GtkWidget* save_item;
+static GtkWidget* save_as_item;
 
 static GtkWidget* lblSize;
 static GtkWidget* lblType;
@@ -109,6 +110,7 @@ static void save(const char* path) {
 		g_free(_filePath);
 		_filePath = (char*)g_malloc(strlen(path) + 1);
 		strcpy(_filePath, path);
+		update_titlebar(GTK_WINDOW(window));
 	}
 	dirty = false;
 }
@@ -205,6 +207,18 @@ static void save_click(GtkWidget* widget, gpointer data) {
 	save(_filePath);
 }
 
+static void save_as_click(GtkWidget* widget, gpointer data) {
+	GtkWidget* dialog = gtk_file_chooser_dialog_new("Save As", GTK_WINDOW(window), GTK_FILE_CHOOSER_ACTION_SAVE, "Cancel", GTK_RESPONSE_CANCEL, "Save", GTK_RESPONSE_ACCEPT, NULL);
+	gint res = gtk_dialog_run(GTK_DIALOG(dialog));
+
+	if (res == GTK_RESPONSE_ACCEPT) {
+		char* path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+		save(path);
+		g_free(path);
+	}
+	gtk_widget_destroy(dialog);
+}
+
 static void export_click(GtkWidget* widget, gpointer data) {
 	GtkTreeIter iter;
 	stateheader* sh;
@@ -217,7 +231,7 @@ static void export_click(GtkWidget* widget, gpointer data) {
 			return;
 		}
 
-		GtkWidget* dialog = gtk_file_chooser_dialog_new("Export", GTK_WINDOW(window), GTK_FILE_CHOOSER_ACTION_SAVE, "Cancel", GTK_RESPONSE_CANCEL, "Open", GTK_RESPONSE_ACCEPT, NULL);
+		GtkWidget* dialog = gtk_file_chooser_dialog_new("Export", GTK_WINDOW(window), GTK_FILE_CHOOSER_ACTION_SAVE, "Cancel", GTK_RESPONSE_CANCEL, "Export", GTK_RESPONSE_ACCEPT, NULL);
 		gint res = gtk_dialog_run(GTK_DIALOG(dialog));
 
 		if (res == GTK_RESPONSE_ACCEPT) {
@@ -229,6 +243,7 @@ static void export_click(GtkWidget* widget, gpointer data) {
 				fwrite(gbcsav, 1, len, outfile);
 				fclose(outfile);
 			}
+			g_free(path);
 		}
 		gtk_widget_destroy(dialog);
 		free(gbcsav);
@@ -297,6 +312,30 @@ static void destroy(GtkWidget* widget, gpointer data) {
     gtk_main_quit();
 }
 
+GtkWidget* make_menu_item(const char* label, GtkMenuShell* add_to, GCallback callback) {
+	GtkWidget* w = gtk_menu_item_new_with_label(label);
+	gtk_menu_shell_append(add_to, w);
+	g_signal_connect(w, "activate", callback, NULL);
+	return w;
+}
+
+GtkWidget* build_menubar() {
+	GtkWidget* menubar = gtk_menu_bar_new();
+	GtkWidget* file_item = gtk_menu_item_new_with_label("File");
+	gtk_menu_shell_append(GTK_MENU_SHELL(menubar), file_item);
+	g_signal_connect(file_item, "activate", G_CALLBACK(file_click), NULL);
+
+	GtkWidget* file_menu = gtk_menu_new();
+	gtk_menu_item_set_submenu(GTK_MENU_ITEM(file_item), file_menu);
+
+	open_item = make_menu_item("Open", GTK_MENU_SHELL(file_menu), G_CALLBACK(open_click));
+	save_item = make_menu_item("Save", GTK_MENU_SHELL(file_menu), G_CALLBACK(save_click));
+	save_as_item = make_menu_item("Save As...", GTK_MENU_SHELL(file_menu), G_CALLBACK(save_as_click));
+
+	gtk_widget_show_all(menubar);
+	return menubar;
+}
+
 GtkWidget* build_window() {
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_widget_show(window);
@@ -308,22 +347,8 @@ GtkWidget* build_window() {
 	gtk_container_add(GTK_CONTAINER(window), vbox1);
 
 	// construct menubar
-	GtkWidget* menubar = gtk_menu_bar_new();
-	GtkWidget* file_item = gtk_menu_item_new_with_label("File");
-	gtk_menu_shell_append(GTK_MENU_SHELL(menubar), file_item);
-	g_signal_connect(file_item, "activate", G_CALLBACK(file_click), NULL);
-
-	GtkWidget* file_menu = gtk_menu_new();
-	gtk_menu_item_set_submenu(GTK_MENU_ITEM(file_item), file_menu);
-	open_item = gtk_menu_item_new_with_label("Open");
-	gtk_menu_shell_append(GTK_MENU_SHELL(file_menu), open_item);
-	g_signal_connect(open_item, "activate", G_CALLBACK(open_click), NULL);
-	save_item = gtk_menu_item_new_with_label("Save");
-	gtk_menu_shell_append(GTK_MENU_SHELL(file_menu), save_item);
-	g_signal_connect(save_item, "activate", G_CALLBACK(save_click), NULL);
-
+	GtkWidget* menubar = build_menubar();
 	gtk_box_pack_start(GTK_BOX(vbox1), menubar, FALSE, FALSE, 0);
-	gtk_widget_show_all(menubar);
 
 	// construct/add top container, with list box and one other element
 	GtkWidget* hbox1 = gtk_hbox_new(FALSE, 0);
