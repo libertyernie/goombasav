@@ -30,7 +30,6 @@ static GtkTreeSelection* selection;
 static GtkWidget* normal_rows[5];
 static GtkWidget* cfg_rows[5]; // some hboxes will be in both arrays
 
-static GtkWidget* open_item;
 static GtkWidget* save_item;
 static GtkWidget* save_as_item;
 
@@ -395,6 +394,10 @@ static gboolean delete_event(GtkWidget* widget, GdkEvent* event, gpointer data) 
 static void destroy(GtkWidget* widget, gpointer data) {
     gtk_main_quit();
 }
+
+static void exit_click(GtkWidget* widget, gpointer data) {
+	if (!delete_event(window, NULL, NULL)) gtk_widget_destroy(window);
+}
 #pragma endregion
 
 GtkWidget* make_menu_item(const char* label, GtkMenuShell* add_to, GCallback callback) {
@@ -413,9 +416,14 @@ GtkWidget* build_menubar() {
 	GtkWidget* file_menu = gtk_menu_new();
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(file_item), file_menu);
 
-	open_item = make_menu_item("Open", GTK_MENU_SHELL(file_menu), G_CALLBACK(open_click));
+	GtkWidget* open_item = make_menu_item("Open", GTK_MENU_SHELL(file_menu), G_CALLBACK(open_click));
 	save_item = make_menu_item("Save", GTK_MENU_SHELL(file_menu), G_CALLBACK(save_click));
 	save_as_item = make_menu_item("Save As...", GTK_MENU_SHELL(file_menu), G_CALLBACK(save_as_click));
+
+	GtkWidget* sep = gtk_separator_menu_item_new();
+	gtk_menu_shell_append(GTK_MENU_SHELL(file_menu), sep);
+
+	GtkWidget* exit_item = make_menu_item("Close", GTK_MENU_SHELL(file_menu), G_CALLBACK(exit_click));
 
 	gtk_widget_show_all(menubar);
 	return menubar;
