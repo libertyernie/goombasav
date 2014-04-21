@@ -12,6 +12,12 @@ const char* TITLE = "Goomba Save Manager";
 const char* const sleeptxt[] = { "5min", "10min", "30min", "OFF" };
 const char* const brightxt[] = { "I", "II", "III", "IIII", "IIIII" };
 
+const char* goomba_basename(const char* c) {
+	const char* i1 = strrchr(c, '/') + 1;
+	const char* i2 = strrchr(c, '\\') + 1;
+	return i1 > i2 ? i1 : i2;
+}
+
 #pragma region window-level variables
 static char loaded_sram[GOOMBA_COLOR_SRAM_SIZE];
 static char* _filePath = NULL;
@@ -92,9 +98,7 @@ static void update_titlebar(GtkWindow* window) {
 		gtk_window_set_title(window, TITLE);
 		return;
 	}
-	char* i1 = strrchr(_filePath, '/') + 1;
-	char* i2 = strrchr(_filePath, '\\') + 1;
-	char* filename = i1 > i2 ? i1 : i2;
+	const char* filename = goomba_basename(_filePath);
 	char* buf = (char*)malloc(strlen(TITLE) + 3 + strlen(filename) + 1);
 	sprintf(buf, "%s - %s", TITLE, filename);
 	gtk_window_set_title(window, buf);
@@ -370,7 +374,22 @@ static void selection_changed(GtkWidget* widget, gpointer data) {
 }
 
 static gboolean delete_event(GtkWidget* widget, GdkEvent* event, gpointer data) {
-    return FALSE;
+	if (_filePath != NULL && dirty) {
+		GtkWidget* dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_NONE,
+			"Save changes to %s?", goomba_basename(_filePath));
+		gtk_dialog_add_button(GTK_DIALOG(dialog), "Close without Saving", GTK_RESPONSE_NO);
+		gtk_dialog_add_button(GTK_DIALOG(dialog), "Cancel", GTK_RESPONSE_CANCEL);
+		gtk_dialog_add_button(GTK_DIALOG(dialog), "Save", GTK_RESPONSE_YES);
+		gtk_dialog_set_default_response(GTK_DIALOG(dialog), GTK_RESPONSE_YES);
+		gint res = gtk_dialog_run(GTK_DIALOG(dialog));
+		gtk_widget_destroy(dialog);
+		if (res == GTK_RESPONSE_YES) {
+			save(_filePath);
+		} else if (res == GTK_RESPONSE_CANCEL) {
+			return TRUE;
+		}
+	}
+	return FALSE;
 }
 
 static void destroy(GtkWidget* widget, gpointer data) {
