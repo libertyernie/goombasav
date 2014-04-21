@@ -12,6 +12,7 @@ const char* TITLE = "Goomba Save Manager";
 const char* const sleeptxt[] = { "5min", "10min", "30min", "OFF" };
 const char* const brightxt[] = { "I", "II", "III", "IIII", "IIIII" };
 
+#pragma region window-level variables
 static char loaded_sram[GOOMBA_COLOR_SRAM_SIZE];
 static char* _filePath = NULL;
 static bool dirty;
@@ -38,6 +39,7 @@ static GtkWidget* lblGamma;
 static GtkWidget* lblAutostate;
 static GtkWidget* lblChecksum;
 static GtkWidget* lblTitle;
+#pragma endregion
 
 static void show_standard_rows() {
 	for (int i=0; i<5; i++) {
@@ -115,6 +117,7 @@ static void save(const char* path) {
 	dirty = false;
 }
 
+#pragma region event handlers
 // Update status of Save and Save As items whenever File menu is opened
 static void file_click(GtkWidget* widget, gpointer data) {
 	gtk_widget_set_sensitive(save_item, (_filePath != nullptr && dirty));
@@ -250,6 +253,10 @@ static void export_click(GtkWidget* widget, gpointer data) {
 	}
 }
 
+static void replace_click(GtkWidget* widget, gpointer data) {
+
+}
+
 static void selection_changed(GtkWidget* widget, gpointer data) {
 	GtkTreeIter iter;
 	stateheader* ptr;
@@ -311,6 +318,7 @@ static gboolean delete_event(GtkWidget* widget, GdkEvent* event, gpointer data) 
 static void destroy(GtkWidget* widget, gpointer data) {
     gtk_main_quit();
 }
+#pragma endregion
 
 GtkWidget* make_menu_item(const char* label, GtkMenuShell* add_to, GCallback callback) {
 	GtkWidget* w = gtk_menu_item_new_with_label(label);
@@ -404,6 +412,7 @@ GtkWidget* build_window() {
 	gtk_widget_set_size_request(btnReplace, 80, -1);
 	gtk_box_pack_start(GTK_BOX(button_hbox), btnReplace, FALSE, FALSE, 0);
 	gtk_widget_show(btnReplace);
+	g_signal_connect(btnReplace, "clicked", G_CALLBACK(replace_click), NULL);
 	GtkWidget* btnExport = gtk_button_new_with_label("Export");
 	gtk_widget_set_size_request(btnExport, 80, -1);
 	gtk_box_pack_start(GTK_BOX(button_hbox), btnExport, FALSE, FALSE, 0);
