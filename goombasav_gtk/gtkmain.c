@@ -41,6 +41,7 @@ static GtkWidget* lblChecksum;
 static GtkWidget* lblTitle;
 #pragma endregion
 
+#pragma region gtk helper functions
 static void show_standard_rows() {
 	for (int i=0; i<5; i++) {
 		gtk_widget_hide(cfg_rows[i]);
@@ -100,6 +101,23 @@ static void update_titlebar(GtkWindow* window) {
 	free(buf);
 }
 
+static void header_scan() {
+	gtk_list_store_clear(listStore);
+	GtkTreeIter iter;
+	if (headers != NULL) {
+		free(headers);
+	}
+	headers = stateheader_scan(loaded_sram);
+	int i;
+	for (i = 0; headers[i] != NULL; i++) {
+		gtk_list_store_append(listStore, &iter);
+		gtk_list_store_set(listStore, &iter, 0, stateheader_summary_str(headers[i]), 1, headers[i], -1);
+	}
+	set_all_labels();
+}
+#pragma endregion
+
+#pragma region event handlers
 static void save(const char* path) {
 	FILE* f = fopen(path, "wb");
 	if (f == NULL) {
@@ -117,7 +135,6 @@ static void save(const char* path) {
 	dirty = false;
 }
 
-#pragma region event handlers
 // Update status of Save and Save As items whenever File menu is opened
 static void file_click(GtkWidget* widget, gpointer data) {
 	gtk_widget_set_sensitive(save_item, (_filePath != nullptr && dirty));
@@ -127,7 +144,10 @@ static void file_click(GtkWidget* widget, gpointer data) {
 static void open_click(GtkWidget* widget, gpointer data) {
 	GtkWidget* dialog = gtk_file_chooser_dialog_new("Open", GTK_WINDOW(window), GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
 	gint res = gtk_dialog_run(GTK_DIALOG(dialog));
-	if (res != GTK_RESPONSE_ACCEPT) return;
+	if (res != GTK_RESPONSE_ACCEPT) {
+		gtk_widget_destroy(dialog);
+		return;
+	}
 
 	char* path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
 	FILE* f = fopen(path, "rb");
@@ -192,18 +212,7 @@ static void open_click(GtkWidget* widget, gpointer data) {
 
 	update_titlebar(GTK_WINDOW(window));
 
-	gtk_list_store_clear(listStore);
-	GtkTreeIter iter;
-	if (headers != NULL) {
-		free(headers);
-	}
-	headers = stateheader_scan(loaded_sram);
-	int i;
-	for (i = 0; headers[i] != NULL; i++) {
-		gtk_list_store_append(listStore, &iter);
-		gtk_list_store_set(listStore, &iter, 0, stateheader_summary_str(headers[i]), 1, headers[i], -1);
-	}
-	set_all_labels();
+	header_scan();
 }
 
 static void save_click(GtkWidget* widget, gpointer data) {
@@ -254,7 +263,56 @@ static void export_click(GtkWidget* widget, gpointer data) {
 }
 
 static void replace_click(GtkWidget* widget, gpointer data) {
+	GtkTreeIter iter;
+	stateheader* sh;
+	if (_filePath != NULL && gtk_tree_selection_get_selected(GTK_TREE_SELECTION(selection), NULL, &iter)) {
+		gtk_tree_model_get(GTK_TREE_MODEL(listStore), &iter, 1, &sh, -1);
 
+		GtkWidget* dialog = gtk_file_chooser_dialog_new("Replace", GTK_WINDOW(window), GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+		gint res = gtk_dialog_run(GTK_DIALOG(dialog));
+		if (res != GTK_RESPONSE_ACCEPT) {
+			gtk_widget_destroy(dialog);
+			return;
+		}
+
+		char* path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+		FILE* f = fopen(path, "rb");
+		gtk_widget_destroy(dialog);
+
+		fseek(f, 0, SEEK_END);
+		size_t len = ftell(f);
+		if (len > 65536) len = 65536; // prevent using too much memory on opening big file by accident
+		char* gbc_data = (char*)malloc(len);
+		fseek(f, 0, SEEK_SET);
+		size_t total_bytes_read = 0;
+		while (total_bytes_read < len) {
+			size_t bytes_read = fread(gbc_data, 1, len - total_bytes_read, f);
+			total_bytes_read += bytes_read;
+			if (bytes_read <= 0) {
+				error_msg("Could only read %lu bytes from %s", (unsigned long)total_bytes_read, path); 
+				free(gbc_data);
+				g_free(path);
+				fclose(f);
+				return;
+			}
+		}
+
+		g_free(path);
+		fclose(f);
+
+		// only first X bytes will be used, where X is uncompressed size of current data
+		void* new_data = goomba_new_sav(loaded_sram, sh, gbc_data, len);
+		free(gbc_data);
+		if (new_data == NULL) {
+			error_msg(goomba_last_error());
+		} else {
+			memcpy(loaded_sram, new_data, GOOMBA_COLOR_SRAM_SIZE);
+			dirty = true;
+			free(new_data);
+
+			header_scan();
+		}
+	}
 }
 
 static void selection_changed(GtkWidget* widget, gpointer data) {
