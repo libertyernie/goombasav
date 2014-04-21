@@ -140,8 +140,8 @@ static void save(const char* path) {
 
 // Update status of Save and Save As items whenever File menu is opened
 static void file_click(GtkWidget* widget, gpointer data) {
-	gtk_widget_set_sensitive(save_item, (_filePath != nullptr && dirty));
-	gtk_widget_set_sensitive(save_as_item, (_filePath != nullptr));
+	gtk_widget_set_sensitive(save_item, (_filePath != NULL && dirty));
+	gtk_widget_set_sensitive(save_as_item, (_filePath != NULL));
 }
 
 static void open_click(GtkWidget* widget, gpointer data) {
