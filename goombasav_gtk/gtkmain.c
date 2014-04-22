@@ -144,25 +144,15 @@ static void file_click(GtkWidget* widget, gpointer data) {
 	gtk_widget_set_sensitive(save_as_item, (_filePath != NULL));
 }
 
-static void open_click(GtkWidget* widget, gpointer data) {
-	GtkWidget* dialog = gtk_file_chooser_dialog_new("Open", GTK_WINDOW(window), GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
-	gint res = gtk_dialog_run(GTK_DIALOG(dialog));
-	if (res != GTK_RESPONSE_ACCEPT) {
-		gtk_widget_destroy(dialog);
-		return;
-	}
-
-	char* path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+static void load(const char* path) {
 	FILE* f = fopen(path, "rb");
-	gtk_widget_destroy(dialog);
-
 	if (f == NULL) {
 		error_msg("Could not open file %s", path);
 		return;
 	}
 	size_t total_bytes_read = 0;
 	while (total_bytes_read < GOOMBA_COLOR_SRAM_SIZE) {
-		size_t bytes_read = fread(loaded_sram, 1, GOOMBA_COLOR_SRAM_SIZE-total_bytes_read, f);
+		size_t bytes_read = fread(loaded_sram, 1, GOOMBA_COLOR_SRAM_SIZE - total_bytes_read, f);
 		total_bytes_read += bytes_read;
 		if (bytes_read <= 0) {
 			error_msg("Could only read %lu bytes from %s", (unsigned long)total_bytes_read, path);
@@ -184,7 +174,6 @@ static void open_click(GtkWidget* widget, gpointer data) {
 	if (cleaned == NULL) {
 		// this should not happen
 		error_msg(goomba_last_error());
-		g_free(path);
 		return;
 	} else if (cleaned != loaded_sram) {
 		GtkWidget* dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_NONE,
@@ -201,7 +190,6 @@ static void open_click(GtkWidget* widget, gpointer data) {
 		}
 		free(cleaned);
 		if (res == GTK_RESPONSE_CANCEL) {
-			g_free(path);
 			return;
 		}
 	} else {
@@ -211,11 +199,24 @@ static void open_click(GtkWidget* widget, gpointer data) {
 	if (_filePath != NULL) free(_filePath);
 	_filePath = (char*)malloc(strlen(path) + 1);
 	strcpy(_filePath, path);
-	g_free(path);
 
 	update_titlebar(GTK_WINDOW(window));
 
 	header_scan();
+}
+
+static void open_click(GtkWidget* widget, gpointer data) {
+	GtkWidget* dialog = gtk_file_chooser_dialog_new("Open", GTK_WINDOW(window), GTK_FILE_CHOOSER_ACTION_OPEN, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+	gint res = gtk_dialog_run(GTK_DIALOG(dialog));
+	if (res != GTK_RESPONSE_ACCEPT) {
+		gtk_widget_destroy(dialog);
+		return;
+	}
+
+	char* path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+	gtk_widget_destroy(dialog);
+	load(path);
+	g_free(path);
 }
 
 static void save_click(GtkWidget* widget, gpointer data) {
@@ -371,7 +372,9 @@ static void selection_changed(GtkWidget* widget, gpointer data) {
 		}
 	}
 }
+#pragma endregion
 
+#pragma region window closing
 static gboolean delete_event(GtkWidget* widget, GdkEvent* event, gpointer data) {
 	if (_filePath != NULL && dirty) {
 		GtkWidget* dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_NONE,
@@ -521,6 +524,10 @@ int main(int argc, char **argv) {
 
 	update_titlebar(GTK_WINDOW(window));
 	show_standard_rows();
+
+	if (argc >= 2) {
+		load(argv[1]);
+	}
 
 	gtk_main();
 
