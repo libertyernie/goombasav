@@ -32,6 +32,8 @@ static GtkWidget* cfg_rows[5]; // some hboxes will be in both arrays
 
 static GtkWidget* save_item;
 static GtkWidget* save_as_item;
+static GtkWidget* btnExport;
+static GtkWidget* btnReplace;
 
 static GtkWidget* lblSize;
 static GtkWidget* lblType;
@@ -339,6 +341,9 @@ static void selection_changed(GtkWidget* widget, gpointer data) {
 		sprintf(buf, "Title: %.32s", ptr->title);
 		gtk_label_set_text(GTK_LABEL(lblTitle), buf);
 
+		gtk_widget_set_sensitive(btnExport, ptr->type == GOOMBA_SRAMSAVE);
+		gtk_widget_set_sensitive(btnReplace, ptr->type == GOOMBA_SRAMSAVE);
+
 		if (ptr->type == GOOMBA_CONFIGSAVE) {
 			show_configuration_rows();
 
@@ -496,12 +501,12 @@ GtkWidget* build_window() {
 	gtk_box_pack_end(GTK_BOX(vbox2), button_hbox, FALSE, FALSE, 0);
 	gtk_widget_show(button_hbox);
 
-	GtkWidget* btnReplace = gtk_button_new_with_label("Replace");
+	btnReplace = gtk_button_new_with_label("Replace");
 	gtk_widget_set_size_request(btnReplace, 80, -1);
 	gtk_box_pack_start(GTK_BOX(button_hbox), btnReplace, FALSE, FALSE, 0);
 	gtk_widget_show(btnReplace);
 	g_signal_connect(btnReplace, "clicked", G_CALLBACK(replace_click), NULL);
-	GtkWidget* btnExport = gtk_button_new_with_label("Export");
+	btnExport = gtk_button_new_with_label("Export");
 	gtk_widget_set_size_request(btnExport, 80, -1);
 	gtk_box_pack_start(GTK_BOX(button_hbox), btnExport, FALSE, FALSE, 0);
 	gtk_widget_show(btnExport);
