@@ -1,6 +1,5 @@
 #include <memory.h>
 #include <stdarg.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "goombasav.h"
@@ -19,10 +18,10 @@ const char* goomba_last_error() {
 // Covers every byte. It goes one byte at a time, so it's inefficient
 // output_bytes is limited to 8 at maximum
 uint64_t checksum_slow(const void* ptr, size_t length, int output_bytes) {
-	const unsigned char* p = ptr;
+	const unsigned char* p = (const unsigned char*)ptr;
 	uint64_t sum=0;
 	char* sumptr = (char*)&sum;
-	int j;
+	size_t j;
 	for (j=0;j<length;j++) {
 		int index = j%output_bytes;
 		sumptr[index] += *p;
@@ -259,7 +258,7 @@ void* goomba_extract(const void* gba_data, const stateheader* header_ptr, goomba
 goomba_size_t copy_until_invalid_header(void* dest, const stateheader* src_param) {
 	const void* src = src_param;
 	goomba_size_t bytes_copied = 0;
-	while (true) {
+	while (1) {
 		const stateheader* sh = (const stateheader*)src;
 		if (!stateheader_plausible(sh)) break;
 
