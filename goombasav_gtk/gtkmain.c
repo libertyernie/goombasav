@@ -18,6 +18,23 @@ const char* goomba_basename(const char* c) {
 	return i1 > i2 ? i1 : i2;
 }
 
+const char* GPL_NOTICE = "Goomba Save Manager (GTK frontend)\n"
+"Copyright (C) 2014 libertyernie\n"
+"http://github.com/libertyernie/goombasav\n"
+"\n"
+"This program is free software: you can redistribute it and/or modify\n"
+"it under the terms of the GNU General Public License as published by\n"
+"the Free Software Foundation, either version 3 of the License, or\n"
+"(at your option) any later version.\n"
+"\n"
+"This program is distributed in the hope that it will be useful,\n"
+"but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
+"MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the\n"
+"GNU General Public License for more details.\n"
+"\n"
+"You should have received a copy of the GNU General Public License\n"
+"along with this program. If not, see <http://www.gnu.org/licenses/>.\n";
+
 #pragma region window-level variables
 static char loaded_sram[GOOMBA_COLOR_SRAM_SIZE];
 static char* _filePath = NULL;
@@ -321,6 +338,16 @@ static void replace_click(GtkWidget* widget, gpointer data) {
 	}
 }
 
+static void about_click(GtkWidget* widget, gpointer data) {
+	gtk_show_about_dialog(GTK_WINDOW(window),
+		"copyright", "Copyright (C) 2014 libertyernie",
+		"license", GPL_NOTICE,
+		"program-name", "Goomba Save Manager",
+		"website", "http://github.com/libertyernie/goombasav",
+		"comments", "version 20140424",
+		NULL);
+}
+
 static void selection_changed(GtkWidget* widget, gpointer data) {
 	GtkTreeIter iter;
 	stateheader* ptr;
@@ -417,10 +444,10 @@ GtkWidget* make_menu_item(const char* label, GtkMenuShell* add_to, GCallback cal
 
 GtkWidget* build_menubar() {
 	GtkWidget* menubar = gtk_menu_bar_new();
+
 	GtkWidget* file_item = gtk_menu_item_new_with_label("File");
 	gtk_menu_shell_append(GTK_MENU_SHELL(menubar), file_item);
 	g_signal_connect(file_item, "activate", G_CALLBACK(file_click), NULL);
-
 	GtkWidget* file_menu = gtk_menu_new();
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(file_item), file_menu);
 
@@ -432,6 +459,13 @@ GtkWidget* build_menubar() {
 	gtk_menu_shell_append(GTK_MENU_SHELL(file_menu), sep);
 
 	GtkWidget* exit_item = make_menu_item("Close", GTK_MENU_SHELL(file_menu), G_CALLBACK(exit_click));
+
+	GtkWidget* help_item = gtk_menu_item_new_with_label("Help");
+	gtk_menu_shell_append(GTK_MENU_SHELL(menubar), help_item);
+	GtkWidget* help_menu = gtk_menu_new();
+	gtk_menu_item_set_submenu(GTK_MENU_ITEM(help_item), help_menu);
+
+	GtkWidget* about_item = make_menu_item("About", GTK_MENU_SHELL(help_menu), G_CALLBACK(about_click));
 
 	gtk_widget_show_all(menubar);
 	return menubar;
