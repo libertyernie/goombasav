@@ -39,6 +39,7 @@ const char* stateheader_summary_str(const stateheader* sh);
 int stateheader_plausible(const stateheader* sh);
 stateheader* stateheader_advance(const stateheader* sh);
 stateheader** stateheader_scan(const void* gba_data);
+uint64_t goomba_compressed_data_checksum(const stateheader* sh, int output_bytes);
 char* goomba_cleanup(const void* gba_data_param);
 void* goomba_extract(const void* gba_data, const stateheader* header_ptr, goomba_size_t* size_output);
 char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* gbc_sram, goomba_size_t gbc_length);

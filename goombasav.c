@@ -16,6 +16,21 @@ const char* goomba_last_error() {
 	return (const char*)last_error;
 }
 
+// Covers every byte. It goes one byte at a time, so it's inefficient
+// output_bytes is limited to 8 at maximum
+uint64_t checksum_slow(const void* ptr, size_t length, int output_bytes) {
+	const unsigned char* p = ptr;
+	uint64_t sum=0;
+	char* sumptr = (char*)&sum;
+	int j;
+	for (j=0;j<length;j++) {
+		int index = j%output_bytes;
+		sumptr[index] += *p;
+		p++;
+	}
+	return sum;
+}
+
 const char* stateheader_typestr(uint16_t type) {
 	switch (type) {
 	case GOOMBA_STATESAVE:
@@ -115,6 +130,12 @@ stateheader** stateheader_scan(const void* gba_data) {
 		sh = stateheader_advance(sh);
 	}
 	return headers;
+}
+
+// Uses checksum_slow, and looks at the compressed data (not the header).
+// output_bytes is limited to sizeof(int) at maximum
+uint64_t goomba_compressed_data_checksum(const stateheader* sh, int output_bytes) {
+	return checksum_slow(sh+1, sh->size - sizeof(stateheader), output_bytes);
 }
 
 /**

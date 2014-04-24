@@ -63,6 +63,7 @@ static GtkWidget* lblGamma;
 static GtkWidget* lblAutostate;
 static GtkWidget* lblChecksum;
 static GtkWidget* lblTitle;
+static GtkWidget* lblCompressedDataChecksum;
 #pragma endregion
 
 #pragma region gtk helper functions
@@ -368,6 +369,9 @@ static void selection_changed(GtkWidget* widget, gpointer data) {
 		sprintf(buf, "Title: %.32s", ptr->title);
 		gtk_label_set_text(GTK_LABEL(lblTitle), buf);
 
+		sprintf(buf, "Hash of compressed data: %6X", goomba_compressed_data_checksum(ptr, 3));
+		gtk_label_set_text(GTK_LABEL(lblCompressedDataChecksum), buf);
+
 		gtk_widget_set_sensitive(btnExport, ptr->type == GOOMBA_SRAMSAVE);
 		gtk_widget_set_sensitive(btnReplace, ptr->type == GOOMBA_SRAMSAVE);
 
@@ -545,6 +549,12 @@ GtkWidget* build_window() {
 	gtk_box_pack_start(GTK_BOX(button_hbox), btnExport, FALSE, FALSE, 0);
 	gtk_widget_show(btnExport);
 	g_signal_connect(btnExport, "clicked", G_CALLBACK(export_click), NULL);
+
+  // little hash
+  lblCompressedDataChecksum = gtk_label_new("Hash of compressed data:");
+	gtk_widget_show(lblCompressedDataChecksum);
+	gtk_misc_set_alignment(GTK_MISC(lblCompressedDataChecksum), 0, 0.5);
+	gtk_box_pack_end(GTK_BOX(vbox2), lblCompressedDataChecksum, FALSE, FALSE, 0);
 
 	// show things
 	gtk_widget_show(vbox2);
