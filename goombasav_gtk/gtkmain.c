@@ -63,7 +63,9 @@ static GtkWidget* lblGamma;
 static GtkWidget* lblAutostate;
 static GtkWidget* lblChecksum;
 static GtkWidget* lblTitle;
-static GtkWidget* lblCompressedDataChecksum;
+
+static GtkWidget* dataHashColor;
+static GtkWidget* lblDataHash;
 #pragma endregion
 
 #pragma region gtk helper functions
@@ -110,6 +112,9 @@ static void set_all_labels() {
 	lblset(&lblChecksum, "ROM checksum:", normal_rows[3]);
 
 	lblset(&lblTitle, "Title:", normal_rows[4]);
+
+	if (lblDataHash != NULL) gtk_label_set_text(GTK_LABEL(lblDataHash), "");
+	if (dataHashColor != NULL) gtk_widget_hide(dataHashColor);
 }
 
 static void update_titlebar(GtkWindow* window) {
@@ -369,8 +374,21 @@ static void selection_changed(GtkWidget* widget, gpointer data) {
 		sprintf(buf, "Title: %.32s", ptr->title);
 		gtk_label_set_text(GTK_LABEL(lblTitle), buf);
 
-		sprintf(buf, "Hash of compressed data: %6X", goomba_compressed_data_checksum(ptr, 3));
-		gtk_label_set_text(GTK_LABEL(lblCompressedDataChecksum), buf);
+		if (ptr->size > sizeof(stateheader)) {
+			uint64_t ck = goomba_compressed_data_checksum(ptr, 3);
+			sprintf(buf, "Hash of compressed data: %6X", ck);
+			gtk_label_set_text(GTK_LABEL(lblDataHash), buf);
+
+			GdkColor color;
+			color.red = 0x101 * ((ck >> 16) & 0xFF);
+			color.green = 0x101 * ((ck >> 8) & 0xFF);
+			color.blue = 0x101 * (ck & 0xFF);
+			gtk_widget_show(dataHashColor);
+			gtk_widget_modify_bg(dataHashColor, GTK_STATE_NORMAL, &color);
+		} else {
+			gtk_label_set_text(GTK_LABEL(lblDataHash), "");
+			gtk_widget_hide(dataHashColor);
+		}
 
 		gtk_widget_set_sensitive(btnExport, ptr->type == GOOMBA_SRAMSAVE);
 		gtk_widget_set_sensitive(btnReplace, ptr->type == GOOMBA_SRAMSAVE);
@@ -550,11 +568,18 @@ GtkWidget* build_window() {
 	gtk_widget_show(btnExport);
 	g_signal_connect(btnExport, "clicked", G_CALLBACK(export_click), NULL);
 
-  // little hash
-  lblCompressedDataChecksum = gtk_label_new("Hash of compressed data:");
-	gtk_widget_show(lblCompressedDataChecksum);
-	gtk_misc_set_alignment(GTK_MISC(lblCompressedDataChecksum), 0, 0.5);
-	gtk_box_pack_end(GTK_BOX(vbox2), lblCompressedDataChecksum, FALSE, FALSE, 0);
+	// little hash
+	lblDataHash = gtk_label_new("");
+	gtk_misc_set_alignment(GTK_MISC(lblDataHash), 0, 0.5);
+
+	dataHashColor = gtk_event_box_new();
+
+	GtkWidget* hash_hbox = gtk_hbox_new(FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(hash_hbox), lblDataHash, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(hash_hbox), dataHashColor, TRUE, TRUE, 8);
+
+	gtk_box_pack_end(GTK_BOX(vbox2), hash_hbox, FALSE, FALSE, 0);
+	gtk_widget_show_all(hash_hbox);
 
 	// show things
 	gtk_widget_show(vbox2);
