@@ -1,8 +1,5 @@
 // goombasav command line version.
-// Tested and working with:
-// * Visual Studio 2013 (use /TP compiler option)
-// * gcc 4.8.2 on Cygwin (64-bit)
-// * gcc 4.7.2 on Debian (32-bit)
+// Works with gcc, g++, and Visual Studio 2013 (for the latter, use /TP to compile as C++ code)
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,7 +7,7 @@
 #include "goombasav.h"
 #include "platformname.h"
 
-const char* USAGE = "goombasav (2014-04-13)\n"
+const char* USAGE = "goombasav (2014-04-25)\n"
 "Usage: goombasav {x/extract} gba.sav gbc.sav\n"
 "       goombasav {r/replace} gba.sav gbc.sav\n"
 "       goombasav {c/clean} gba.sav [output.sav]\n"
@@ -64,6 +61,18 @@ void license() {
 void could_not_open(const char* filename) {
 	fprintf(stderr, "Could not open file: %s\n", filename);
 	exit(EXIT_FAILURE);
+}
+
+void print_indent(const char* prefix, const char* multiline_str) {
+	printf("  ");
+	while (*multiline_str != '\0') {
+		putc(*multiline_str, stdout);
+		if (*multiline_str == '\n') {
+			printf("  ");
+		}
+		multiline_str++;
+	}
+	putc('\n', stdout);
 }
 
 stateheader* ask(const void* first_header, const char* prompt) {
@@ -209,6 +218,7 @@ void list(const char* gbafile) {
 	while (headers[i] != NULL) {
 		printf("%d. ", i);
 		printf("%s\n", stateheader_summary_str(headers[i]));
+		print_indent("  ", stateheader_str(headers[i]));
 		i++;
 	}
 
