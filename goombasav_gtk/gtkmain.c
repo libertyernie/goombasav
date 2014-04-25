@@ -350,7 +350,7 @@ static void about_click(GtkWidget* widget, gpointer data) {
 		"license", GPL_NOTICE,
 		"program-name", "Goomba Save Manager",
 		"website", "http://github.com/libertyernie/goombasav",
-		"comments", "version 20140424",
+		"comments", "version 2014-04-25",
 		NULL);
 }
 
