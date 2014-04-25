@@ -78,6 +78,7 @@ namespace goombasav_clr {
 	private: System::Windows::Forms::Button^  btnExtract;
 	private: System::Windows::Forms::Button^  btnReplace;
 	private: System::Windows::Forms::FlowLayoutPanel^  flpButtons;
+	private: System::Windows::Forms::Label^  hashPadding;
 
 	private: System::ComponentModel::IContainer^  components;
 			 /// <summary>
@@ -90,8 +91,8 @@ namespace goombasav_clr {
 				 this->splitContainer1 = (gcnew System::Windows::Forms::SplitContainer());
 				 this->pnlHash = (gcnew System::Windows::Forms::Panel());
 				 this->hashBox = (gcnew System::Windows::Forms::Label());
-				 this->lblHash = (gcnew System::Windows::Forms::Label());
 				 this->lblHashVal = (gcnew System::Windows::Forms::Label());
+				 this->lblHash = (gcnew System::Windows::Forms::Label());
 				 this->flpButtons = (gcnew System::Windows::Forms::FlowLayoutPanel());
 				 this->btnReplace = (gcnew System::Windows::Forms::Button());
 				 this->btnExtract = (gcnew System::Windows::Forms::Button());
@@ -129,6 +130,7 @@ namespace goombasav_clr {
 				 this->exitToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 				 this->helpToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 				 this->aboutToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
+				 this->hashPadding = (gcnew System::Windows::Forms::Label());
 				 (cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->splitContainer1))->BeginInit();
 				 this->splitContainer1->Panel1->SuspendLayout();
 				 this->splitContainer1->Panel2->SuspendLayout();
@@ -177,6 +179,7 @@ namespace goombasav_clr {
 				 // 
 				 // pnlHash
 				 // 
+				 this->pnlHash->Controls->Add(this->hashPadding);
 				 this->pnlHash->Controls->Add(this->hashBox);
 				 this->pnlHash->Controls->Add(this->lblHashVal);
 				 this->pnlHash->Controls->Add(this->lblHash);
@@ -195,6 +198,16 @@ namespace goombasav_clr {
 				 this->hashBox->Size = System::Drawing::Size(199, 17);
 				 this->hashBox->TabIndex = 2;
 				 // 
+				 // lblHashVal
+				 // 
+				 this->lblHashVal->AutoSize = true;
+				 this->lblHashVal->Dock = System::Windows::Forms::DockStyle::Left;
+				 this->lblHashVal->Location = System::Drawing::Point(174, 0);
+				 this->lblHashVal->Margin = System::Windows::Forms::Padding(4, 0, 4, 0);
+				 this->lblHashVal->Name = L"lblHashVal";
+				 this->lblHashVal->Size = System::Drawing::Size(0, 17);
+				 this->lblHashVal->TabIndex = 1;
+				 // 
 				 // lblHash
 				 // 
 				 this->lblHash->AutoSize = true;
@@ -205,16 +218,6 @@ namespace goombasav_clr {
 				 this->lblHash->Size = System::Drawing::Size(174, 17);
 				 this->lblHash->TabIndex = 0;
 				 this->lblHash->Text = L"Hash of compressed data:";
-				 // 
-				 // lblHashVal
-				 // 
-				 this->lblHashVal->AutoSize = true;
-				 this->lblHashVal->Dock = System::Windows::Forms::DockStyle::Left;
-				 this->lblHashVal->Location = System::Drawing::Point(174, 0);
-				 this->lblHashVal->Margin = System::Windows::Forms::Padding(4, 0, 4, 0);
-				 this->lblHashVal->Name = L"lblHashVal";
-				 this->lblHashVal->Size = System::Drawing::Size(0, 17);
-				 this->lblHashVal->TabIndex = 1;
 				 // 
 				 // flpButtons
 				 // 
@@ -570,6 +573,15 @@ namespace goombasav_clr {
 				 this->aboutToolStripMenuItem->Text = L"About";
 				 this->aboutToolStripMenuItem->Click += gcnew System::EventHandler(this, &MainForm::aboutToolStripMenuItem_Click);
 				 // 
+				 // hashPadding
+				 // 
+				 this->hashPadding->Dock = System::Windows::Forms::DockStyle::Right;
+				 this->hashPadding->Location = System::Drawing::Point(365, 0);
+				 this->hashPadding->Name = L"hashPadding";
+				 this->hashPadding->Size = System::Drawing::Size(8, 17);
+				 this->hashPadding->TabIndex = 3;
+				 this->hashPadding->Text = L"label1";
+				 // 
 				 // MainForm
 				 // 
 				 this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
@@ -795,6 +807,7 @@ namespace goombasav_clr {
 			lblFramecountVal->Text = "";
 			lblChecksumVal->Text = "";
 			lblTitleVal->Text = "";
+			pnlHash->Visible = false;
 		}
 	
 		Void listBox1_SelectedIndexChanged(Object^ sender, EventArgs^ e) {
