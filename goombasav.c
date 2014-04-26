@@ -75,7 +75,8 @@ const char* stateheader_str(const stateheader* sh) {
 		j += sprintf(goomba_strbuf + j, "sleep: %s\n", strs.sleep);
 		j += sprintf(goomba_strbuf + j, "autoload state: %s\n", strs.autoload_state);
 		j += sprintf(goomba_strbuf + j, "gamma: %s\n", strs.gamma);
-		j += sprintf(goomba_strbuf + j, "rom checksum: %8X\n", cd->sram_checksum);
+		j += sprintf(goomba_strbuf + j, "rom checksum: %8X (0xE000-0xFFFF %s)\n", cd->sram_checksum,
+			cd->sram_checksum ? "occupied" : "free");
 	} else {
 		j += sprintf(goomba_strbuf + j, "%scompressed_size: %u\n",
 			(sh->uncompressed_size < sh->size ? "" : "un"),
