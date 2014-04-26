@@ -7,8 +7,10 @@
 
 #define goomba_error(...) { sprintf(last_error, __VA_ARGS__); }
 
-char last_error[256];
+static const char* const sleeptxt[] = { "5min", "10min", "30min", "OFF" };
+static const char* const brightxt[] = { "I", "II", "III", "IIII", "IIIII" };
 
+static char last_error[256];
 static char goomba_strbuf[256];
 
 const char* goomba_last_error() {
@@ -28,6 +30,18 @@ uint64_t checksum_slow(const void* ptr, size_t length, int output_bytes) {
 		p++;
 	}
 	return sum;
+}
+
+/**
+ * Gets a struct containing pointers to three static strings (which do not
+ * need to be deallocated.)
+ */
+configdata_misc_strings configdata_get_misc(int misc) {
+	configdata_misc_strings s;
+	s.sleep = sleeptxt[misc & 0x3];
+	s.autoload_state = ((misc & 0x10) >> 4) ? "ON" : "OFF";
+	s.gamma = brightxt[(misc & 0xE0) >> 5];
+	return s;
 }
 
 const char* stateheader_typestr(uint16_t type) {
@@ -57,14 +71,17 @@ const char* stateheader_str(const stateheader* sh) {
 		configdata* cd = (configdata*)sh;
 		j += sprintf(goomba_strbuf + j, "bordercolor: %u\n", cd->bordercolor);
 		j += sprintf(goomba_strbuf + j, "palettebank: %u\n", cd->palettebank);
-		j += sprintf(goomba_strbuf + j, "misc: %u\n", cd->misc);
-		j += sprintf(goomba_strbuf + j, "reserved3: %u\n", cd->reserved3);
-		j += sprintf(goomba_strbuf + j, "sram_checksum: %8X\n", cd->sram_checksum);
-		//j += sprintf(goomba_strbuf + j, "zero: %d\n", cd->zero);
+		configdata_misc_strings strs = configdata_get_misc(cd->misc);
+		j += sprintf(goomba_strbuf + j, "sleep: %s\n", strs.sleep);
+		j += sprintf(goomba_strbuf + j, "autoload state: %s\n", strs.autoload_state);
+		j += sprintf(goomba_strbuf + j, "gamma: %s\n", strs.gamma);
+		j += sprintf(goomba_strbuf + j, "rom checksum: %8X\n", cd->sram_checksum);
 	} else {
-		j += sprintf(goomba_strbuf + j, "uncompressed_size: %u\n", sh->uncompressed_size);
+		j += sprintf(goomba_strbuf + j, "%scompressed_size: %u\n",
+			(sh->uncompressed_size < sh->size ? "" : "un"),
+			sh->uncompressed_size);
 		j += sprintf(goomba_strbuf + j, "framecount: %u\n", sh->framecount);
-		j += sprintf(goomba_strbuf + j, "checksum: %8X\n", sh->checksum);
+		j += sprintf(goomba_strbuf + j, "rom checksum: %8X\n", sh->checksum);
 	}
 	j += sprintf(goomba_strbuf + j, "title: %s", sh->title);
 	return goomba_strbuf;

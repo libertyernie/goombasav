@@ -32,8 +32,15 @@ typedef struct {
 	char title[32];
 } stateheader;
 
+typedef struct {
+	const char* sleep;
+	const char* autoload_state;
+	const char* gamma;
+} configdata_misc_strings;
+
 const char* goomba_last_error();
 
+configdata_misc_strings configdata_get_misc(int misc);
 const char* stateheader_str(const stateheader* sh);
 const char* stateheader_summary_str(const stateheader* sh);
 int stateheader_plausible(const stateheader* sh);
