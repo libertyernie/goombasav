@@ -9,8 +9,6 @@
 #define note_msg(...) { GtkWidget* dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_CLOSE, __VA_ARGS__); gtk_dialog_run(GTK_DIALOG(dialog)); gtk_widget_destroy(dialog); }
 
 const char* TITLE = "Goomba Save Manager";
-const char* const sleeptxt[] = { "5min", "10min", "30min", "OFF" };
-const char* const brightxt[] = { "I", "II", "III", "IIII", "IIIII" };
 
 const char* goomba_basename(const char* c) {
 	const char* i1 = strrchr(c, '/') + 1;
@@ -401,11 +399,12 @@ static void selection_changed(GtkWidget* widget, gpointer data) {
 			gtk_label_set_text(GTK_LABEL(lblBorder), buf);
 			sprintf(buf, "Palette: %u", cd->palettebank);
 			gtk_label_set_text(GTK_LABEL(lblPalette), buf);
-			sprintf(buf, "Sleep: %s", sleeptxt[cd->misc & 0x3]);
+			configdata_misc_strings strs = configdata_get_misc(cd->misc);
+			sprintf(buf, "Sleep: %s", strs.sleep);
 			gtk_label_set_text(GTK_LABEL(lblSleep), buf);
-			sprintf(buf, "Gamma: %s", brightxt[(cd->misc & 0xE0) >> 5]);
+			sprintf(buf, "Gamma: %s", strs.gamma);
 			gtk_label_set_text(GTK_LABEL(lblGamma), buf);
-			sprintf(buf, "Autoload state: %s", ((cd->misc & 0x10) >> 4) ? "ON" : "OFF");
+			sprintf(buf, "Autoload state: %s", strs.autoload_state);
 			gtk_label_set_text(GTK_LABEL(lblAutostate), buf);
 
 			sprintf(buf, "ROM checksum: %08X", cd->sram_checksum);

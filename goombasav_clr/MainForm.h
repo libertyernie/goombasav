@@ -22,8 +22,6 @@ namespace goombasav_clr {
 	typedef Windows::Forms::DialogResult DR;
 
 	const char* TITLE = "Goomba Save Manager";
-	const char* const sleeptxt[] = { "5min", "10min", "30min", "OFF" };
-	const char* const brightxt[] = { "I", "II", "III", "IIII", "IIIII" };
 
 	public ref class MainForm : public System::Windows::Forms::Form
 	{
@@ -827,9 +825,10 @@ namespace goombasav_clr {
 				configdata* cd = p->cd_ptr();
 				lblBorderVal->Text = cd->bordercolor.ToString();
 				lblPaletteVal->Text = cd->palettebank.ToString();
-				lblSleepVal->Text = gcnew String(sleeptxt[cd->misc & 0x3]);
-				lblAutostateVal->Text = ((cd->misc & 0x10) >> 4) ? "ON" : "OFF";
-				lblGammaVal->Text = gcnew String(brightxt[(cd->misc & 0xE0) >> 5]);
+				configdata_misc_strings strs = configdata_get_misc(cd->misc);
+				lblSleepVal->Text = gcnew String(strs.sleep);
+				lblAutostateVal->Text = gcnew String(strs.autoload_state);
+				lblGammaVal->Text = gcnew String(strs.gamma);
 				lblChecksumVal->Text = cd->sram_checksum.ToString("X8"); // The SRAM with this ROM checksum value is currently in 0xe000-0xffff
 			} else {
 				flpConfigdata->Visible = false;
