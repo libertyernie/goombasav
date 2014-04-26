@@ -219,6 +219,7 @@ void list(const char* gbafile) {
 		printf("%d. ", i);
 		printf("%s\n", stateheader_summary_str(headers[i]));
 		print_indent("  ", stateheader_str(headers[i]));
+		printf("  [3-byte compressed data hash: %6X]\n", goomba_compressed_data_checksum(headers[i], 3));
 		i++;
 	}
 
