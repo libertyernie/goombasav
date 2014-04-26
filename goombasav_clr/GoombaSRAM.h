@@ -1,19 +1,27 @@
 #include "HeaderPtr.h"
 
 namespace Goombasav {
-	public ref class GoombaLengthException : System::Exception {
+	public ref class GoombaException : System::Exception {
 	public:
-		GoombaLengthException(System::String^ message) : Exception(message) {}
+		GoombaException(System::String^ message) : Exception(message) {}
+		GoombaException(const char* message) : GoombaException(gcnew System::String(message)) {}
 	};
 
 	public ref class GoombaSRAM {
 	private:
-		char* data; // always GOOMBA_COLOR_SRAM_SIZE bytes, allocated with malloc
+		void* data; // always GOOMBA_COLOR_SRAM_SIZE bytes, allocated with malloc
+		void RefreshHeaders();
 	public:
+		// HeaderPtr objects are invalid after data is replaced in the SRAM.
+		System::Collections::ObjectModel::ReadOnlyCollection<HeaderPtr^>^ Headers;
+
 		GoombaSRAM(array<unsigned char>^ data);
 		~GoombaSRAM();
 		System::String^ ToString() override;
 
-		System::Collections::Generic::List<HeaderPtr^>^ FindHeaders();
+		array<unsigned char>^ Extract(HeaderPtr^ header);
+		array<unsigned char>^ Replace(HeaderPtr^ header, array<unsigned char>^ data);
+
+		array<unsigned char>^ ToArray();
 	};
 }
