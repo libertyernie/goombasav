@@ -19,6 +19,7 @@ namespace goombasav_clr {
 	using namespace System::IO;
 
 	using msclr::interop::marshal_context;
+	using Goombasav::HeaderPtr;
 	typedef Windows::Forms::DialogResult DR;
 
 	const char* TITLE = "Goomba Save Manager";

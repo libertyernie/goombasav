@@ -18,7 +18,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v120_xp</PlatformToolset>
     <CLRSupport>true</CLRSupport>
@@ -57,8 +57,8 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies />
-      <SubSystem>Windows</SubSystem>
-      <EntryPointSymbol>main</EntryPointSymbol>
+      <EntryPointSymbol>
+      </EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -86,6 +86,7 @@
     <ClCompile Include="..\minilzo-2.06\minilzo.c" />
     <ClCompile Include="AboutForm.cpp" />
     <ClCompile Include="clrmain.cpp" />
+    <ClCompile Include="GoombaSRAM.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\goombasav.h" />
@@ -95,6 +96,7 @@
     <ClInclude Include="AboutForm.h">
       <FileType>CppForm</FileType>
     </ClInclude>
+    <ClInclude Include="GoombaSRAM.h" />
     <ClInclude Include="HeaderPtr.h" />
     <ClInclude Include="MainForm.h">
       <FileType>CppForm</FileType>
