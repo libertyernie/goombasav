@@ -36,7 +36,7 @@ uint64_t checksum_slow(const void* ptr, size_t length, int output_bytes) {
  * Gets a struct containing pointers to three static strings (which do not
  * need to be deallocated.)
  */
-configdata_misc_strings configdata_get_misc(int misc) {
+configdata_misc_strings configdata_get_misc(char misc) {
 	configdata_misc_strings s;
 	s.sleep = sleeptxt[misc & 0x3];
 	s.autoload_state = ((misc & 0x10) >> 4) ? "ON" : "OFF";

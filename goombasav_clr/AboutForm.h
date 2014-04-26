@@ -150,9 +150,9 @@ namespace goombasav_clr {
 			this->label3->AutoSize = true;
 			this->label3->Location = System::Drawing::Point(14, 71);
 			this->label3->Name = L"label3";
-			this->label3->Size = System::Drawing::Size(334, 17);
+			this->label3->Size = System::Drawing::Size(107, 17);
 			this->label3->TabIndex = 7;
-			this->label3->Text = L"Written in C++/CLI with backend code in standard C.";
+			this->label3->Text = L"C++/CLI version";
 			// 
 			// lblNETVersion
 			// 
