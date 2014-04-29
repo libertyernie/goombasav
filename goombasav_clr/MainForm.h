@@ -742,7 +742,7 @@ namespace goombasav_clr {
 
 		void save(String^ path) {
 			marshal_context context;
-			FILE* f = fopen(context.marshal_as<const char*>(_filePath), "wb");
+			FILE* f = fopen(context.marshal_as<const char*>(path), "wb");
 			if (f == NULL) {
 				MessageBox::Show("Could not open file: " + gcnew String(strerror(errno)), "Error", MessageBoxButtons::OK, MessageBoxIcon::Information);
 				return;
@@ -751,6 +751,7 @@ namespace goombasav_clr {
 			fclose(f);
 			_filePath = path;
 			dirty = false;
+			this->Text = gcnew String(TITLE) + " - " + IO::Path::GetFileName(path);
 		}
 
 		void headerScan() {
