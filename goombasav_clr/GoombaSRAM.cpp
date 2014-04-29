@@ -2,6 +2,7 @@
 #include <cstring>
 #include "GoombaSRAM.h"
 #include "../goombasav.h"
+#include <cstdio>
 
 using System::String;
 using System::Collections::Generic::List;
@@ -14,10 +15,25 @@ namespace Goombasav {
 		} else if (arr->Length > GOOMBA_COLOR_SRAM_SIZE) {
 			throw gcnew GoombaException("Array length is larger than " + GOOMBA_COLOR_SRAM_SIZE + " bytes");
 		}
-		this->data = (char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
 		pin_ptr<unsigned char> pin = &arr[0];
-		memcpy(this->data, pin, GOOMBA_COLOR_SRAM_SIZE);
-		RefreshHeaders();
+		init(pin);
+	}
+
+	GoombaSRAM::GoombaSRAM(const void* ptr) {
+		init(ptr);
+	}
+
+	void GoombaSRAM::init(const void* ptr) {
+		this->data = (char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
+		memcpy(this->data, ptr, GOOMBA_COLOR_SRAM_SIZE);
+
+		stateheader** headers = stateheader_scan(this->data);
+		List<HeaderPtr^>^ list = gcnew List<HeaderPtr^>;
+		for (int i = 0; headers[i] != NULL; i++) {
+			list->Add(gcnew HeaderPtr(headers[i]));
+		}
+		free(headers);
+		this->Headers = gcnew ReadOnlyCollection<HeaderPtr^>(list);
 	}
 
 	GoombaSRAM::~GoombaSRAM() {
@@ -29,16 +45,6 @@ namespace Goombasav {
 
 	String^ GoombaSRAM::ToString() {
 		return "Goomba SRAM: " + this->Headers->Count + " headers";
-	}
-
-	void GoombaSRAM::RefreshHeaders() {
-		stateheader** headers = stateheader_scan(this->data);
-		List<HeaderPtr^>^ list = gcnew List<HeaderPtr^>;
-		for (int i = 0; headers[i] != NULL; i++) {
-			list->Add(gcnew HeaderPtr(headers[i]));
-		}
-		free(headers);
-		this->Headers = gcnew ReadOnlyCollection<HeaderPtr^>(list);
 	}
 
 	array<unsigned char>^ GoombaSRAM::Extract(HeaderPtr^ header) {
@@ -53,14 +59,12 @@ namespace Goombasav {
 		return arr;
 	}
 
-	array<unsigned char>^ GoombaSRAM::Replace(HeaderPtr^ header, array<unsigned char>^ data) {
+	GoombaSRAM^ GoombaSRAM::CopyAndReplace(HeaderPtr^ header, array<unsigned char>^ data) {
 		pin_ptr<unsigned char> pin = &data[0];
 		void* new_data = goomba_new_sav(this->data, header->sh_ptr(), pin, data->Length);
 		if (new_data == NULL) throw gcnew GoombaException(goomba_last_error());
 
-		free(this->data);
-		this->data = new_data;
-		RefreshHeaders();
+		return gcnew GoombaSRAM(new_data);
 	}
 
 	array<unsigned char>^ GoombaSRAM::ToArray() {
