@@ -18,9 +18,6 @@
     <ClCompile Include="AssemblyInfo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GoombaSRAM.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\goombasav.c">
       <Filter>Source Files</Filter>
     </ClCompile>
