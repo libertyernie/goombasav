@@ -89,14 +89,14 @@ namespace goombasav_clr {
 			this->lblVersion->Name = L"lblVersion";
 			this->lblVersion->Size = System::Drawing::Size(82, 17);
 			this->lblVersion->TabIndex = 1;
-			this->lblVersion->Text = L"2014-04-25";
+			this->lblVersion->Text = L"2014-04-30";
 			// 
 			// label1
 			// 
 			this->label1->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Bottom)
 				| System::Windows::Forms::AnchorStyles::Left)
 				| System::Windows::Forms::AnchorStyles::Right));
-			this->label1->Location = System::Drawing::Point(12, 108);
+			this->label1->Location = System::Drawing::Point(12, 88);
 			this->label1->Name = L"label1";
 			this->label1->Size = System::Drawing::Size(433, 228);
 			this->label1->TabIndex = 2;
@@ -106,7 +106,7 @@ namespace goombasav_clr {
 			// 
 			this->btnLicense->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
 			this->btnLicense->AutoSize = true;
-			this->btnLicense->Location = System::Drawing::Point(12, 339);
+			this->btnLicense->Location = System::Drawing::Point(12, 319);
 			this->btnLicense->Name = L"btnLicense";
 			this->btnLicense->Size = System::Drawing::Size(79, 27);
 			this->btnLicense->TabIndex = 3;
@@ -126,7 +126,7 @@ namespace goombasav_clr {
 			// button1
 			// 
 			this->button1->AutoSize = true;
-			this->button1->Location = System::Drawing::Point(157, 37);
+			this->button1->Location = System::Drawing::Point(330, 41);
 			this->button1->Name = L"button1";
 			this->button1->Size = System::Drawing::Size(115, 27);
 			this->button1->TabIndex = 5;
@@ -139,7 +139,7 @@ namespace goombasav_clr {
 			this->label2->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Top | System::Windows::Forms::AnchorStyles::Left)
 				| System::Windows::Forms::AnchorStyles::Right));
 			this->label2->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
-			this->label2->Location = System::Drawing::Point(12, 97);
+			this->label2->Location = System::Drawing::Point(12, 77);
 			this->label2->Margin = System::Windows::Forms::Padding(3, 9, 3, 9);
 			this->label2->Name = L"label2";
 			this->label2->Size = System::Drawing::Size(433, 2);
@@ -148,7 +148,7 @@ namespace goombasav_clr {
 			// label3
 			// 
 			this->label3->AutoSize = true;
-			this->label3->Location = System::Drawing::Point(14, 71);
+			this->label3->Location = System::Drawing::Point(338, 9);
 			this->label3->Name = L"label3";
 			this->label3->Size = System::Drawing::Size(107, 17);
 			this->label3->TabIndex = 7;
@@ -159,7 +159,7 @@ namespace goombasav_clr {
 			this->lblNETVersion->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left)
 				| System::Windows::Forms::AnchorStyles::Right));
 			this->lblNETVersion->ForeColor = System::Drawing::SystemColors::ControlDark;
-			this->lblNETVersion->Location = System::Drawing::Point(97, 339);
+			this->lblNETVersion->Location = System::Drawing::Point(97, 319);
 			this->lblNETVersion->Name = L"lblNETVersion";
 			this->lblNETVersion->Size = System::Drawing::Size(348, 27);
 			this->lblNETVersion->TabIndex = 8;
@@ -170,7 +170,7 @@ namespace goombasav_clr {
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(457, 378);
+			this->ClientSize = System::Drawing::Size(457, 358);
 			this->Controls->Add(this->lblNETVersion);
 			this->Controls->Add(this->label3);
 			this->Controls->Add(this->label2);
