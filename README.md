@@ -1,11 +1,19 @@
 Goomba Save Manager
 ===================
 
-This repo contains two programs designed to edit the SRAM data of the Goomba and Goomba Color emulators. It can extract and replace the compressed Game Boy / Game Boy Color SRAM data. It can't edit savestate data (yet).
+This repo contains two programs designed to edit the SRAM data of the Goomba and Goomba Color emulators. It can extract and replace the compressed Game Boy / Game Boy Color SRAM data. It can't edit savestate data or add new SRAM (yet).
 
-.exe files are located in the "Release Binaries" folder.
+.exe files are located in the "Release Binaries" folder. Linux / Cygwin users can build the command-line version of the application by using the Makefile or by running:
 
-Make sure you back up your save data first, just in case.
+  gcc -Wall -o goombasav main.c goombasav.c minilzo-2.06/minilzo.c
+
+Make sure you back up your save data before using the application, just in case.
+
+NEW in version 2014-04-30:
+* The GTK application was added.
+* The "Save As" in the C++/CLI version now works properly.
+* The command-line app, when run with one filename argument, now shows a lot more information about the save data.
+* All three versions now display a three-byte hash of the compressed data, so you can see at a glance when it gets replaced.
 
 goombasav
 ---------
@@ -52,3 +60,12 @@ Goomba Save Manager (goombasav_clr)
 Goomba Save Manager (goombasav_clr.exe) wraps the backend code (goombasav.c) in a Windows Forms interface with C++/CLI. It runs on Windows XP and newer, uses .NET Framework 4 and requires the Visual C++ 2013 redistributable packages.
 
 Use the Open and Save/Save As options from the File menu to open Goomba / Goomba Color save files, and use the Extract and Replace buttons to edit the SRAM. If the file needs to be "cleaned" (see above), the program will let you know when you open it. (If you clean the file, the changes won't be saved until you choose Save or Save As.)
+
+Goomba Save Manager (goombasav_gtk)
+-----------------------------------
+
+This version of Goomba Save Manager wraps the goombasav.c code in a GTK (2.0) interface, whose design largely mirrors the C++/CLI version.
+
+You can compile it on GNU/Linux (etc.) using the Makefile in the goombasav_gtk folder - note that the files in the directory above it (goombasav.c, minilzo-2.06, and so on) ARE used, and so the best way is to check out the whole directory structure from git, cd to goombasav_gtk, and run make from there.
+
+To run this version in Visual Studio, install the 32-bit all-in-one package (http://www.gtk.org/download/win32.php) to C:\gtk, and set the GTKDIR system environment variable to C:\gtk (in Windows 8, go to This PC -> Properties -> Advanced system settings -> Advanced -> Environment variables, and add a new system variable.)
