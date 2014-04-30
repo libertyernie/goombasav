@@ -27,9 +27,6 @@
     <ClCompile Include="AboutForm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GoombaSRAM.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MainForm.h">
@@ -54,9 +51,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GoombaSRAM.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
