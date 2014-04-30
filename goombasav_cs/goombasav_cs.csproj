@@ -78,9 +78,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\goombasav_clr\goombasav_clr.vcxproj">
-      <Project>{bdde37ef-9d86-408a-b1cb-db3e49c6d238}</Project>
-      <Name>goombasav_clr</Name>
+    <ProjectReference Include="..\goombasav_net\goombasav_net.vcxproj">
+      <Project>{4c762aa4-b552-4cac-96aa-6df008b39de8}</Project>
+      <Name>goombasav_net</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -11,6 +11,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "goombasav_gtk", "goombasav_
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "goombasav_cs", "goombasav_cs\goombasav_cs.csproj", "{DA7820F8-9E2A-4A17-AC7C-713A21181411}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "goombasav_net", "goombasav_net\goombasav_net.vcxproj", "{4C762AA4-B552-4CAC-96AA-6DF008B39DE8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -61,6 +63,16 @@ Global
 		{DA7820F8-9E2A-4A17-AC7C-713A21181411}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{DA7820F8-9E2A-4A17-AC7C-713A21181411}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{DA7820F8-9E2A-4A17-AC7C-713A21181411}.Release|Win32.ActiveCfg = Release|Any CPU
+		{4C762AA4-B552-4CAC-96AA-6DF008B39DE8}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{4C762AA4-B552-4CAC-96AA-6DF008B39DE8}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{4C762AA4-B552-4CAC-96AA-6DF008B39DE8}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{4C762AA4-B552-4CAC-96AA-6DF008B39DE8}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4C762AA4-B552-4CAC-96AA-6DF008B39DE8}.Debug|Win32.Build.0 = Debug|Win32
+		{4C762AA4-B552-4CAC-96AA-6DF008B39DE8}.Release|Any CPU.ActiveCfg = Release|Win32
+		{4C762AA4-B552-4CAC-96AA-6DF008B39DE8}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{4C762AA4-B552-4CAC-96AA-6DF008B39DE8}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{4C762AA4-B552-4CAC-96AA-6DF008B39DE8}.Release|Win32.ActiveCfg = Release|Win32
+		{4C762AA4-B552-4CAC-96AA-6DF008B39DE8}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
