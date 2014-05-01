@@ -89,7 +89,7 @@
     <ClInclude Include="..\minilzo-2.06\lzodefs.h" />
     <ClInclude Include="..\minilzo-2.06\minilzo.h" />
     <ClInclude Include="GoombaSRAM.h" />
-    <ClInclude Include="HeaderPtr.h" />
+    <ClInclude Include="Stateheader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
