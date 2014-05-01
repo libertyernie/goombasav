@@ -58,8 +58,16 @@ namespace Goombasav {
 		}
 #pragma endregion
 
-		String^ ToString() override {
+		String^ GetSummary() {
 			return gcnew String(stateheader_summary_str((const stateheader*)ptr));
+		}
+
+		String^ GetDescription() {
+			return gcnew String(stateheader_str((const stateheader*)ptr));
+		}
+
+		String^ ToString() override {
+			return GetSummary();
 		}
 	};
 }

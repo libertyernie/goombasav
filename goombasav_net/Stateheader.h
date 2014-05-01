@@ -1,6 +1,8 @@
 #pragma once
 #include "GoombaHeader.h"
 
+using System::Tuple;
+
 namespace Goombasav {
 	ref class GoombaSRAM;
 
@@ -39,5 +41,14 @@ namespace Goombasav {
 			}
 		}
 #pragma endregion
+
+		// A three-byte hash of the compressed data - useful for showing on-screen as an RGB color.
+		Tuple<uint8_t, uint8_t, uint8_t>^ CompressedDataHash() {
+			uint64_t hash = goomba_compressed_data_checksum(this->Pointer, 3);
+			return gcnew Tuple<uint8_t, uint8_t, uint8_t>(
+				hash & 0xFF,
+				(hash >> 8) & 0xFF,
+				(hash >> 16) & 0xFF);
+		}
 	};
 }
