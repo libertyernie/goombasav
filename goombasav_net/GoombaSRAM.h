@@ -1,4 +1,5 @@
 #pragma once
+#include "Configdata.h"
 #include "Stateheader.h"
 #include <cstdlib>
 #include <cstring>
@@ -20,7 +21,7 @@ namespace Goombasav {
 		void* data;
 		
 		// HeaderPtr objects are invalid after data is replaced in the SRAM.
-		ReadOnlyCollection<Stateheader^>^ headers;
+		ReadOnlyCollection<GoombaHeader^>^ headers;
 
 		void init(const void* ptr, bool clean)  {
 			this->data = (char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
@@ -37,12 +38,16 @@ namespace Goombasav {
 			}
 
 			stateheader** headers = stateheader_scan(this->data);
-			List<Stateheader^>^ list = gcnew List<Stateheader^>;
+			List<GoombaHeader^>^ list = gcnew List<GoombaHeader^>;
 			for (int i = 0; headers[i] != NULL; i++) {
-				list->Add(gcnew Stateheader(headers[i], this));
+				if (headers[i]->type == GOOMBA_CONFIGSAVE) {
+					list->Add(gcnew Configdata((configdata*)headers[i], this));
+				} else {
+					list->Add(gcnew Stateheader(headers[i], this));
+				}
 			}
 			free(headers);
-			this->headers = gcnew ReadOnlyCollection<Stateheader^>(list);
+			this->headers = gcnew ReadOnlyCollection<GoombaHeader^>(list);
 		}
 	public:
 		GoombaSRAM(array<unsigned char>^ arr, bool clean) {
@@ -66,8 +71,8 @@ namespace Goombasav {
 			}
 		}
 
-		property ReadOnlyCollection<Stateheader^>^ Headers {
-			ReadOnlyCollection<Stateheader^>^ get() {
+		property ReadOnlyCollection<GoombaHeader^>^ Headers {
+			ReadOnlyCollection<GoombaHeader^>^ get() {
 				return headers;
 			}
 		}

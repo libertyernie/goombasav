@@ -50,5 +50,8 @@
     <ClInclude Include="GoombaHeader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Configdata.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

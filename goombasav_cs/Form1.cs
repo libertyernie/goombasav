@@ -16,14 +16,15 @@ namespace goombasav_cs {
 		public Form1() {
 			InitializeComponent();
 
-			GoombaSRAM sram = new GoombaSRAM(File.ReadAllBytes("C:/Users/Owner/Desktop/SharedFolder/regular.sav"), true);
-			Console.WriteLine(string.Join(", ", sram.Headers));
+			GoombaSRAM sram = new GoombaSRAM(File.ReadAllBytes("C:/Users/Owner/Desktop/SharedFolder/pokemon.sav"), true);
+			Console.WriteLine(string.Join(", ", from s in sram.Headers
+													select s.GetType() + " " + s.Title));
 
 			MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider();
 			byte[] hash = md5.ComputeHash(sram.ToArray());
 			foreach (byte b in hash) Console.Write(b.ToString("X2"));
 			Console.WriteLine();
-			GoombaSRAM sram2 = sram.CopyAndReplace(sram.Headers[0], File.ReadAllBytes("C:/Users/Owner/Desktop/Pokemon Silver (isaac) (Enable clock reset).sav"));
+			GoombaSRAM sram2 = sram.CopyAndReplace((Stateheader)sram.Headers[0], File.ReadAllBytes("C:/Users/Owner/Desktop/Pokemon Silver (isaac) (Enable clock reset).sav"));
 			hash = md5.ComputeHash(sram2.ToArray());
 			foreach (byte b in hash) Console.Write(b.ToString("X2"));
 			Console.WriteLine();
