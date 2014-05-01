@@ -24,6 +24,9 @@
     <ClCompile Include="..\minilzo-2.06\minilzo.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="expose.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GoombaSRAM.h">

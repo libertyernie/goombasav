@@ -1,5 +1,11 @@
 #pragma once
 #include "HeaderPtr.h"
+#include <cstdlib>
+#include <cstring>
+
+using namespace System;
+using namespace System::Collections::Generic;
+using System::Collections::ObjectModel::ReadOnlyCollection;
 
 namespace Goombasav {
 	public ref class GoombaException : System::Exception {
@@ -15,23 +21,33 @@ namespace Goombasav {
 		// HeaderPtr objects are invalid after data is replaced in the SRAM.
 		ReadOnlyCollection<HeaderPtr^>^ Headers;
 
-		GoombaSRAM(array<unsigned char>^ arr) {
+		GoombaSRAM(array<unsigned char>^ arr, bool clean) {
 			if (arr->Length < GOOMBA_COLOR_SRAM_SIZE) {
 				throw gcnew GoombaException("Array length is smaller than " + GOOMBA_COLOR_SRAM_SIZE + " bytes");
 			} else if (arr->Length > GOOMBA_COLOR_SRAM_SIZE) {
 				throw gcnew GoombaException("Array length is larger than " + GOOMBA_COLOR_SRAM_SIZE + " bytes");
 			}
 			pin_ptr<unsigned char> pin = &arr[0];
-			init(pin);
+			init(pin, clean);
 		}
 
-		GoombaSRAM(const void* ptr) {
-			init(ptr);
+		GoombaSRAM(const void* ptr, bool clean) {
+			init(ptr, clean);
 		}
 
-		void init(const void* ptr)  {
+		void init(const void* ptr, bool clean)  {
 			this->data = (char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
 			memcpy(this->data, ptr, GOOMBA_COLOR_SRAM_SIZE);
+
+			if (clean) {
+				char* cleaned = goomba_cleanup(this->data);
+				if (cleaned == NULL) {
+					throw gcnew GoombaException(goomba_last_error());
+				} else if (cleaned != this->data) {
+					free(this->data);
+					this->data = cleaned;
+				}
+			}
 
 			stateheader** headers = stateheader_scan(this->data);
 			List<HeaderPtr^>^ list = gcnew List<HeaderPtr^>;
@@ -70,7 +86,7 @@ namespace Goombasav {
 			void* new_data = goomba_new_sav(this->data, header->sh_ptr(), pin, data->Length);
 			if (new_data == NULL) throw gcnew GoombaException(goomba_last_error());
 
-			return gcnew GoombaSRAM(new_data);
+			return gcnew GoombaSRAM(new_data, false);
 		}
 
 		array<unsigned char>^ ToArray() {

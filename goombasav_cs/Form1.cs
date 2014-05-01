@@ -16,7 +16,7 @@ namespace goombasav_cs {
 		public Form1() {
 			InitializeComponent();
 
-			GoombaSRAM sram = new GoombaSRAM(File.ReadAllBytes("C:/Users/Owner/Desktop/SharedFolder/pokemon.sav"));
+			GoombaSRAM sram = new GoombaSRAM(File.ReadAllBytes("C:/Users/Owner/Desktop/SharedFolder/regular.sav"), true);
 			Console.WriteLine(string.Join(", ", sram.Headers));
 
 			MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider();
