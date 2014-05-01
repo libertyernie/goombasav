@@ -21,14 +21,39 @@ namespace goombasav_cs {
 													select s.GetDescription()));
 
 			MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider();
-			byte[] hash = md5.ComputeHash(sram.ToArray());
-			foreach (byte b in hash) Console.Write(b.ToString("X2"));
+			byte[] mh = md5.ComputeHash(sram.ToArray());
+			foreach (byte b in mh) Console.Write(b.ToString("X2"));
 			Console.WriteLine();
 			GoombaSRAM sram2 = sram.CopyAndReplace((Stateheader)sram.Headers[0], File.ReadAllBytes("C:/Users/Owner/Desktop/Pokemon Silver (isaac) (Enable clock reset).sav"));
-			hash = md5.ComputeHash(sram2.ToArray());
-			foreach (byte b in hash) Console.Write(b.ToString("X2"));
+			mh = md5.ComputeHash(sram2.ToArray());
+			foreach (byte b in mh) Console.Write(b.ToString("X2"));
 			Console.WriteLine();
 			File.WriteAllBytes("../../../pokemon2.sav", sram2.ToArray());
+
+			GoombaHeader h = sram.Headers[0];
+			lblSizeVal.Text = h.Size + " bytes";
+			lblTypeVal.Text = h.Type == Stateheader.STATESAVE ? "Savestate"
+				: h.Type == Stateheader.SRAMSAVE ? "SRAM"
+				: h.Type == Stateheader.CONFIGSAVE ? "Config"
+				: "Unknown";
+			if (h is Stateheader) {
+				Stateheader sh = (Stateheader)h;
+				flpConfigdata.Visible = false;
+				flpStateheader.Visible = true;
+				lblUncompressedSize.Text = 
+					sh.DataSize >= sh.Size
+					? "Uncompressed size:"
+					: "Compressed size:";
+				lblUncompressedSizeVal.Text = sh.DataSize + " bytes";
+				lblFramecountVal.Text = sh.Framecount.ToString();
+				lblChecksumVal.Text = sh.ROMChecksum.ToString("X8");
+
+				panel1.Visible = true;
+				uint hash = sh.CompressedDataHash();
+				lblHashVal.Text = hash.ToString("X6");
+				hashBox.BackColor = Color.FromArgb((int)(hash | 0xFF000000));
+			}
+			lblTitleVal.Text = h.Title;
 		}
 	}
 }
