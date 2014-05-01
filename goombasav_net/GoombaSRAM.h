@@ -16,24 +16,11 @@ namespace Goombasav {
 
 	public ref class GoombaSRAM {
 	private:
-		void* data; // always GOOMBA_COLOR_SRAM_SIZE bytes, allocated with malloc
-	public:
+		// always GOOMBA_COLOR_SRAM_SIZE bytes, allocated with malloc
+		void* data;
+		
 		// HeaderPtr objects are invalid after data is replaced in the SRAM.
-		ReadOnlyCollection<HeaderPtr^>^ Headers;
-
-		GoombaSRAM(array<unsigned char>^ arr, bool clean) {
-			if (arr->Length < GOOMBA_COLOR_SRAM_SIZE) {
-				throw gcnew GoombaException("Array length is smaller than " + GOOMBA_COLOR_SRAM_SIZE + " bytes");
-			} else if (arr->Length > GOOMBA_COLOR_SRAM_SIZE) {
-				throw gcnew GoombaException("Array length is larger than " + GOOMBA_COLOR_SRAM_SIZE + " bytes");
-			}
-			pin_ptr<unsigned char> pin = &arr[0];
-			init(pin, clean);
-		}
-
-		GoombaSRAM(const void* ptr, bool clean) {
-			init(ptr, clean);
-		}
+		ReadOnlyCollection<HeaderPtr^>^ headers;
 
 		void init(const void* ptr, bool clean)  {
 			this->data = (char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
@@ -55,13 +42,33 @@ namespace Goombasav {
 				list->Add(gcnew HeaderPtr(headers[i]));
 			}
 			free(headers);
-			this->Headers = gcnew ReadOnlyCollection<HeaderPtr^>(list);
+			this->headers = gcnew ReadOnlyCollection<HeaderPtr^>(list);
+		}
+	public:
+		GoombaSRAM(array<unsigned char>^ arr, bool clean) {
+			if (arr->Length < GOOMBA_COLOR_SRAM_SIZE) {
+				throw gcnew GoombaException("Array length is smaller than " + GOOMBA_COLOR_SRAM_SIZE + " bytes");
+			} else if (arr->Length > GOOMBA_COLOR_SRAM_SIZE) {
+				throw gcnew GoombaException("Array length is larger than " + GOOMBA_COLOR_SRAM_SIZE + " bytes");
+			}
+			pin_ptr<unsigned char> pin = &arr[0];
+			init(pin, clean);
+		}
+
+		GoombaSRAM(const void* ptr, bool clean) {
+			init(ptr, clean);
 		}
 
 		~GoombaSRAM() {
 			if (data != NULL) {
 				free(data);
 				data = NULL;
+			}
+		}
+
+		property ReadOnlyCollection<HeaderPtr^>^ Headers {
+			ReadOnlyCollection<HeaderPtr^>^ get() {
+				return headers;
 			}
 		}
 
