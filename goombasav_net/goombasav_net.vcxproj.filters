@@ -47,5 +47,8 @@
     <ClInclude Include="Stateheader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GoombaHeader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
