@@ -61,8 +61,8 @@
 			this.lblTitleVal = new System.Windows.Forms.Label();
 			this.label2 = new System.Windows.Forms.Label();
 			this.panel1 = new System.Windows.Forms.Panel();
-			this.lblHashVal = new System.Windows.Forms.Label();
 			this.hashBox = new System.Windows.Forms.Label();
+			this.lblHashVal = new System.Windows.Forms.Label();
 			this.lblHash = new System.Windows.Forms.Label();
 			this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
 			this.btnReplace = new System.Windows.Forms.Button();
@@ -105,31 +105,35 @@
 			// openToolStripMenuItem
 			// 
 			this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-			this.openToolStripMenuItem.Size = new System.Drawing.Size(138, 24);
+			this.openToolStripMenuItem.Size = new System.Drawing.Size(175, 24);
 			this.openToolStripMenuItem.Text = "Open";
+			this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
 			// 
 			// saveToolStripMenuItem
 			// 
 			this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-			this.saveToolStripMenuItem.Size = new System.Drawing.Size(138, 24);
+			this.saveToolStripMenuItem.Size = new System.Drawing.Size(175, 24);
 			this.saveToolStripMenuItem.Text = "Save";
+			this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
 			// 
 			// saveAsToolStripMenuItem
 			// 
 			this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-			this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(138, 24);
+			this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(175, 24);
 			this.saveAsToolStripMenuItem.Text = "Save As...";
+			this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.saveAsToolStripMenuItem_Click);
 			// 
 			// toolStripMenuItem1
 			// 
 			this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-			this.toolStripMenuItem1.Size = new System.Drawing.Size(135, 6);
+			this.toolStripMenuItem1.Size = new System.Drawing.Size(172, 6);
 			// 
 			// exitToolStripMenuItem
 			// 
 			this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-			this.exitToolStripMenuItem.Size = new System.Drawing.Size(138, 24);
+			this.exitToolStripMenuItem.Size = new System.Drawing.Size(175, 24);
 			this.exitToolStripMenuItem.Text = "Exit";
+			this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
 			// 
 			// helpToolStripMenuItem
 			// 
@@ -144,6 +148,7 @@
 			this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
 			this.aboutToolStripMenuItem.Size = new System.Drawing.Size(119, 24);
 			this.aboutToolStripMenuItem.Text = "About";
+			this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
 			// 
 			// splitContainer1
 			// 
@@ -441,6 +446,14 @@
 			this.panel1.Size = new System.Drawing.Size(373, 17);
 			this.panel1.TabIndex = 0;
 			// 
+			// hashBox
+			// 
+			this.hashBox.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.hashBox.Location = new System.Drawing.Point(174, 0);
+			this.hashBox.Name = "hashBox";
+			this.hashBox.Size = new System.Drawing.Size(199, 17);
+			this.hashBox.TabIndex = 1;
+			// 
 			// lblHashVal
 			// 
 			this.lblHashVal.AutoSize = true;
@@ -449,14 +462,6 @@
 			this.lblHashVal.Name = "lblHashVal";
 			this.lblHashVal.Size = new System.Drawing.Size(0, 17);
 			this.lblHashVal.TabIndex = 2;
-			// 
-			// hashBox
-			// 
-			this.hashBox.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.hashBox.Location = new System.Drawing.Point(174, 0);
-			this.hashBox.Name = "hashBox";
-			this.hashBox.Size = new System.Drawing.Size(199, 17);
-			this.hashBox.TabIndex = 1;
 			// 
 			// lblHash
 			// 
@@ -487,6 +492,7 @@
 			this.btnReplace.TabIndex = 0;
 			this.btnReplace.Text = "Replace";
 			this.btnReplace.UseVisualStyleBackColor = true;
+			this.btnReplace.Click += new System.EventHandler(this.btnReplace_Click);
 			// 
 			// btnExtract
 			// 
@@ -496,6 +502,7 @@
 			this.btnExtract.TabIndex = 1;
 			this.btnExtract.Text = "Extract";
 			this.btnExtract.UseVisualStyleBackColor = true;
+			this.btnExtract.Click += new System.EventHandler(this.btnExtract_Click);
 			// 
 			// Form1
 			// 

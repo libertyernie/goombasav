@@ -13,7 +13,7 @@ namespace goombasav_cs {
 		static void Main() {
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
-			Application.Run(new Form1());
+			Application.Run(new Form1("C:/Users/Owner/Desktop/SharedFolder/regular.sav"));
 		}
 	}
 }

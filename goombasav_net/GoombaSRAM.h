@@ -38,6 +38,7 @@ namespace Goombasav {
 			}
 
 			stateheader** headers = stateheader_scan(this->data);
+			if (headers == NULL) throw gcnew GoombaException(goomba_last_error());
 			List<GoombaHeader^>^ list = gcnew List<GoombaHeader^>;
 			for (int i = 0; headers[i] != NULL; i++) {
 				if (headers[i]->type == GOOMBA_CONFIGSAVE) {
@@ -50,11 +51,12 @@ namespace Goombasav {
 			this->headers = gcnew ReadOnlyCollection<GoombaHeader^>(list);
 		}
 	public:
+		static int ExpectedSize = GOOMBA_COLOR_SRAM_SIZE;
+
+		// arr must be at least ExpectedSize bytes. If it is more, the extra bytes will be ignored.
 		GoombaSRAM(array<unsigned char>^ arr, bool clean) {
 			if (arr->Length < GOOMBA_COLOR_SRAM_SIZE) {
 				throw gcnew GoombaException("Array length is smaller than " + GOOMBA_COLOR_SRAM_SIZE + " bytes");
-			} else if (arr->Length > GOOMBA_COLOR_SRAM_SIZE) {
-				throw gcnew GoombaException("Array length is larger than " + GOOMBA_COLOR_SRAM_SIZE + " bytes");
 			}
 			pin_ptr<unsigned char> pin = &arr[0];
 			init(pin, clean);
