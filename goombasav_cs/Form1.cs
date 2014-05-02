@@ -38,41 +38,38 @@ namespace goombasav_cs {
 			this->DragDrop += gcnew System::Windows::Forms::DragEventHandler(this, &goombasav_clr::MainForm::OnDragDrop);
 			this->AllowDrop = true;*/
 
+			this.DragEnter += Form1_DragEnter;
+			this.DragDrop += Form1_DragDrop;
+			this.AllowDrop = true;
+
 			if (filename != null) {
 				load(filename);
 			}
-
-			/*GoombaSRAM sram = new GoombaSRAM(File.ReadAllBytes("C:/Users/Owner/Desktop/SharedFolder/pokemon.sav"), true);
-			Console.WriteLine(string.Join("\n-----\n", from s in sram.Headers
-													select s.GetDescription()));
-
-			MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider();
-			byte[] mh = md5.ComputeHash(sram.ToArray());
-			foreach (byte b in mh) Console.Write(b.ToString("X2"));
-			Console.WriteLine();
-			GoombaSRAM sram2 = sram.CopyAndReplace((Stateheader)sram.Headers[0], File.ReadAllBytes("C:/Users/Owner/Desktop/Pokemon Silver (isaac) (Enable clock reset).sav"));
-			mh = md5.ComputeHash(sram2.ToArray());
-			foreach (byte b in mh) Console.Write(b.ToString("X2"));
-			Console.WriteLine();
-			File.WriteAllBytes("../../../pokemon2.sav", sram2.ToArray());
-
-			*/
 		}
 
 		private void openToolStripMenuItem_Click(object sender, EventArgs e) {
-
+			OpenFileDialog d = new OpenFileDialog();
+			d.Filter = "Game Boy Advance save data (*.sav)|*.sav|All files (*.*)|*.*";
+			if (d.ShowDialog() == DialogResult.OK) {
+				load(d.FileName);
+			}
 		}
 
 		private void saveToolStripMenuItem_Click(object sender, EventArgs e) {
-
+			save(filePath);
 		}
 
 		private void saveAsToolStripMenuItem_Click(object sender, EventArgs e) {
-
+			SaveFileDialog d = new SaveFileDialog();
+			d.Filter = "Game Boy Advance save data (*.sav)|*.sav|All files (*.*)|*.*";
+			d.AddExtension = true;
+			if (d.ShowDialog() == DialogResult.OK) {
+				save(d.FileName);
+			}
 		}
 
 		private void exitToolStripMenuItem_Click(object sender, EventArgs e) {
-
+			this.Close();
 		}
 
 		private void aboutToolStripMenuItem_Click(object sender, EventArgs e) {
@@ -110,8 +107,47 @@ namespace goombasav_cs {
 				uint hash = sh.CompressedDataHash();
 				lblHashVal.Text = hash.ToString("X6");
 				hashBox.BackColor = Color.FromArgb((int)(hash | 0xFF000000));
+			} else if (h is Configdata) {
+				flpConfigdata.Visible = true;
+				flpStateheader.Visible = false;
+
+				Configdata cd = (Configdata)h;
+				lblBorderVal.Text = cd.BorderColor.ToString();
+				lblPaletteVal.Text = cd.PaletteBank.ToString();
+				MiscStrings strs = cd.GetMiscStrings;
+				lblSleepVal.Text = strs.SleepStr;
+				lblAutostateVal.Text = strs.AutoloadStateStr;
+				lblGammaVal.Text = strs.GammaStr;
+				lblChecksumVal.Text = cd.ROMChecksum.ToString("X8"); // The SRAM with this ROM checksum value is currently in 0xe000-0xffff
+
+				panel1.Visible = false;
+			} else {
+				flpConfigdata.Visible = flpStateheader.Visible = panel1.Visible = false;
 			}
 			lblTitleVal.Text = h.Title;
+		}
+
+		private void Form1_DragEnter(object sender, DragEventArgs e) {
+			throw new NotImplementedException();
+		}
+
+		private void Form1_DragDrop(object sender, DragEventArgs e) {
+			throw new NotImplementedException();
+		}
+
+		private void resetDescriptionPanel() {
+			btnExtract.Enabled = false;
+			btnReplace.Enabled = false;
+			lblSizeVal.Text = "";
+			lblTypeVal.Text = "";
+			flpConfigdata.Visible = false;
+			flpStateheader.Visible = true;
+			lblUncompressedSize.Text = "Uncompressed size:";
+			lblUncompressedSizeVal.Text = "";
+			lblFramecountVal.Text = "";
+			lblChecksumVal.Text = "";
+			lblTitleVal.Text = "";
+			panel1.Visible = false;
 		}
 
 		private bool okToClose() {
