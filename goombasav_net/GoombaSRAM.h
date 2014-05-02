@@ -67,7 +67,11 @@ namespace Goombasav {
 		}
 
 		~GoombaSRAM() {
-			if (data != NULL) {
+			this->!GoombaSRAM(); // call finalizer
+		}
+
+		!GoombaSRAM() {
+			if (data != NULL) { // safe to run more than once, because Dispose() will call it
 				free(data);
 				data = NULL;
 			}
