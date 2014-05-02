@@ -77,7 +77,12 @@ namespace goombasav_cs {
 		}
 
 		private void btnReplace_Click(object sender, EventArgs e) {
-
+			OpenFileDialog d = new OpenFileDialog();
+			d.Title = btnReplace.Text;
+			d.Filter = "Game Boy save data (*.sav)|*.sav|All files (*.*)|*.*";
+			if (d.ShowDialog() == DialogResult.OK) {
+				replace(d.FileName);
+			}
 		}
 
 		private void btnExtract_Click(object sender, EventArgs e) {
@@ -107,6 +112,8 @@ namespace goombasav_cs {
 				uint hash = sh.CompressedDataHash();
 				lblHashVal.Text = hash.ToString("X6");
 				hashBox.BackColor = Color.FromArgb((int)(hash | 0xFF000000));
+
+				btnExtract.Enabled = btnReplace.Enabled = (sh.Type == GoombaHeader.SRAMSAVE);
 			} else if (h is Configdata) {
 				flpConfigdata.Visible = true;
 				flpStateheader.Visible = false;
@@ -121,8 +128,10 @@ namespace goombasav_cs {
 				lblChecksumVal.Text = cd.ROMChecksum.ToString("X8"); // The SRAM with this ROM checksum value is currently in 0xe000-0xffff
 
 				panel1.Visible = false;
+				btnExtract.Enabled = btnReplace.Enabled = false;
 			} else {
 				flpConfigdata.Visible = flpStateheader.Visible = panel1.Visible = false;
+				btnExtract.Enabled = btnReplace.Enabled = false;
 			}
 			lblTitleVal.Text = h.Title;
 		}
@@ -133,6 +142,28 @@ namespace goombasav_cs {
 
 		private void Form1_DragDrop(object sender, DragEventArgs e) {
 			throw new NotImplementedException();
+		}
+
+		private void replace(String filename) {
+			byte[] gbc_data_arr = File.ReadAllBytes(filename);
+			object h = listBox1.SelectedItem;
+			if (h == null) {
+				MessageBox.Show("No item is selected.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return;
+			} else if (!(h is Stateheader)) {
+				MessageBox.Show("You cannot replace data for this type of header.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			}
+			try {
+				GoombaSRAM new_data = loaded_sram.CopyAndReplace((Stateheader)h, gbc_data_arr);
+				loaded_sram = new_data;
+				dirty = true;
+
+				int sel = listBox1.SelectedIndex;
+				headerScan();
+				if (listBox1.Items.Count > sel) listBox1.SelectedIndex = sel;
+			} catch (GoombaException e) {
+				MessageBox.Show(e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			}
 		}
 
 		private void resetDescriptionPanel() {
@@ -197,7 +228,7 @@ namespace goombasav_cs {
 
 		private void headerScan() {
 			listBox1.Items.Clear();
-			//resetDescriptionPanel();
+			resetDescriptionPanel();
 			listBox1.Items.AddRange(loaded_sram.Headers.ToArray());
 			if (loaded_sram.Headers.Count == 0) {
 				MessageBox.Show("No headers were found in this file. It may not be valid SRAM data", "Note",
