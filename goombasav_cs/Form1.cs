@@ -73,7 +73,7 @@ namespace goombasav_cs {
 		}
 
 		private void aboutToolStripMenuItem_Click(object sender, EventArgs e) {
-
+			using (AboutForm a = new AboutForm()) a.ShowDialog(this);
 		}
 
 		private void btnReplace_Click(object sender, EventArgs e) {
