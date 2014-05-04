@@ -86,7 +86,26 @@ namespace goombasav_cs {
 		}
 
 		private void btnExtract_Click(object sender, EventArgs e) {
-
+			object h = listBox1.SelectedItem;
+			if (h is Stateheader) {
+				Stateheader sh = (Stateheader)h;
+				byte[] data;
+				try {
+					data = loaded_sram.Extract(sh);
+				} catch (GoombaException ex) {
+					MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+					return;
+				}
+				SaveFileDialog d = new SaveFileDialog();
+				d.Title = btnExtract.Text;
+				d.Filter = "Game Boy save data (*.sav)|*.sav|All files (*.*)|*.*";
+				d.AddExtension = true;
+				if (d.ShowDialog() == DialogResult.OK) {
+					File.WriteAllBytes(d.FileName, data);
+				}
+			} else {
+				MessageBox.Show("Cannot export this type of data.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			}
 		}
 
 		private void listBox1_SelectedIndexChanged(object sender, EventArgs e) {
