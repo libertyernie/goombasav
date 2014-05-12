@@ -219,7 +219,7 @@ void list(const char* gbafile) {
 		printf("%d. ", i);
 		printf("%s\n", stateheader_summary_str(headers[i]));
 		print_indent("  ", stateheader_str(headers[i]));
-		if (headers[i]->size > sizeof(stateheader)) {
+		if (little_endian_conv_16(headers[i]->size) > sizeof(stateheader)) {
 			printf("  [3-byte compressed data hash: %6X]\n", goomba_compressed_data_checksum(headers[i], 3));
 		}
 		i++;
@@ -231,11 +231,6 @@ void list(const char* gbafile) {
 
 int main(int argc, char** argv) {
 	if (argc > 4 || argc < 2) usage();
-
-	if (*(uint16_t *)"\0\xff" < 0x100) {
-		fprintf(stderr, "This program will only run correctly on a little-endian processor.\n");
-		return 1;
-	}
 
 	if (argc == 2) {
 		if (strcmp("--help", argv[1]) == 0 || strcmp("/?", argv[1]) == 0) {

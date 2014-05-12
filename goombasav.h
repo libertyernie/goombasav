@@ -11,6 +11,18 @@
 
 typedef uint32_t goomba_size_t; // want a consistent size for printf. This is an alias for uint32_t, but this makes it clear that we're counting the size of something.
 
+/* 16-bit and 32-bit values in the stateheader are stored as little endian
+(native to the GBA's ARM chip as well as x86 processors.) Use this function
+after getting or before setting a value if your code might run on a big-endian
+processor (e.g. PowerPC.) */
+uint16_t little_endian_conv_16(uint16_t value);
+
+/* 16-bit and 32-bit values in the stateheader are stored as little endian
+(native to the GBA's ARM chip as well as x86 processors.) Use this function
+after getting or before setting a value if your code might run on a big-endian
+processor (e.g. PowerPC.) */
+uint32_t little_endian_conv_32(uint32_t value);
+
 typedef struct {		//(modified stateheader)
 	uint16_t size;
 	uint16_t type;	//=CONFIGSAVE

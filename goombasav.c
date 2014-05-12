@@ -7,6 +7,9 @@
 
 #define goomba_error(...) { sprintf(last_error, __VA_ARGS__); }
 
+#define F16 little_endian_conv_16
+#define F32 little_endian_conv_32
+
 static const char* const sleeptxt[] = { "5min", "10min", "30min", "OFF" };
 static const char* const brightxt[] = { "I", "II", "III", "IIII", "IIIII" };
 
@@ -30,6 +33,30 @@ uint64_t checksum_slow(const void* ptr, size_t length, int output_bytes) {
 		p++;
 	}
 	return sum;
+}
+
+uint16_t little_endian_conv_16(uint16_t value) {
+	if (*(uint16_t *)"\0\xff" < 0x100) {
+		uint16_t buffer;
+		((char*)&buffer)[0] = ((char*)&value)[1];
+		((char*)&buffer)[1] = ((char*)&value)[0];
+		return buffer;
+	} else {
+		return value;
+	}
+}
+
+uint32_t little_endian_conv_32(uint32_t value) {
+	if (*(uint16_t *)"\0\xff" < 0x100) {
+		uint32_t buffer;
+		((char*)&buffer)[0] = ((char*)&value)[3];
+		((char*)&buffer)[1] = ((char*)&value)[2];
+		((char*)&buffer)[2] = ((char*)&value)[1];
+		((char*)&buffer)[3] = ((char*)&value)[0];
+		return buffer;
+	} else {
+		return value;
+	}
 }
 
 /**
@@ -65,9 +92,9 @@ const char* stateheader_typestr(uint16_t type) {
  */
 const char* stateheader_str(const stateheader* sh) {
 	int j = 0;
-	j += sprintf(goomba_strbuf + j, "size: %u\n", sh->size);
-	j += sprintf(goomba_strbuf + j, "type: %s (%u)\n", stateheader_typestr(sh->type), sh->type);
-	if (sh->type == GOOMBA_CONFIGSAVE) {
+	j += sprintf(goomba_strbuf + j, "size: %u\n", F16(sh->size));
+	j += sprintf(goomba_strbuf + j, "type: %s (%u)\n", stateheader_typestr(F16(sh->type)), F16(sh->type));
+	if (F16(sh->type) == GOOMBA_CONFIGSAVE) {
 		configdata* cd = (configdata*)sh;
 		j += sprintf(goomba_strbuf + j, "bordercolor: %u\n", cd->bordercolor);
 		j += sprintf(goomba_strbuf + j, "palettebank: %u\n", cd->palettebank);
@@ -75,14 +102,14 @@ const char* stateheader_str(const stateheader* sh) {
 		j += sprintf(goomba_strbuf + j, "sleep: %s\n", strs.sleep);
 		j += sprintf(goomba_strbuf + j, "autoload state: %s\n", strs.autoload_state);
 		j += sprintf(goomba_strbuf + j, "gamma: %s\n", strs.gamma);
-		j += sprintf(goomba_strbuf + j, "rom checksum: %8X (0xE000-0xFFFF %s)\n", cd->sram_checksum,
-			cd->sram_checksum ? "occupied" : "free");
+		j += sprintf(goomba_strbuf + j, "rom checksum: %8X (0xE000-0xFFFF %s)\n", F32(cd->sram_checksum),
+			cd->sram_checksum != 0 ? "occupied" : "free");
 	} else {
 		j += sprintf(goomba_strbuf + j, "%scompressed_size: %u\n",
-			(sh->uncompressed_size < sh->size ? "" : "un"),
-			sh->uncompressed_size);
-		j += sprintf(goomba_strbuf + j, "framecount: %u\n", sh->framecount);
-		j += sprintf(goomba_strbuf + j, "rom checksum: %8X\n", sh->checksum);
+			(F32(sh->uncompressed_size) < F16(sh->size) ? "" : "un"),
+			F32(sh->uncompressed_size));
+		j += sprintf(goomba_strbuf + j, "framecount: %u\n", F32(sh->framecount));
+		j += sprintf(goomba_strbuf + j, "rom checksum: %8X\n", F32(sh->checksum));
 	}
 	j += sprintf(goomba_strbuf + j, "title: %s", sh->title);
 	return goomba_strbuf;
@@ -95,13 +122,15 @@ const char* stateheader_str(const stateheader* sh) {
 * stateheader_str or stateheader_summary_str will overwrite this buffer.
 */
 const char* stateheader_summary_str(const stateheader* sh) {
-	sprintf(goomba_strbuf, "%s: %s (%u b / %u uncomp)", stateheader_typestr(sh->type), sh->title, sh->size, sh->uncompressed_size);
+	sprintf(goomba_strbuf, "%s: %s (%u b / %u uncomp)", stateheader_typestr(
+		F16(sh->type)), sh->title, F16(sh->size), F32(sh->uncompressed_size));
 	return goomba_strbuf;
 }
 
 int stateheader_plausible(const stateheader* sh) {
-	return sh->type < 3 && sh->size >= sizeof(stateheader) && // check type (0,1,2) and size (at least 48)
-		(sh->type == GOOMBA_CONFIGSAVE || sh->uncompressed_size > 0); // check uncompressed_size, but not for configsave
+	return F16(sh->type) < 3 && F16(sh->size) >= sizeof(stateheader) && // check type (0,1,2) and size (at least 48)
+		(F16(sh->type) == GOOMBA_CONFIGSAVE || sh->uncompressed_size != 0); // check uncompressed_size, but not for configsave
+	// when checking for whether something equals 0, endian conversion is not necessary
 }
 
 /**
@@ -115,7 +144,7 @@ int stateheader_plausible(const stateheader* sh) {
 stateheader* stateheader_advance(const stateheader* sh) {
 	if (!stateheader_plausible(sh)) return NULL;
 
-	uint16_t s = sh->size;
+	uint16_t s = F16(sh->size);
 	char* c = (char*)sh;
 	c += s;
 	return (stateheader*)c;
@@ -137,11 +166,11 @@ stateheader** stateheader_scan(const void* gba_data) {
 	memset(headers, 0, psize * 64);
 
 	uint32_t* check = (uint32_t*)gba_data;
-	if (*check == GOOMBA_STATEID) check++;
+	if (F32(*check) == GOOMBA_STATEID) check++;
 
 	stateheader* sh = (stateheader*)check;
 	int i = 0;
-	while (stateheader_plausible(sh) && i < 64) {
+	while (stateheader_plausible(sh) && i < 63) {
 		headers[i] = sh;
 		i++;
 		sh = stateheader_advance(sh);
@@ -152,7 +181,7 @@ stateheader** stateheader_scan(const void* gba_data) {
 // Uses checksum_slow, and looks at the compressed data (not the header).
 // output_bytes is limited to sizeof(int) at maximum
 uint64_t goomba_compressed_data_checksum(const stateheader* sh, int output_bytes) {
-	return checksum_slow(sh+1, sh->size - sizeof(stateheader), output_bytes);
+	return checksum_slow(sh+1, F16(sh->size) - sizeof(stateheader), output_bytes);
 }
 
 /**
@@ -167,11 +196,11 @@ int64_t goomba_get_configdata_checksum_field(const void* gba_data) {
 
 	int i;
 	for (i = 0; headers[i] != NULL; i++) {
-		if (headers[i]->type == GOOMBA_CONFIGSAVE) {
+		if (F16(headers[i]->type) == GOOMBA_CONFIGSAVE) {
 			// found configdata
 			const configdata* cd = (configdata*)headers[i];
 			free(headers);
-			return cd->sram_checksum; // 0 = clean, postitive = unclean
+			return F32(cd->sram_checksum); // 0 = clean, postitive = unclean
 		}
 	}
 
@@ -198,13 +227,13 @@ char* goomba_cleanup(const void* gba_data_param) {
 
 	int i, j;
 	for (i = 0; headers[i] != NULL; i++) {
-		if (headers[i]->type == GOOMBA_CONFIGSAVE) {
+		if (F16(headers[i]->type) == GOOMBA_CONFIGSAVE) {
 			// found configdata
 			configdata* cd = (configdata*)headers[i];
-			const uint32_t checksum = cd->sram_checksum;
+			const uint32_t checksum = F32(cd->sram_checksum);
 			for (j = 0; headers[j] != NULL; j++) {
 				stateheader* sh = headers[j];
-				if (sh->type == GOOMBA_SRAMSAVE && sh->checksum == checksum) {
+				if (F16(sh->type) == GOOMBA_SRAMSAVE && F32(sh->checksum) == checksum) {
 					// found stateheader
 					free(headers); // so make sure we return something before the loop goes around again!!
 
@@ -234,7 +263,7 @@ char* goomba_cleanup(const void* gba_data_param) {
 void* goomba_extract(const void* gba_data, const stateheader* header_ptr, goomba_size_t* size_output) {
 	const stateheader* sh = (const stateheader*)header_ptr;
 
-	if (sh->type != GOOMBA_SRAMSAVE) {
+	if (F16(sh->type) != GOOMBA_SRAMSAVE) {
 		goomba_error("Error: this program can only extract SRAM data.\n");
 		return NULL;
 	}
@@ -242,14 +271,14 @@ void* goomba_extract(const void* gba_data, const stateheader* header_ptr, goomba
 	const int64_t ck = goomba_get_configdata_checksum_field(gba_data);
 	if (ck < 0) {
 		return NULL;
-	} else if (ck == sh->checksum) {
+	} else if (ck == F32(sh->checksum)) {
 		goomba_error("File is unclean - run goomba_cleanup before trying to extract SRAM, or you might get old data\n");
 		return NULL;
 	} else if (ck != 0) {
 		fprintf(stderr, "File is unclean, but it shouldn't affect retrieval of the data you asked for\n");
 	}
 	
-	lzo_uint compressed_size = sh->size - sizeof(stateheader);
+	lzo_uint compressed_size = F16(sh->size) - sizeof(stateheader);
 	lzo_uint output_size = 32768;
 	const unsigned char* compressed_data = (unsigned char*)header_ptr + sizeof(stateheader);
 	unsigned char* uncompressed_data = (unsigned char*)malloc(output_size);
@@ -280,11 +309,11 @@ goomba_size_t copy_until_invalid_header(void* dest, const stateheader* src_param
 		const stateheader* sh = (const stateheader*)src;
 		if (!stateheader_plausible(sh)) break;
 
-		memcpy(dest, src, sh->size);
+		memcpy(dest, src, F16(sh->size));
 
-		src = (char*)src + sh->size;
-		dest = (char*)dest + sh->size;
-		bytes_copied += sh->size;
+		src = (char*)src + F16(sh->size);
+		dest = (char*)dest + F16(sh->size);
+		bytes_copied += F16(sh->size);
 	}
 	memcpy(dest, src, sizeof(stateheader)); // copy "footer"
 	return bytes_copied + sizeof(stateheader);
@@ -297,7 +326,7 @@ char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* g
 	int64_t ck = goomba_get_configdata_checksum_field(gba_data);
 	if (ck < 0) {
 		return NULL;
-	} else if (ck == sh->checksum) {
+	} else if (ck == F32(sh->checksum)) {
 		// have to clean file
 		goomba_error("File is unclean - run goomba_cleanup before trying to replace SRAM, or your new data might get overwritten");
 		return NULL;
@@ -305,7 +334,7 @@ char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* g
 		fprintf(stderr, "File is unclean, but it shouldn't affect replacement of the data you asked for\n");
 	}
 
-	if (sh->type != GOOMBA_SRAMSAVE) {
+	if (F16(sh->type) != GOOMBA_SRAMSAVE) {
 		goomba_error("Error - This program cannot replace non-SRAM data.\n");
 		return NULL;
 	}
@@ -313,7 +342,7 @@ char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* g
 	// sh->uncompressed_size is valid for Goomba Color.
 	// For Goomba, it's actually compressed size (and will be less than sh->size).
 	goomba_size_t uncompressed_size;
-	if (sh->size > sh->uncompressed_size) {
+	if (F16(sh->size) > F32(sh->uncompressed_size)) {
 		// Uncompress to a temporary location, just so we can see how big it is
 		goomba_size_t output;
 		void* dump = goomba_extract(gba_data, sh, &output);
@@ -324,7 +353,7 @@ char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* g
 		uncompressed_size = output;
 	} else {
 		// Goomba Color header - use size from there
-		uncompressed_size = sh->uncompressed_size;
+		uncompressed_size = F32(sh->uncompressed_size);
 	}
 	
 	if (gbc_length < uncompressed_size) {
@@ -341,7 +370,7 @@ char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* g
 		goomba_error("Warning: unknown data at end of GBC save file - only first %u bytes will be used\n", uncompressed_size);
 	}
 
-	if (sh->type != GOOMBA_SRAMSAVE) {
+	if (F16(sh->type) != GOOMBA_SRAMSAVE) {
 		goomba_error("The data at gba_header is not SRAM data.\n");
 		return NULL;
 	}
@@ -361,7 +390,7 @@ char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* g
 
 	// backup data that comes after this header
 	unsigned char* backup = (unsigned char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
-	goomba_size_t backup_len = copy_until_invalid_header(backup, (stateheader*)(gba_header_ptr + sh->size));
+	goomba_size_t backup_len = copy_until_invalid_header(backup, (stateheader*)(gba_header_ptr + F16(sh->size)));
 
 	// compress gbc sram
 	lzo_uint compressed_size;
@@ -374,20 +403,22 @@ char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* g
 	working += compressed_size;
 	fprintf(stderr, "Compressed %u bytes (compressed size: %lu)\n", uncompressed_size, compressed_size);
 
-	if (sh->size > sh->uncompressed_size) {
+	if (F16(sh->size) > F32(sh->uncompressed_size)) {
 		// Goomba header (not Goomba Color)
-		new_sh->uncompressed_size = compressed_size;
+		new_sh->uncompressed_size = F32(compressed_size);
 	}
 
-	new_sh->size = (uint16_t)(compressed_size + sizeof(stateheader));
+	new_sh->size = F16((uint16_t)(compressed_size + sizeof(stateheader)));
 	// pad to 4 bytes!
 	// if I don't do this, goomba color might not load the palette settings, or seemingly 'forget' them later
 	// btw, the settings are stored in the configdata struct defined in goombasav.h
-	while (new_sh->size % 4 != 0) {
+	uint16_t s = F16(new_sh->size);
+	while (s % 4 != 0) {
 		*working = 0;
 		working++;
-		new_sh->size++;
+		s++;
 	}
+	new_sh->size = F16(s);
 
 	goomba_size_t used = working - goomba_new_sav;
 	if (used + backup_len > GOOMBA_COLOR_AVAILABLE_SIZE) {
