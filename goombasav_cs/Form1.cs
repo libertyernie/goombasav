@@ -156,11 +156,33 @@ namespace goombasav_cs {
 		}
 
 		private void Form1_DragEnter(object sender, DragEventArgs e) {
-			throw new NotImplementedException();
+			e.Effect = DragDropEffects.None;
+			if (e.Data.GetDataPresent(DataFormats.FileDrop)) {
+				string[] arr = (string[])e.Data.GetData(DataFormats.FileDrop);
+				if (arr.Length == 1) {
+					string pathname = arr[0];
+					if (pathname.EndsWith(".sav", System.StringComparison.InvariantCultureIgnoreCase)) {
+						e.Effect = DragDropEffects.Link;
+					}
+				}
+			}
 		}
 
 		private void Form1_DragDrop(object sender, DragEventArgs e) {
-			throw new NotImplementedException();
+			string[] arr = (string[])e.Data.GetData(DataFormats.FileDrop);
+			int first = 0;
+			using (FileStream stream = new FileStream(arr[0], FileMode.Open, FileAccess.Read)) {
+				for (int i=0; i<4; i++) {
+					first += stream.ReadByte() << 8 * i;
+				}
+			}
+			if ((uint)first == GoombaHeader.STATEID) {
+				// try open file
+				load(arr[0]);
+			} else {
+				// try replace
+				replace(arr[0]);
+			}
 		}
 
 		private void replace(String filename) {

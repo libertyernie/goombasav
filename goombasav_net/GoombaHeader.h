@@ -25,6 +25,7 @@ namespace Goombasav {
 		static uint16_t STATESAVE = GOOMBA_STATESAVE;
 		static uint16_t SRAMSAVE = GOOMBA_SRAMSAVE;
 		static uint16_t CONFIGSAVE = GOOMBA_CONFIGSAVE;
+		static uint32_t STATEID = GOOMBA_STATEID;
 
 #pragma region properties
 		property const void* VoidPointer {
