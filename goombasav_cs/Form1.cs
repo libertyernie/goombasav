@@ -235,7 +235,7 @@ namespace goombasav_cs {
 			return true;
 		}
 
-		private void load(String filename) {
+		private void load(string filename) {
 			if (!okToClose()) return;
 			byte[] arr = System.IO.File.ReadAllBytes(filename);
 			if (arr.Length > GoombaSRAM.ExpectedSize) {
@@ -245,6 +245,7 @@ namespace goombasav_cs {
 			}
 			try {
 				loaded_sram = new GoombaSRAM(arr, true);
+				dirty = false;
 			} catch (GoombaException e) {
 				MessageBox.Show(e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				return;
