@@ -13,6 +13,16 @@ using System.Windows.Forms;
 
 namespace goombasav_cs {
 	public partial class Form1 : Form {
+		/// <summary>
+		/// The main entry point for the application.
+		/// </summary>
+		[STAThread]
+		static void Main() {
+			Application.EnableVisualStyles();
+			Application.SetCompatibleTextRenderingDefault(false);
+			Application.Run(new Form1("C:/Users/Owner/Desktop/SharedFolder/regular.sav"));
+		}
+
 		const String TITLE = "Goomba Save Manager";
 
 		private GoombaSRAM loaded_sram;
