@@ -51,7 +51,7 @@
 			this.label2.Name = "label2";
 			this.label2.Size = new System.Drawing.Size(82, 17);
 			this.label2.TabIndex = 1;
-			this.label2.Text = "2014-05-04";
+			this.label2.Text = "2014-05-13";
 			// 
 			// label3
 			// 
@@ -110,11 +110,11 @@
 			// label6
 			// 
 			this.label6.AutoSize = true;
-			this.label6.Location = new System.Drawing.Point(290, 9);
+			this.label6.Location = new System.Drawing.Point(383, 9);
 			this.label6.Name = "label6";
-			this.label6.Size = new System.Drawing.Size(155, 17);
+			this.label6.Size = new System.Drawing.Size(62, 17);
 			this.label6.TabIndex = 7;
-			this.label6.Text = "C# version / C++ library";
+			this.label6.Text = "C# / C++";
 			// 
 			// AboutForm
 			// 
