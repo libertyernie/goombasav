@@ -17,10 +17,10 @@ namespace goombasav_cs {
 		/// The main entry point for the application.
 		/// </summary>
 		[STAThread]
-		static void Main() {
+		static void Main(string[] args) {
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
-			Application.Run(new Form1("C:/Users/Owner/Desktop/SharedFolder/regular.sav"));
+			Application.Run(new Form1(args.Length > 0 ? args[0] : null));
 		}
 
 		const String TITLE = "Goomba Save Manager";
@@ -44,16 +44,17 @@ namespace goombasav_cs {
 
 			filePath = null;
 
-			/*this->DragEnter += gcnew System::Windows::Forms::DragEventHandler(this, &goombasav_clr::MainForm::OnDragEnter);
-			this->DragDrop += gcnew System::Windows::Forms::DragEventHandler(this, &goombasav_clr::MainForm::OnDragDrop);
-			this->AllowDrop = true;*/
-
 			this.DragEnter += Form1_DragEnter;
 			this.DragDrop += Form1_DragDrop;
 			this.AllowDrop = true;
 
+			this.Text = TITLE;
 			if (filename != null) {
-				load(filename);
+				try {
+					load(filename);
+				} catch (FileNotFoundException) {
+					MessageBox.Show("File not found: " + filename, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				}
 			}
 		}
 
