@@ -1,0 +1,125 @@
+#Examine the file
+#The "3-byte data hash" is something I made up - 3 bytes is useful because I can show it in the GUI as a color, making it easy to see when something changes
+$ ./goombasav.exe regular.sav
+0. SRAM: TETRIS DX (416 b / 367 uncomp)
+  size: 416
+  type: SRAM (1)
+  compressed_size: 367
+  framecount: 0
+  rom checksum: D527E7DF
+  title: TETRIS DX
+  [3-byte compressed data hash: C8BE2E]
+1. Configuration: CFG (48 b / 0 uncomp)
+  size: 48
+  type: Configuration (2)
+  bordercolor: 0
+  palettebank: 0
+  sleep: 5min
+  autoload state: OFF
+  gamma: I
+  rom checksum: D527E7DF (0xE000-0xFFFF occupied)
+  title: CFG
+2. Savestate: TETRIS DX (3024 b / 2975 uncomp)
+  size: 3024
+  type: Savestate (0)
+  compressed_size: 2975
+  framecount: 724
+  rom checksum: D527E7DF
+  title: TETRIS DX
+  [3-byte compressed data hash: 75D6A5]
+
+#Clean the file - the real data for SRAM #0 is uncompressed at 0xE000, so we have to compress and copy it there before we can do anything else
+$ ./goombasav c regular.sav
+Actual uncompressed size: 8192
+Compressed 8192 bytes (compressed size: 373)
+
+#Examine again - see that #0 changes and the CFG checksum is now 0
+$ ./goombasav regular.sav
+0. SRAM: TETRIS DX (424 b / 373 uncomp)
+  size: 424
+  type: SRAM (1)
+  compressed_size: 373
+  framecount: 0
+  rom checksum: D527E7DF
+  title: TETRIS DX
+  [3-byte compressed data hash: 1359A5]
+1. Configuration: CFG (48 b / 0 uncomp)
+  size: 48
+  type: Configuration (2)
+  bordercolor: 0
+  palettebank: 0
+  sleep: 5min
+  autoload state: OFF
+  gamma: I
+  rom checksum:        0 (0xE000-0xFFFF free)
+  title: CFG
+2. Savestate: TETRIS DX (3024 b / 2975 uncomp)
+  size: 3024
+  type: Savestate (0)
+  compressed_size: 2975
+  framecount: 724
+  rom checksum: D527E7DF
+  title: TETRIS DX
+  [3-byte compressed data hash: 75D6A5]
+
+#Extract the Tetris DX save file
+#The program lists all headers and asks which you want to extract - type 0 for Tetris DX
+$ ./goombasav x regular.sav tetrisdx.sav
+0. SRAM: TETRIS DX (424 b / 373 uncomp)
+1. Configuration: CFG (48 b / 0 uncomp)
+2. Savestate: TETRIS DX (3024 b / 2975 uncomp)
+Extract: 0
+size: 424
+type: SRAM (1)
+compressed_size: 373
+framecount: 0
+rom checksum: D527E7DF
+title: TETRIS DX
+Actual uncompressed size: 8192
+
+#Play the game in VBA
+$ vba/VisualBoyAdvance-M.exe tetrisdx.gbc
+
+#Replace the file - works just like extraction
+$ ./goombasav r regular.sav tetrisdx.sav
+0. SRAM: TETRIS DX (424 b / 373 uncomp)
+1. Configuration: CFG (48 b / 0 uncomp)
+2. Savestate: TETRIS DX (3024 b / 2975 uncomp)
+Replace: 0
+size: 424
+type: SRAM (1)
+compressed_size: 373
+framecount: 0
+rom checksum: D527E7DF
+title: TETRIS DX
+Actual uncompressed size: 8192
+Compressed 8192 bytes (compressed size: 410)
+
+#Examine the file - see that the Tetris DX SRAM has changed
+$ ./goombasav regular.sav
+0. SRAM: TETRIS DX (460 b / 410 uncomp)
+  size: 460
+  type: SRAM (1)
+  compressed_size: 410
+  framecount: 0
+  rom checksum: D527E7DF
+  title: TETRIS DX
+  [3-byte compressed data hash: 7E44FC]
+1. Configuration: CFG (48 b / 0 uncomp)
+  size: 48
+  type: Configuration (2)
+  bordercolor: 0
+  palettebank: 0
+  sleep: 5min
+  autoload state: OFF
+  gamma: I
+  rom checksum:        0 (0xE000-0xFFFF free)
+  title: CFG
+2. Savestate: TETRIS DX (3024 b / 2975 uncomp)
+  size: 3024
+  type: Savestate (0)
+  compressed_size: 2975
+  framecount: 724
+  rom checksum: D527E7DF
+  title: TETRIS DX
+  [3-byte compressed data hash: 75D6A5]
