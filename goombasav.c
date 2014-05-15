@@ -60,10 +60,6 @@ uint32_t little_endian_conv_32(uint32_t value) {
 	}
 }
 
-/**
- * Gets a struct containing pointers to three static strings (which do not
- * need to be deallocated.)
- */
 configdata_misc_strings configdata_get_misc(char misc) {
 	configdata_misc_strings s;
 	s.sleep = sleeptxt[misc & 0x3];
@@ -85,12 +81,6 @@ const char* stateheader_typestr(uint16_t type) {
 	}
 }
 
-/**
- * Returns a multi-line description string that includes all parameters of the
- * given stateheader or configdata structure.
- * This string is stored in a static character buffer, and subsequent calls to
- * stateheader_str or stateheader_summary_str will overwrite this buffer.
- */
 const char* stateheader_str(const stateheader* sh) {
 	int j = 0;
 	j += sprintf(goomba_strbuf + j, "size: %u\n", F16(sh->size));
@@ -116,12 +106,6 @@ const char* stateheader_str(const stateheader* sh) {
 	return goomba_strbuf;
 }
 
-/**
-* Returns a one-line summary string displaying the size and title of the
-* stateheader or configdata structure.
-* This string is stored in a static character buffer, and subsequent calls to
-* stateheader_str or stateheader_summary_str will overwrite this buffer.
-*/
 const char* stateheader_summary_str(const stateheader* sh) {
 	sprintf(goomba_strbuf, "%s: %s (%u b / %u uncomp)", stateheader_typestr(
 		F16(sh->type)), sh->title, F16(sh->size), F32(sh->uncompressed_size));
@@ -134,14 +118,6 @@ int stateheader_plausible(const stateheader* sh) {
 	// when checking for whether something equals 0, endian conversion is not necessary
 }
 
-/**
- * When given a pointer to a stateheader, returns a pointer to where the next
- * stateheader will be located (if any). Use stateheader_plausible to
- * determine if there really is a header at this location.
- *
- * If stateheader_plausible determines that the input is not a valid
- * stateheader, NULL will be returned.
- */
 stateheader* stateheader_advance(const stateheader* sh) {
 	if (!stateheader_plausible(sh)) return NULL;
 
@@ -151,14 +127,6 @@ stateheader* stateheader_advance(const stateheader* sh) {
 	return (stateheader*)c;
 }
 
-/**
-* Scans for valid stateheaders and allocates an array to store them. The array
-* will have a capacity of 64, and any difference between that
-* and the number of headers found will be filled with NULL entries. The last
-* entry (array[63]) is guaranteed to be NULL.
-* NOTE: the gba_data parameter can point to a valid header, or to a sequence
-* equal to GOOMBA_STATEID immediately before a valid header.
-*/
 stateheader** stateheader_scan(const void* gba_data) {
 	// Do not edit gba_data!
 	// We are casting to non-const pointers so the client gets non-const pointers back.
@@ -179,11 +147,6 @@ stateheader** stateheader_scan(const void* gba_data) {
 	return headers;
 }
 
-/**
- * Returns the stateheader in gba_data with the title field = gbc_title,
- * or NULL if there is none. Only the first 15 bytes of gbc_title will be
- * used in the comparison.
- */
 stateheader* stateheader_for(const void* gba_data, const char* gbc_title) {
 	char title[0x10];
 	memcpy(title, gbc_title, 0x0F);
@@ -231,16 +194,6 @@ int64_t goomba_get_configdata_checksum_field(const void* gba_data) {
 	return -1; // not sure when this would happen
 }
 
-/**
- * If there is save data in 0xe000-0xffff (as signaled by the configdata),
- * this function compresses it to where it's supposed to go. In the event that
- * the data passed in is already clean, the same pointer will be returned.
- * NULL will be returned if an error occurs.
- *
- * The given pointer must be at least GOOMBA_COLOR_SRAM_SIZE bytes in length.
- * If it is longer, any information after GOOMBA_COLOR_SRAM_SIZE bytes will be
- * ignored.
- */
 char* goomba_cleanup(const void* gba_data_param) {
 	char gba_data[GOOMBA_COLOR_SRAM_SIZE]; // on stack - do not need to free
 	memcpy(gba_data, gba_data_param, GOOMBA_COLOR_SRAM_SIZE);
@@ -278,11 +231,6 @@ char* goomba_cleanup(const void* gba_data_param) {
 	return (char*)gba_data_param;
 }
 
-/**
- * Allocates memory to store the uncompressed GB/GBC save file extracted from
- * the Goomba Color save file stored in header_ptr, or returns NULL if the
- * decompression failed.
- */
 void* goomba_extract(const void* gba_data, const stateheader* header_ptr, goomba_size_t* size_output) {
 	const stateheader* sh = (const stateheader*)header_ptr;
 
@@ -320,11 +268,6 @@ void* goomba_extract(const void* gba_data, const stateheader* header_ptr, goomba
 	return uncompressed_data;
 }
 
-/**
- * Copies data from the source (which must point to a valid stateheader or
- * configdata) to dest, up to and including the first 48 bytes that do not
- * constitute a valid header.
- */
 goomba_size_t copy_until_invalid_header(void* dest, const stateheader* src_param) {
 	const void* src = src_param;
 	goomba_size_t bytes_copied = 0;

@@ -52,16 +52,89 @@ typedef struct {
 
 const char* goomba_last_error();
 
+/**
+* Gets a struct containing pointers to three static strings (which do not
+* need to be deallocated.)
+*/
 configdata_misc_strings configdata_get_misc(char misc);
+
+/**
+* Returns a multi-line description string that includes all parameters of the
+* given stateheader or configdata structure.
+* This string is stored in a static character buffer, and subsequent calls to
+* stateheader_str or stateheader_summary_str will overwrite this buffer.
+*/
 const char* stateheader_str(const stateheader* sh);
+
+/**
+* Returns a one-line summary string displaying the size and title of the
+* stateheader or configdata structure.
+* This string is stored in a static character buffer, and subsequent calls to
+* stateheader_str or stateheader_summary_str will overwrite this buffer.
+*/
 const char* stateheader_summary_str(const stateheader* sh);
+
 int stateheader_plausible(const stateheader* sh);
+
+/**
+* When given a pointer to a stateheader, returns a pointer to where the next
+* stateheader will be located (if any). Use stateheader_plausible to
+* determine if there really is a header at this location.
+*
+* If stateheader_plausible determines that the input is not a valid
+* stateheader, NULL will be returned.
+*/
 stateheader* stateheader_advance(const stateheader* sh);
+
+/**
+* Scans for valid stateheaders and allocates an array to store them. The array
+* will have a capacity of 64, and any difference between that
+* and the number of headers found will be filled with NULL entries. The last
+* entry (array[63]) is guaranteed to be NULL.
+* NOTE: the gba_data parameter can point to a valid header, or to a sequence
+* equal to GOOMBA_STATEID immediately before a valid header.
+*/
 stateheader** stateheader_scan(const void* gba_data);
+
+/**
+* Returns the stateheader in gba_data with the title field = gbc_title,
+* or NULL if there is none. Only the first 15 bytes of gbc_title will be
+* used in the comparison.
+*/
 stateheader* stateheader_for(const void* gba_data, const char* gbc_title_ptr);
+
+/**
+ * Makes a hash of the compressed data that comes after the given header,
+ * using output_bytes bytes. A three-byte hash can be displayed as a color to
+ * give visual feedback of a change in the data. The maximum of output_bytes is
+ * sizeof(int).
+ */
 uint64_t goomba_compressed_data_checksum(const stateheader* sh, int output_bytes);
+
+/**
+* If there is save data in 0xe000-0xffff (as signaled by the configdata),
+* this function compresses it to where it's supposed to go. In the event that
+* the data passed in is already clean, the same pointer will be returned.
+* NULL will be returned if an error occurs.
+*
+* The given pointer must be at least GOOMBA_COLOR_SRAM_SIZE bytes in length.
+* If it is longer, any information after GOOMBA_COLOR_SRAM_SIZE bytes will be
+* ignored.
+*/
 char* goomba_cleanup(const void* gba_data_param);
+
+/**
+* Allocates memory to store the uncompressed GB/GBC save file extracted from
+* the Goomba Color save file stored in header_ptr, or returns NULL if the
+* decompression failed.
+*/
 void* goomba_extract(const void* gba_data, const stateheader* header_ptr, goomba_size_t* size_output);
+
+/**
+* Copies data from the source (which must point to a valid stateheader or
+* configdata) to dest, up to and including the first 48 bytes that do not
+* constitute a valid header.
+*/
 char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* gbc_sram, goomba_size_t gbc_length);
 
 #endif
