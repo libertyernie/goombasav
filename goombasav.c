@@ -2,6 +2,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "goombasav.h"
 #include "minilzo-2.06/minilzo.h"
 
@@ -176,6 +177,28 @@ stateheader** stateheader_scan(const void* gba_data) {
 		sh = stateheader_advance(sh);
 	}
 	return headers;
+}
+
+/**
+ * Returns the stateheader in gba_data with the title field = gbc_title,
+ * or NULL if there is none. Only the first 15 bytes of gbc_title will be
+ * used in the comparison.
+ */
+stateheader* stateheader_for(const void* gba_data, const char* gbc_title) {
+	char title[0x10];
+	memcpy(title, gbc_title, 0x0F);
+	title[0x0F] = '\0';
+	stateheader* use_this = NULL;
+	stateheader** headers = stateheader_scan(gba_data);
+	for (int i = 0; headers[i] != NULL; i++) {
+		if (strcmp(headers[i]->title, title) == 0) {
+			use_this = headers[i];
+			break;
+		}
+	}
+	free(headers);
+	if (use_this == NULL) sprintf(last_error, "Could not find SRAM data for %s", title);
+	return use_this;
 }
 
 // Uses checksum_slow, and looks at the compressed data (not the header).
