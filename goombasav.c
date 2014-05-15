@@ -256,7 +256,7 @@ void* goomba_extract(const void* gba_data, const stateheader* header_ptr, goomba
 	int r = lzo1x_decompress_safe(compressed_data, compressed_size,
 		uncompressed_data, &output_size,
 		(void*)NULL);
-	fprintf(stderr, "Actual uncompressed size: %lu\n", output_size);
+	//fprintf(stderr, "Actual uncompressed size: %lu\n", output_size);
 	if (r == LZO_E_INPUT_NOT_CONSUMED) {
 		//goomba_error("Warning: input not fully used. Double-check the result to make sure it works.\n");
 	} else if (r < 0) {
@@ -367,7 +367,7 @@ char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* g
 		wrkmem);
 	free(wrkmem);
 	working += compressed_size;
-	fprintf(stderr, "Compressed %u bytes (compressed size: %lu)\n", uncompressed_size, compressed_size);
+	//fprintf(stderr, "Compressed %u bytes (compressed size: %lu)\n", uncompressed_size, compressed_size);
 
 	if (F16(sh->size) > F32(sh->uncompressed_size)) {
 		// Goomba header (not Goomba Color)
