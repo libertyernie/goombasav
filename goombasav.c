@@ -176,7 +176,8 @@ stateheader* stateheader_for(const void* gba_data, const char* gbc_title) {
 	title[0x0F] = '\0';
 	stateheader* use_this = NULL;
 	stateheader** headers = stateheader_scan(gba_data);
-	for (int i = 0; headers[i] != NULL; i++) {
+	int i;
+	for (i = 0; headers[i] != NULL; i++) {
 		if (strcmp(headers[i]->title, title) == 0) {
 			use_this = headers[i];
 			break;
