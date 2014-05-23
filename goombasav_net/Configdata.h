@@ -1,4 +1,6 @@
 #pragma once
+/* Configdata.h - subclass for Goomba's configuration data.
+See GoombaHeader.h for license. */
 #include "GoombaHeader.h"
 
 namespace Goombasav {

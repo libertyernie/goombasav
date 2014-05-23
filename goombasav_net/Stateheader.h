@@ -1,4 +1,6 @@
 #pragma once
+/* Stateheader.h - subclass for SRAM or savestate data.
+See GoombaHeader.h for license. */
 #include "GoombaHeader.h"
 
 using System::Tuple;
