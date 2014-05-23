@@ -22,7 +22,7 @@ const char* GPL_NOTICE = "Goomba Save Manager (GTK frontend)\n"
 "\n"
 "This program is free software: you can redistribute it and/or modify\n"
 "it under the terms of the GNU General Public License as published by\n"
-"the Free Software Foundation, either version 3 of the License, or\n"
+"the Free Software Foundation, either version 2 of the License, or\n"
 "(at your option) any later version.\n"
 "\n"
 "This program is distributed in the hope that it will be useful,\n"
@@ -348,7 +348,7 @@ static void about_click(GtkWidget* widget, gpointer data) {
 		"license", GPL_NOTICE,
 		"program-name", "Goomba Save Manager",
 		"website", "http://github.com/libertyernie/goombasav",
-		"comments", "version 2014-04-30",
+		"comments", "version 2014-05-23",
 		NULL);
 }
 

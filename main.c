@@ -27,7 +27,7 @@ as C++ code (Properties -> C/C++ -> Advanced -> Compile As.)
 #include "goombasav.h"
 #include "platformname.h"
 
-const char* USAGE = "goombasav (2014-05-13)\n"
+const char* USAGE = "goombasav (2014-05-23)\n"
 "Usage: goombasav {x/extract} gba.sav gbc.sav\n"
 "       goombasav {r/replace} gba.sav gbc.sav\n"
 "       goombasav {c/clean} gba.sav [output.sav]\n"
