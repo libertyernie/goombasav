@@ -284,7 +284,7 @@ void* goomba_extract(const void* gba_data, const stateheader* header_ptr, goomba
 	if (r == LZO_E_INPUT_NOT_CONSUMED) {
 		//goomba_error("Warning: input not fully used. Double-check the result to make sure it works.\n");
 	} else if (r < 0) {
-		goomba_error("LZO error code: %d\nLook this up in lzoconf.h.\n", r);
+		goomba_error("Cannot decompress data (lzoconf.h error code %d).\n", r);
 		free(uncompressed_data);
 		return NULL;
 	}
