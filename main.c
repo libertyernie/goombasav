@@ -27,10 +27,10 @@ as C++ code (Properties -> C/C++ -> Advanced -> Compile As.)
 #include "goombasav.h"
 #include "platformname.h"
 
-const char* USAGE = "goombasav (2014-05-23)\n"
+const char* USAGE = "goombasav (2014-06-13)\n"
 "Usage: goombasav {x/extract} gba.sav gbc.sav\n"
 "       goombasav {r/replace} gba.sav gbc.sav\n"
-"       goombasav {c/clean} gba.sav [output.sav]\n"
+"       goombasav {c/clean} gba-in.sav [gba-out.sav]\n"
 "       goombasav gba.sav\n"
 "\n"
 "  x: extract save data from first file -> store in second file\n"
