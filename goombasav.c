@@ -99,8 +99,10 @@ const char* stateheader_typestr(uint16_t type) {
 		return "SRAM";
 	case GOOMBA_CONFIGSAVE:
 		return "Configuration";
+	case GOOMBA_PALETTE: // Used by Goomba Paletted
+		return "Palette";
 	default:
-		return "Unknown"; // Stateheaders with type >2 are rejected by stateheader_plausible
+		return "Unknown"; // Stateheaders with these types are rejected by stateheader_plausible
 	}
 }
 
@@ -136,7 +138,9 @@ const char* stateheader_summary_str(const stateheader* sh) {
 }
 
 int stateheader_plausible(const stateheader* sh) {
-	return F16(sh->type) < 3 && F16(sh->size) >= sizeof(stateheader) && // check type (0,1,2) and size (at least 48)
+	uint16_t type = F16(sh->type);
+	if (type < 0 || type == 3 || type == 4 || type > 5) return 0;
+	return F16(sh->size) >= sizeof(stateheader) && // check size (at least 48)
 		(F16(sh->type) == GOOMBA_CONFIGSAVE || sh->uncompressed_size != 0); // check uncompressed_size, but not for configsave
 	// when checking for whether something equals 0, endian conversion is not necessary
 }

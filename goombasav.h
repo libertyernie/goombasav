@@ -31,6 +31,7 @@ as C++ code (Properties -> C/C++ -> Advanced -> Compile As.)
 #define GOOMBA_STATESAVE 0
 #define GOOMBA_SRAMSAVE 1
 #define GOOMBA_CONFIGSAVE 2
+#define GOOMBA_PALETTE 5
 
 typedef uint32_t goomba_size_t; // want a consistent size for printf. This is an alias for uint32_t, but this makes it clear that we're counting the size of something.
 
