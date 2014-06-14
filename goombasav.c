@@ -1,5 +1,6 @@
 /* goombasav.c - functions to handle Goomba / Goomba Color SRAM
 
+last updated June 13, 2014
 Copyright (C) 2014 libertyernie
 
 This program is free software: you can redistribute it and/or modify
@@ -37,11 +38,18 @@ as C++ code (Properties -> C/C++ -> Advanced -> Compile As.)
 static const char* const sleeptxt[] = { "5min", "10min", "30min", "OFF" };
 static const char* const brightxt[] = { "I", "II", "III", "IIII", "IIIII" };
 
-static char last_error[256];
+static char last_error[256] = "No error has occured yet.";
 static char goomba_strbuf[256];
 
 const char* goomba_last_error() {
 	return (const char*)last_error;
+}
+
+size_t goomba_set_last_error(const char* msg) {
+	size_t len = strnlen(msg, sizeof(last_error)-1);
+	memcpy(last_error, msg, len);
+	last_error[sizeof(last_error)-1] = '\0';
+	return len;
 }
 
 // Covers every byte. It goes one byte at a time, so it's inefficient

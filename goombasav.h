@@ -1,5 +1,6 @@
 /* goombasav.h - functions to handle Goomba / Goomba Color SRAM
 
+last updated June 13, 2014
 Copyright (C) 2014 libertyernie
 
 This program is free software: you can redistribute it and/or modify
@@ -74,7 +75,21 @@ typedef struct {
 	const char* gamma;
 } configdata_misc_strings;
 
+/**
+* Returns the last error encountered by goombasav (for functions that return
+* NULL on error.) This string is stored statically by goombasav and its
+* contents may change over time.
+*/
 const char* goomba_last_error();
+
+/**
+* Set the string buffer used by goomba_last_error to a custom value. If the
+* input string is too long, the resulting goomba_last_error string will be
+* truncated.
+* Returns the number of bytes copied to the buffer (at present, the maximum
+* is 255.)
+*/
+size_t goomba_set_last_error(const char* msg);
 
 /**
 * Gets a struct containing pointers to three static strings (which do not
