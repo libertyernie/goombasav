@@ -1,6 +1,6 @@
 /* goombasav.h - functions to handle Goomba / Goomba Color SRAM
 
-last updated June 13, 2014
+last updated July 3, 2014
 Copyright (C) 2014 libertyernie
 
 This program is free software: you can redistribute it and/or modify
@@ -141,6 +141,11 @@ stateheader** stateheader_scan(const void* gba_data);
 * used in the comparison.
 */
 stateheader* stateheader_for(const void* gba_data, const char* gbc_title_ptr);
+
+/**
+ * Returns true if the given data starts with GOOMBA_STATEID (little endian.)
+ */
+int goomba_is_sram(const void* data);
 
 /**
  * Makes a hash of the compressed data that comes after the given header,

@@ -27,10 +27,11 @@ as C++ code (Properties -> C/C++ -> Advanced -> Compile As.)
 #include "goombasav.h"
 #include "platformname.h"
 
-const char* USAGE = "goombasav (2014-06-13)\n"
+const char* USAGE = "goombasav (2014-07-03)\n"
 "Usage: goombasav {x/extract} gba.sav gbc.sav\n"
 "       goombasav {r/replace} gba.sav gbc.sav\n"
 "       goombasav {c/clean} gba-in.sav [gba-out.sav]\n"
+"       goombasav isok [file1.sav [file2.sav [...]]]\n"
 "       goombasav gba.sav\n"
 "\n"
 "  x: extract save data from first file -> store in second file\n"
@@ -38,6 +39,7 @@ const char* USAGE = "goombasav (2014-06-13)\n"
 "  r: replace data in first file <- read from second file\n"
 "  c: clean sram at 0xE000 in first file -> write to second file if specified,\n"
 "     replace first file otherwise (second file can be - for stdout)\n"
+"  isok: check if the file begins with D8 31 A7 57\n"
 "\n"
 "  one argument: view Goomba headers\n"
 "                (file can be - for stdin)\n"
@@ -250,6 +252,20 @@ void list(const char* gbafile) {
 }
 
 int main(int argc, char** argv) {
+	if (argc >= 2 && strcmp("isok", argv[1]) == 0) {
+		uint32_t id;
+		int exitcode = 0, i;
+		for (i = 2; i < argc; i++) {
+			FILE* f = fopen(argv[i], "rb");
+			size_t br = fread(&id, 1, 4, f);
+			fclose(f);
+			int result = br < 4 ? 0 : goomba_is_sram(&id);
+			printf("%s: %s\n", argv[i], result ? "OK" : "FAILED");
+			if (!result) exitcode = 1;
+		}
+		return exitcode;
+	}
+
 	if (argc > 4 || argc < 2) usage();
 
 	if (argc == 2) {

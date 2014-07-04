@@ -1,6 +1,6 @@
 /* goombasav.c - functions to handle Goomba / Goomba Color SRAM
 
-last updated June 13, 2014
+last updated July 3, 2014
 Copyright (C) 2014 libertyernie
 
 This program is free software: you can redistribute it and/or modify
@@ -52,7 +52,7 @@ size_t goomba_set_last_error(const char* msg) {
 	return len;
 }
 
-// Covers every byte. It goes one byte at a time, so it's inefficient
+// For making a checksum of the compressed data.
 // output_bytes is limited to 8 at maximum
 uint64_t checksum_slow(const void* ptr, size_t length, int output_bytes) {
 	const unsigned char* p = (const unsigned char*)ptr;
@@ -201,9 +201,13 @@ stateheader* stateheader_for(const void* gba_data, const char* gbc_title) {
 }
 
 // Uses checksum_slow, and looks at the compressed data (not the header).
-// output_bytes is limited to sizeof(int) at maximum
+// output_bytes is limited to 8 at maximum
 uint64_t goomba_compressed_data_checksum(const stateheader* sh, int output_bytes) {
 	return checksum_slow(sh+1, F16(sh->size) - sizeof(stateheader), output_bytes);
+}
+
+int goomba_is_sram(const void* data) {
+	return F32(*(uint32_t*)data) == GOOMBA_STATEID;
 }
 
 /**
