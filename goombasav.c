@@ -1,6 +1,6 @@
 /* goombasav.c - functions to handle Goomba / Goomba Color SRAM
 
-last updated July 3, 2014
+last updated September 8, 2014
 Copyright (C) 2014 libertyernie
 
 This program is free software: you can redistribute it and/or modify
@@ -22,7 +22,6 @@ When compiling in Visual Studio, set all goombasav files to compile
 as C++ code (Properties -> C/C++ -> Advanced -> Compile As.)
 */
 
-#include <memory.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -190,7 +189,7 @@ stateheader* stateheader_for(const void* gba_data, const char* gbc_title) {
 	stateheader** headers = stateheader_scan(gba_data);
 	int i;
 	for (i = 0; headers[i] != NULL; i++) {
-		if (strcmp(headers[i]->title, title) == 0) {
+		if (strcmp(headers[i]->title, title) == 0 && headers[i]->type == GOOMBA_SRAMSAVE) {
 			use_this = headers[i];
 			break;
 		}
