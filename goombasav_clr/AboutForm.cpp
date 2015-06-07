@@ -1,2 +1,0 @@
-#include "AboutForm.h"
-

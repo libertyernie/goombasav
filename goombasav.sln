@@ -5,8 +5,6 @@ VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "goombasav", "goombasav.vcxproj", "{705A80A7-65C4-4C28-A081-6571D96125FF}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "goombasav_clr", "goombasav_clr\goombasav_clr.vcxproj", "{BDDE37EF-9D86-408A-B1CB-DB3E49C6D238}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "goombasav_gtk", "goombasav_gtk\goombasav_gtk.vcxproj", "{E1CF112F-A1A9-4F78-B083-C70E41295914}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "goombasav_cs", "goombasav_cs\goombasav_cs.csproj", "{DA7820F8-9E2A-4A17-AC7C-713A21181411}"
@@ -33,16 +31,6 @@ Global
 		{705A80A7-65C4-4C28-A081-6571D96125FF}.Release|Mixed Platforms.Build.0 = Release|Win32
 		{705A80A7-65C4-4C28-A081-6571D96125FF}.Release|Win32.ActiveCfg = Release|Win32
 		{705A80A7-65C4-4C28-A081-6571D96125FF}.Release|Win32.Build.0 = Release|Win32
-		{BDDE37EF-9D86-408A-B1CB-DB3E49C6D238}.Debug|Any CPU.ActiveCfg = Debug|Win32
-		{BDDE37EF-9D86-408A-B1CB-DB3E49C6D238}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
-		{BDDE37EF-9D86-408A-B1CB-DB3E49C6D238}.Debug|Mixed Platforms.Build.0 = Debug|Win32
-		{BDDE37EF-9D86-408A-B1CB-DB3E49C6D238}.Debug|Win32.ActiveCfg = Debug|Win32
-		{BDDE37EF-9D86-408A-B1CB-DB3E49C6D238}.Debug|Win32.Build.0 = Debug|Win32
-		{BDDE37EF-9D86-408A-B1CB-DB3E49C6D238}.Release|Any CPU.ActiveCfg = Release|Win32
-		{BDDE37EF-9D86-408A-B1CB-DB3E49C6D238}.Release|Mixed Platforms.ActiveCfg = Release|Win32
-		{BDDE37EF-9D86-408A-B1CB-DB3E49C6D238}.Release|Mixed Platforms.Build.0 = Release|Win32
-		{BDDE37EF-9D86-408A-B1CB-DB3E49C6D238}.Release|Win32.ActiveCfg = Release|Win32
-		{BDDE37EF-9D86-408A-B1CB-DB3E49C6D238}.Release|Win32.Build.0 = Release|Win32
 		{E1CF112F-A1A9-4F78-B083-C70E41295914}.Debug|Any CPU.ActiveCfg = Debug|Win32
 		{E1CF112F-A1A9-4F78-B083-C70E41295914}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
 		{E1CF112F-A1A9-4F78-B083-C70E41295914}.Debug|Mixed Platforms.Build.0 = Debug|Win32
