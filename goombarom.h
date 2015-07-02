@@ -22,6 +22,10 @@ as C++ code (Properties -> C/C++ -> Advanced -> Compile As.)
 
 #include <stddef.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Finds the (expected) size of a Game Boy ROM, given a pointer to the start
 of the ROM image. */
 unsigned int gb_rom_size(const void* rom_start);
@@ -41,3 +45,7 @@ string will be allocated in an internal 16-byte buffer which will be
 overwritten later. If buffer is not NULL, the title will be copied to buffer,
 and buffer will be returned. */
 const char* gb_get_title(const void* rom, char* buffer);
+
+#ifdef __cplusplus
+}
+#endif

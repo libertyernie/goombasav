@@ -1,6 +1,6 @@
 /* goombasav.h - functions to handle Goomba / Goomba Color SRAM
 
-last updated July 3, 2014
+last updated July 5, 2014
 Copyright (C) 2014 libertyernie
 
 This program is free software: you can redistribute it and/or modify
@@ -33,6 +33,10 @@ as C++ code (Properties -> C/C++ -> Advanced -> Compile As.)
 #define GOOMBA_SRAMSAVE 1
 #define GOOMBA_CONFIGSAVE 2
 #define GOOMBA_PALETTE 5
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef uint32_t goomba_size_t; // want a consistent size for printf. This is an alias for uint32_t, but this makes it clear that we're counting the size of something.
 
@@ -143,16 +147,15 @@ stateheader** stateheader_scan(const void* gba_data);
 stateheader* stateheader_for(const void* gba_data, const char* gbc_title_ptr);
 
 /**
- * Returns true if the given data starts with GOOMBA_STATEID (little endian.)
- */
+* Returns true if the given data starts with GOOMBA_STATEID (little endian.)
+*/
 int goomba_is_sram(const void* data);
 
 /**
- * Makes a hash of the compressed data that comes after the given header,
- * using output_bytes bytes. A three-byte hash can be displayed as a color to
- * give visual feedback of a change in the data. The maximum of output_bytes is
- * sizeof(int).
- */
+* Makes a hash of the compressed data that comes after the given header,
+* using output_bytes bytes. A three-byte hash can be displayed as a color to
+* give visual feedback of a change in the data. The maximum output_bytes is 8.
+*/
 uint64_t goomba_compressed_data_checksum(const stateheader* sh, int output_bytes);
 
 /**
@@ -181,4 +184,7 @@ void* goomba_extract(const void* gba_data, const stateheader* header_ptr, goomba
 */
 char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* gbc_sram, goomba_size_t gbc_length);
 
+#ifdef __cplusplus
+}
+#endif
 #endif
