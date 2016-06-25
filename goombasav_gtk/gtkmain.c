@@ -17,7 +17,7 @@ const char* goomba_basename(const char* c) {
 }
 
 const char* GPL_NOTICE = "Goomba Save Manager (GTK frontend)\n"
-"Copyright (C) 2014 libertyernie\n"
+"Copyright (C) 2016 libertyernie\n"
 "http://github.com/libertyernie/goombasav\n"
 "\n"
 "This program is free software: you can redistribute it and/or modify\n"
@@ -344,11 +344,11 @@ static void replace_click(GtkWidget* widget, gpointer data) {
 
 static void about_click(GtkWidget* widget, gpointer data) {
 	gtk_show_about_dialog(GTK_WINDOW(window),
-		"copyright", "Copyright (C) 2014 libertyernie",
+		"copyright", "Copyright (C) 2014-2016 libertyernie",
 		"license", GPL_NOTICE,
 		"program-name", "Goomba Save Manager",
 		"website", "http://github.com/libertyernie/goombasav",
-		"comments", "version 2014-05-23",
+		"comments", "version 2016-06-25",
 		NULL);
 }
 

@@ -1,6 +1,6 @@
 /* main.c - command line interface to goombasav
 
-Copyright (C) 2014 libertyernie
+Copyright (C) 2014-2016 libertyernie
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ as C++ code (Properties -> C/C++ -> Advanced -> Compile As.)
 #include "goombasav.h"
 #include "platformname.h"
 
-const char* USAGE = "goombasav (2014-07-03)\n"
+const char* USAGE = "goombasav (2016-06-25)\n"
 "Usage: goombasav {x/extract} gba.sav gbc.sav\n"
 "       goombasav {r/replace} gba.sav gbc.sav\n"
 "       goombasav {c/clean} gba-in.sav [gba-out.sav]\n"
@@ -48,7 +48,7 @@ const char* USAGE = "goombasav (2014-07-03)\n"
 "  /? or --help: print this message\n";
 
 const char* GPL_NOTICE = "goombasav - extract and replace Goomba/Goomba Color save files\n"
-"Copyright (C) 2014 libertyernie\n"
+"Copyright (C) 2014-2016 libertyernie\n"
 "https://github.com/libertyernie/goombasav\n"
 "\n"
 "This program is free software: you can redistribute it and/or modify\n"
