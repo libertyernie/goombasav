@@ -75,7 +75,9 @@ namespace Goombasav {
 		// arr must be at least ExpectedSize bytes. If it is more, the extra bytes will be ignored.
 		GoombaSRAM(array<unsigned char>^ arr, bool clean) {
 			if (arr->Length < GOOMBA_COLOR_SRAM_SIZE) {
-				throw gcnew GoombaException("Array length is smaller than " + GOOMBA_COLOR_SRAM_SIZE + " bytes");
+				array<unsigned char>^ arr2 = gcnew array<unsigned char>(GOOMBA_COLOR_SRAM_SIZE);
+				Array::Copy(arr, arr2, arr->Length);
+				arr = arr2;
 			}
 			pin_ptr<unsigned char> pin = &arr[0];
 			init(pin, clean);
