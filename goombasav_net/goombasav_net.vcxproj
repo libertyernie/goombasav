@@ -79,18 +79,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\goombarom.c" />
     <ClCompile Include="..\goombasav.c" />
     <ClCompile Include="..\minilzo\minilzo.c" />
     <ClCompile Include="AssemblyInfo.cpp" />
     <ClCompile Include="expose.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\goombarom.h" />
     <ClInclude Include="..\goombasav.h" />
     <ClInclude Include="..\minilzo-2.06\lzoconf.h" />
     <ClInclude Include="..\minilzo-2.06\lzodefs.h" />
     <ClInclude Include="..\minilzo-2.06\minilzo.h" />
     <ClInclude Include="Configdata.h" />
     <ClInclude Include="GoombaHeader.h" />
+    <ClInclude Include="ExtractedGBROM.h" />
     <ClInclude Include="GoombaSRAM.h" />
     <ClInclude Include="Stateheader.h" />
   </ItemGroup>

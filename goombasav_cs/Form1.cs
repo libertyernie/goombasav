@@ -23,13 +23,15 @@ namespace goombasav_cs {
 			Application.Run(new Form1(args.Length > 0 ? args[0] : null));
 		}
 
-		const String TITLE = "Goomba Save Manager";
+		const string TITLE = "Goomba Save Manager";
 
 		private GoombaSRAM loaded_sram;
-		private String filePath;
+		private List<ExtractedGBROM> loaded_rom_contents;
+
+		private string filePath;
 		private bool dirty;
 
-		public Form1(String filename) {
+		public Form1(string filename) {
 			InitializeComponent();
 
 			// Update status of Save and Save As items whenever File menu is opened
@@ -60,7 +62,7 @@ namespace goombasav_cs {
 
 		private void openToolStripMenuItem_Click(object sender, EventArgs e) {
 			OpenFileDialog d = new OpenFileDialog();
-			d.Filter = "Game Boy Advance save data (*.sav)|*.sav|All files (*.*)|*.*";
+			d.Filter = "Goomba save data (*.sav)|*.sav|Goomba ROMs (*.gba)|*.gba|All files (*.*)|*.*";
 			if (d.ShowDialog() == DialogResult.OK) {
 				load(d.FileName);
 			}
@@ -72,7 +74,7 @@ namespace goombasav_cs {
 
 		private void saveAsToolStripMenuItem_Click(object sender, EventArgs e) {
 			SaveFileDialog d = new SaveFileDialog();
-			d.Filter = "Game Boy Advance save data (*.sav)|*.sav|All files (*.*)|*.*";
+			d.Filter = "Goomba save data (*.sav)|*.sav|Goomba ROMs (*.gba)|*.gba|All files (*.*)|*.*";
 			d.AddExtension = true;
 			if (d.ShowDialog() == DialogResult.OK) {
 				save(d.FileName);
@@ -114,17 +116,37 @@ namespace goombasav_cs {
 				if (d.ShowDialog() == DialogResult.OK) {
 					File.WriteAllBytes(d.FileName, data);
 				}
+			} else if (h is ExtractedGBROM) {
+				SaveFileDialog d = new SaveFileDialog();
+				d.Title = btnExtract.Text;
+				d.Filter = "Game Boy ROMs (*.gb, *.gbc, *.sgb)|*.gb,*.gbc,*.sgb|All files (*.*)|*.*";
+				d.FileName = ((ExtractedGBROM)h).ToString();
+				d.AddExtension = true;
+				if (d.ShowDialog() == DialogResult.OK) {
+					File.WriteAllBytes(d.FileName, ((ExtractedGBROM)h).Data);
+				}
 			} else {
 				MessageBox.Show("Cannot export this type of data.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
 		}
 
 		private void listBox1_SelectedIndexChanged(object sender, EventArgs e) {
-			GoombaHeader h = (GoombaHeader)listBox1.SelectedItem;
+			object o = listBox1.SelectedItem;
+			if (o is ExtractedGBROM) {
+				ExtractedGBROM r = (ExtractedGBROM)o;
+				lblSizeVal.Text = r.Data.Length + " bytes";
+				lblTypeVal.Text = "GB ROM";
+				flpConfigdata.Visible = flpStateheader.Visible = panel1.Visible = false;
+				btnExtract.Enabled = true;
+				btnReplace.Enabled = false;
+				return;
+			}
+
+			GoombaHeader h = (GoombaHeader)o;
 			lblSizeVal.Text = h.Size + " bytes";
-			lblTypeVal.Text = h.Type == Stateheader.STATESAVE ? "Savestate"
-				: h.Type == Stateheader.SRAMSAVE ? "SRAM"
-				: h.Type == Stateheader.CONFIGSAVE ? "Config"
+			lblTypeVal.Text = h.Type == GoombaHeader.STATESAVE ? "Savestate"
+				: h.Type == GoombaHeader.SRAMSAVE ? "SRAM"
+				: h.Type == GoombaHeader.CONFIGSAVE ? "Config"
 				: "Unknown";
 			if (h is Stateheader) {
 				Stateheader sh = (Stateheader)h;
@@ -196,25 +218,26 @@ namespace goombasav_cs {
 			}
 		}
 
-		private void replace(String filename) {
+		private void replace(string filename) {
 			byte[] gbc_data_arr = File.ReadAllBytes(filename);
 			object h = listBox1.SelectedItem;
 			if (h == null) {
 				MessageBox.Show("No item is selected.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				return;
-			} else if (!(h is Stateheader)) {
-				MessageBox.Show("You cannot replace data for this type of header.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-			}
-			try {
-				GoombaSRAM new_data = loaded_sram.CopyAndReplace((Stateheader)h, gbc_data_arr);
-				loaded_sram = new_data;
-				dirty = true;
+			} else if (h is Stateheader) {
+				try {
+					GoombaSRAM new_data = loaded_sram.CopyAndReplace((Stateheader)h, gbc_data_arr);
+					loaded_sram = new_data;
+					dirty = true;
 
-				int sel = listBox1.SelectedIndex;
-				headerScan();
-				if (listBox1.Items.Count > sel) listBox1.SelectedIndex = sel;
-			} catch (GoombaException e) {
-				MessageBox.Show(e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+					int sel = listBox1.SelectedIndex;
+					headerScan();
+					if (listBox1.Items.Count > sel) listBox1.SelectedIndex = sel;
+				} catch (GoombaException e) {
+					MessageBox.Show(e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				}
+			} else {
+				MessageBox.Show("You cannot replace data for this type of header.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
 		}
 
@@ -248,29 +271,38 @@ namespace goombasav_cs {
 
 		private void load(string filename) {
 			if (!okToClose()) return;
-			byte[] arr = System.IO.File.ReadAllBytes(filename);
-			if (arr.Length > GoombaSRAM.ExpectedSize) {
-				MessageBox.Show("This file is more than " + GoombaSRAM.ExpectedSize +
-					" bytes. If you overwrite the file, the last " + (arr.Length - GoombaSRAM.ExpectedSize) +
-					" bytes will be discarded.", "Note", MessageBoxButtons.OK, MessageBoxIcon.Information);
-			}
+
 			try {
-				loaded_sram = new GoombaSRAM(arr, true);
-				dirty = false;
+				byte[] arr = System.IO.File.ReadAllBytes(filename);
+
+				var extractedRoms = ExtractedGBROM.Extract(arr);
+				if (extractedRoms.Any()) {
+					loaded_sram = null;
+					loaded_rom_contents = extractedRoms;
+				} else {
+					if (arr.Length > GoombaSRAM.ExpectedSize) {
+						MessageBox.Show("This file is more than " + GoombaSRAM.ExpectedSize +
+							" bytes. If you overwrite the file, the last " + (arr.Length - GoombaSRAM.ExpectedSize) +
+							" bytes will be discarded.", "Note", MessageBoxButtons.OK, MessageBoxIcon.Information);
+					}
+					loaded_sram = new GoombaSRAM(arr, true);
+					loaded_rom_contents = null;
+					dirty = false;
+				}
+
+				filePath = filename;
+				this.Text = (filename == null)
+					? TITLE
+					: TITLE + " - " + Path.GetFileName(filename);
+
+				headerScan();
 			} catch (GoombaException e) {
 				MessageBox.Show(e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				return;
 			}
-			
-			filePath = filename;
-			this.Text = (filename == null)
-				? TITLE
-				: TITLE + " - " + Path.GetFileName(filename);
-
-			headerScan();
 		}
 
-		private void save(String path) {
+		private void save(string path) {
 			byte[] arr = loaded_sram.ToArray();
 			File.WriteAllBytes(path, arr);
 
@@ -282,11 +314,21 @@ namespace goombasav_cs {
 		private void headerScan() {
 			listBox1.Items.Clear();
 			resetDescriptionPanel();
-			listBox1.Items.AddRange(loaded_sram.Headers.ToArray());
-			if (loaded_sram.Headers.Count == 0) {
-				MessageBox.Show("No headers were found in this file. It may not be valid SRAM data", "Note",
-					MessageBoxButtons.OK,
-					MessageBoxIcon.Information);
+			if (loaded_sram != null) {
+				listBox1.Items.AddRange(loaded_sram.Headers.ToArray());
+				if (loaded_sram.Headers.Count == 0) {
+					MessageBox.Show("No headers were found in this file. It may not be valid SRAM data", "Note",
+						MessageBoxButtons.OK,
+						MessageBoxIcon.Information);
+				}
+			}
+			if (loaded_rom_contents != null) {
+				listBox1.Items.AddRange(loaded_rom_contents.ToArray());
+				if (loaded_rom_contents.Count == 0) {
+					MessageBox.Show("No Game Boy ROMs were not found in this file. It may not be a valid Goomba ROM", "Note",
+						MessageBoxButtons.OK,
+						MessageBoxIcon.Information);
+				}
 			}
 		}
 	}

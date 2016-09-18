@@ -27,6 +27,9 @@
     <ClCompile Include="..\minilzo\minilzo.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\goombarom.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GoombaSRAM.h">
@@ -51,6 +54,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Configdata.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\goombarom.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ExtractedGBROM.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
