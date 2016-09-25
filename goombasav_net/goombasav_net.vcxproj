@@ -93,7 +93,7 @@
     <ClInclude Include="..\minilzo-2.06\minilzo.h" />
     <ClInclude Include="Configdata.h" />
     <ClInclude Include="GoombaHeader.h" />
-    <ClInclude Include="ExtractedGBROM.h" />
+    <ClInclude Include="GBROM.h" />
     <ClInclude Include="GoombaSRAM.h" />
     <ClInclude Include="Stateheader.h" />
   </ItemGroup>

@@ -27,11 +27,11 @@ using namespace System::Collections::Generic;
 using System::Collections::ObjectModel::ReadOnlyCollection;
 
 namespace Goombasav {
-	public ref class ExtractedGBROM {
+	public ref class GBROM {
 	private:
 		array<unsigned char>^ data;
 
-		ExtractedGBROM(array<unsigned char>^ data) {
+		GBROM(array<unsigned char>^ data) {
 			this->data = data;
 		}
 	public:
@@ -46,8 +46,20 @@ namespace Goombasav {
 			}
 		}
 
-		static List<ExtractedGBROM^>^ Extract(array<unsigned char>^ source) {
-			List<ExtractedGBROM^>^ list = gcnew List<ExtractedGBROM^>();
+		uint32_t GetChecksum() {
+			pin_ptr<unsigned char> p = &data[0];
+
+			uint32_t sum = 0;
+			int i;
+			for (i = 0; i<128; i++) {
+				sum += *p | (*(p + 1) << 8) | (*(p + 2) << 16) | (*(p + 3) << 24);
+				p += 128;
+			}
+			return sum;
+		}
+
+		static List<GBROM^>^ Extract(array<unsigned char>^ source) {
+			List<GBROM^>^ list = gcnew List<GBROM^>();
 
 			pin_ptr<unsigned char> source_ptr = &source[0];
 			const void* ptr = gb_first_rom(source_ptr, source->Length);
@@ -55,7 +67,7 @@ namespace Goombasav {
 				array<unsigned char>^ copy = gcnew array<unsigned char>(gb_rom_size(ptr));
 				pin_ptr<unsigned char> copy_ptr = &copy[0];
 				memmove(copy_ptr, ptr, copy->Length);
-				list->Add(gcnew ExtractedGBROM(copy));
+				list->Add(gcnew GBROM(copy));
 				ptr = gb_next_rom(source_ptr, source->Length, ptr);
 			}
 

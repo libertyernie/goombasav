@@ -59,7 +59,7 @@
     <ClInclude Include="..\goombarom.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ExtractedGBROM.h">
+    <ClInclude Include="GBROM.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
