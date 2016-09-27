@@ -62,5 +62,8 @@
     <ClInclude Include="cli_GoombaSRAM.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="cli_ExtractedROM.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

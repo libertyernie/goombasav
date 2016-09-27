@@ -1,5 +1,5 @@
 #pragma once
-/* GoombaROM.h - class to encapsulate Game Boy ROM extracted from Goomba ROM or other data file
+/* cli_GameBoyROM.h - class to encapsulate Game Boy ROM extracted from Goomba ROM or other data file
 
 Copyright (C) 2016 libertyernie
 
@@ -19,6 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 https://github.com/libertyernie/goombasav */
 
 #include "../goombarom.h"
+#include "cli_ExtractedROM.h"
 #include <cstdlib>
 #include <cstring>
 
@@ -27,7 +28,7 @@ using namespace System::Collections::Generic;
 using System::Collections::ObjectModel::ReadOnlyCollection;
 
 namespace Goombasav {
-	public ref class GameBoyROM {
+	public ref class GameBoyROM : public ExtractedROM {
 	private:
 		array<unsigned char>^ data;
 
@@ -35,18 +36,23 @@ namespace Goombasav {
 			this->data = data;
 		}
 	public:
-		String^ ToString() override {
-			pin_ptr<unsigned char> data_ptr = &data[0];
-			const char* name = gb_get_title(data_ptr, NULL);
-			return gcnew String(name);
+		property String^ Name {
+			virtual String^ get() {
+				pin_ptr<unsigned char> data_ptr = &data[0];
+				const char* name = gb_get_title(data_ptr, NULL);
+				return gcnew String(name);
+			}
 		}
 		property array<unsigned char>^ Data {
-			array<unsigned char>^ get() {
+			virtual array<unsigned char>^ get() {
 				return data;
 			}
 		}
+		String^ ToString() override {
+			return this->Name;
+		}
 
-		uint32_t GetChecksum() {
+		virtual uint32_t GetChecksum() {
 			pin_ptr<unsigned char> p = &data[0];
 
 			uint32_t sum = 0;

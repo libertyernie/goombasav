@@ -8,3 +8,4 @@ Release
 ipch
 *.aps
 *.db
+*.opendb

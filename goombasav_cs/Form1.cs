@@ -26,7 +26,7 @@ namespace goombasav_cs {
 		const string TITLE = "Goomba Save Manager";
 
 		private GoombaSRAM loaded_sram;
-		private List<GameBoyROM> loaded_rom_contents;
+		private List<ExtractedROM> loaded_rom_contents;
 
 		private string filePath;
 		private bool dirty;
@@ -116,16 +116,19 @@ namespace goombasav_cs {
 				if (d.ShowDialog() == DialogResult.OK) {
 					File.WriteAllBytes(d.FileName, data);
 				}
-			} else if (h is GameBoyROM) {
-				SaveFileDialog d = new SaveFileDialog();
+			} else if (h is ExtractedROM) {
+                ExtractedROM r = (ExtractedROM)h;
+                SaveFileDialog d = new SaveFileDialog();
 				d.Title = btnExtract.Text;
-				d.Filter = "Game Boy ROMs (*.gb, *.gbc)|*.gb,*.gbc|All files (*.*)|*.*";
+                d.Filter =
+                    h is GameBoyROM ? "Game Boy ROMs (*.gb, *.gbc)|*.gb,*.gbc|All files (*.*)|*.*"
+                    : "All files (*.*)|*.*";
                 d.FileName = filePath == null || loaded_rom_contents.Count > 1
-                    ? ((GameBoyROM)h).ToString()
+                    ? r.Name
                     : Path.GetFileNameWithoutExtension(filePath);
 				d.AddExtension = true;
 				if (d.ShowDialog() == DialogResult.OK) {
-					File.WriteAllBytes(d.FileName, ((GameBoyROM)h).Data);
+					File.WriteAllBytes(d.FileName, r.Data);
 				}
 			} else {
 				MessageBox.Show("Cannot export this type of data.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -140,7 +143,7 @@ namespace goombasav_cs {
 				lblTypeVal.Text = "GB ROM";
 				flpConfigdata.Visible = flpStateheader.Visible = panel1.Visible = false;
                 lblChecksumVal.Text = r.GetChecksum().ToString("X8");
-                lblTitleVal.Text = r.ToString();
+                lblTitleVal.Text = r.Name;
                 btnExtract.Enabled = true;
 				btnReplace.Enabled = false;
 				return;
@@ -282,7 +285,8 @@ namespace goombasav_cs {
 				var extractedRoms = GameBoyROM.Extract(arr);
 				if (extractedRoms.Any()) {
 					loaded_sram = null;
-					loaded_rom_contents = extractedRoms;
+                    loaded_rom_contents = new List<ExtractedROM>(extractedRoms.Count);
+                    loaded_rom_contents.AddRange(extractedRoms);
 				} else {
 					if (arr.Length > GoombaSRAM.ExpectedSize) {
 						MessageBox.Show("This file is more than " + GoombaSRAM.ExpectedSize +
