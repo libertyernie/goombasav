@@ -32,9 +32,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GoombaSRAM.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\goombasav.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -59,7 +56,10 @@
     <ClInclude Include="..\goombarom.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GBROM.h">
+    <ClInclude Include="cli_GameBoyROM.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cli_GoombaSRAM.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -27,11 +27,11 @@ using namespace System::Collections::Generic;
 using System::Collections::ObjectModel::ReadOnlyCollection;
 
 namespace Goombasav {
-	public ref class GBROM {
+	public ref class GameBoyROM {
 	private:
 		array<unsigned char>^ data;
 
-		GBROM(array<unsigned char>^ data) {
+		GameBoyROM(array<unsigned char>^ data) {
 			this->data = data;
 		}
 	public:
@@ -58,8 +58,8 @@ namespace Goombasav {
 			return sum;
 		}
 
-		static List<GBROM^>^ Extract(array<unsigned char>^ source) {
-			List<GBROM^>^ list = gcnew List<GBROM^>();
+		static List<GameBoyROM^>^ Extract(array<unsigned char>^ source) {
+			List<GameBoyROM^>^ list = gcnew List<GameBoyROM^>();
 
 			pin_ptr<unsigned char> source_ptr = &source[0];
 			const void* ptr = gb_first_rom(source_ptr, source->Length);
@@ -67,7 +67,7 @@ namespace Goombasav {
 				array<unsigned char>^ copy = gcnew array<unsigned char>(gb_rom_size(ptr));
 				pin_ptr<unsigned char> copy_ptr = &copy[0];
 				memmove(copy_ptr, ptr, copy->Length);
-				list->Add(gcnew GBROM(copy));
+				list->Add(gcnew GameBoyROM(copy));
 				ptr = gb_next_rom(source_ptr, source->Length, ptr);
 			}
 

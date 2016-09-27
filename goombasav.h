@@ -28,7 +28,7 @@ as C++ code (Properties -> C/C++ -> Advanced -> Compile As.)
 #include <stdint.h>
 #define GOOMBA_COLOR_SRAM_SIZE 65536
 #define GOOMBA_COLOR_AVAILABLE_SIZE 57344
-#define GOOMBA_STATEID 0x57a731d8
+#define GOOMBA_STATEID 0x57a731dc
 #define GOOMBA_STATESAVE 0
 #define GOOMBA_SRAMSAVE 1
 #define GOOMBA_CONFIGSAVE 2

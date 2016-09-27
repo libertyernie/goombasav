@@ -26,7 +26,7 @@ namespace goombasav_cs {
 		const string TITLE = "Goomba Save Manager";
 
 		private GoombaSRAM loaded_sram;
-		private List<GBROM> loaded_rom_contents;
+		private List<GameBoyROM> loaded_rom_contents;
 
 		private string filePath;
 		private bool dirty;
@@ -116,16 +116,16 @@ namespace goombasav_cs {
 				if (d.ShowDialog() == DialogResult.OK) {
 					File.WriteAllBytes(d.FileName, data);
 				}
-			} else if (h is GBROM) {
+			} else if (h is GameBoyROM) {
 				SaveFileDialog d = new SaveFileDialog();
 				d.Title = btnExtract.Text;
 				d.Filter = "Game Boy ROMs (*.gb, *.gbc)|*.gb,*.gbc|All files (*.*)|*.*";
                 d.FileName = filePath == null || loaded_rom_contents.Count > 1
-                    ? ((GBROM)h).ToString()
+                    ? ((GameBoyROM)h).ToString()
                     : Path.GetFileNameWithoutExtension(filePath);
 				d.AddExtension = true;
 				if (d.ShowDialog() == DialogResult.OK) {
-					File.WriteAllBytes(d.FileName, ((GBROM)h).Data);
+					File.WriteAllBytes(d.FileName, ((GameBoyROM)h).Data);
 				}
 			} else {
 				MessageBox.Show("Cannot export this type of data.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -134,8 +134,8 @@ namespace goombasav_cs {
 
 		private void listBox1_SelectedIndexChanged(object sender, EventArgs e) {
 			object o = listBox1.SelectedItem;
-			if (o is GBROM) {
-				GBROM r = (GBROM)o;
+			if (o is GameBoyROM) {
+				GameBoyROM r = (GameBoyROM)o;
 				lblSizeVal.Text = r.Data.Length + " bytes";
 				lblTypeVal.Text = "GB ROM";
 				flpConfigdata.Visible = flpStateheader.Visible = panel1.Visible = false;
@@ -279,7 +279,7 @@ namespace goombasav_cs {
 			try {
 				byte[] arr = System.IO.File.ReadAllBytes(filename);
 
-				var extractedRoms = GBROM.Extract(arr);
+				var extractedRoms = GameBoyROM.Extract(arr);
 				if (extractedRoms.Any()) {
 					loaded_sram = null;
 					loaded_rom_contents = extractedRoms;
