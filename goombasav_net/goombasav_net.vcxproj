@@ -82,6 +82,7 @@
     <ClCompile Include="..\goombarom.c" />
     <ClCompile Include="..\goombasav.c" />
     <ClCompile Include="..\minilzo\minilzo.c" />
+    <ClCompile Include="..\pocketnesrom.c" />
     <ClCompile Include="AssemblyInfo.cpp" />
     <ClCompile Include="expose.cpp" />
   </ItemGroup>
@@ -91,6 +92,7 @@
     <ClInclude Include="..\minilzo-2.06\lzoconf.h" />
     <ClInclude Include="..\minilzo-2.06\lzodefs.h" />
     <ClInclude Include="..\minilzo-2.06\minilzo.h" />
+    <ClInclude Include="..\pocketnesrom.h" />
     <ClInclude Include="cli_ExtractedROM.h" />
     <ClInclude Include="Configdata.h" />
     <ClInclude Include="GoombaHeader.h" />
