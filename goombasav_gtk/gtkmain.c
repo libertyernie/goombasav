@@ -178,8 +178,9 @@ static void load(const char* path) {
 		size_t bytes_read = fread(loaded_sram, 1, GOOMBA_COLOR_SRAM_SIZE - total_bytes_read, f);
 		total_bytes_read += bytes_read;
 		if (bytes_read <= 0) {
-			error_msg("Could only read %lu bytes from %s", (unsigned long)total_bytes_read, path);
-			return;
+			fprintf(stderr, "Could only read %lu bytes from %s\n", (unsigned long)total_bytes_read, path);
+			memset(loaded_sram + total_bytes_read, 0, GOOMBA_COLOR_SRAM_SIZE - total_bytes_read);
+			total_bytes_read = GOOMBA_COLOR_SRAM_SIZE;
 		}
 	}
 	fseek(f, 0, SEEK_END);
