@@ -71,8 +71,8 @@ namespace Goombasav {
 			const pocketnes_romheader* ptr = pocketnes_first_rom(source_ptr, source->Length);
 			while (ptr) {
 				array<unsigned char>^ copy = gcnew array<unsigned char>(ptr->filesize);
-				pin_ptr<unsigned char> copy_ptr = &copy[0 + sizeof(pocketnes_romheader)];
-				memmove(copy_ptr, ptr, copy->Length - sizeof(pocketnes_romheader));
+				pin_ptr<unsigned char> copy_ptr = &copy[0];
+				memmove(copy_ptr, ptr + 1, copy->Length);
 				list->Add(gcnew PocketNESROM(*ptr, copy));
 				ptr = pocketnes_next_rom(source_ptr, source->Length, ptr);
 			}

@@ -83,6 +83,12 @@ const pocketnes_romheader* pocketnes_next_rom(const void* data, size_t length, c
 uint32_t pocketnes_get_checksum(const void* rom, size_t length) {
 	const uint8_t* p = (const uint8_t*)rom;
 
+	// Checksum should not include NES ROM format header
+	if (length > 16 && memcmp(p, NES_WORD, 4) == 0) {
+		p += 16;
+		length -= 16;
+	}
+
 	// TODO: add support for compressed roms
 
 	uint32_t sum = 0;
