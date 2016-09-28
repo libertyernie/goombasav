@@ -1,7 +1,6 @@
 /* goombasav.c - functions to handle Goomba / Goomba Color SRAM
 
-last updated July 3, 2014
-Copyright (C) 2014 libertyernie
+Copyright (C) 2016 libertyernie
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,7 +17,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 https://github.com/libertyernie/goombasav
 
-When compiling in Visual Studio, set all goombasav files to compile
+When compiling in Visual Studio, set the project to compile
 as C++ code (Properties -> C/C++ -> Advanced -> Compile As.)
 */
 
@@ -170,7 +169,10 @@ stateheader** stateheader_scan(const void* gba_data) {
 	memset(headers, 0, psize * 64);
 
 	uint32_t* check = (uint32_t*)gba_data;
-	if (F32(*check) == GOOMBA_STATEID) check++;
+	uint32_t check_le = F32(*check);
+	if (check_le == GOOMBA_STATEID) check++;
+	if (check_le == POCKETNES_STATEID) check++;
+	if (check_le == POCKETNES_STATEID2) check++;
 
 	stateheader* sh = (stateheader*)check;
 	int i = 0;
@@ -207,7 +209,10 @@ uint64_t goomba_compressed_data_checksum(const stateheader* sh, int output_bytes
 }
 
 int goomba_is_sram(const void* data) {
-	return F32(*(uint32_t*)data) == GOOMBA_STATEID;
+	uint32_t stateid_le = F32(*(uint32_t*)data);
+	return stateid_le == GOOMBA_STATEID
+		|| stateid_le == POCKETNES_STATEID
+		|| stateid_le == POCKETNES_STATEID2;
 }
 
 /**

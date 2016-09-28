@@ -1,7 +1,6 @@
 /* goombasav.h - functions to handle Goomba / Goomba Color SRAM
 
-last updated July 5, 2014
-Copyright (C) 2014 libertyernie
+Copyright (C) 2016 libertyernie
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -29,6 +28,8 @@ as C++ code (Properties -> C/C++ -> Advanced -> Compile As.)
 #define GOOMBA_COLOR_SRAM_SIZE 65536
 #define GOOMBA_COLOR_AVAILABLE_SIZE 57344
 #define GOOMBA_STATEID 0x57a731dc
+#define POCKETNES_STATEID 0x57a731d7
+#define POCKETNES_STATEID2 0x57a731d8
 #define GOOMBA_STATESAVE 0
 #define GOOMBA_SRAMSAVE 1
 #define GOOMBA_CONFIGSAVE 2
