@@ -94,11 +94,11 @@
     <ClInclude Include="..\minilzo-2.06\minilzo.h" />
     <ClInclude Include="..\pocketnesrom.h" />
     <ClInclude Include="cli_ExtractedROM.h" />
-    <ClInclude Include="Configdata.h" />
-    <ClInclude Include="GoombaHeader.h" />
+    <ClInclude Include="cli_Configdata.h" />
+    <ClInclude Include="cli_GoombaHeader.h" />
     <ClInclude Include="cli_GameBoyROM.h" />
     <ClInclude Include="cli_GoombaSRAM.h" />
-    <ClInclude Include="Stateheader.h" />
+    <ClInclude Include="cli_Stateheader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

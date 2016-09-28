@@ -47,15 +47,6 @@
     <ClInclude Include="..\minilzo-2.06\minilzo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Stateheader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GoombaHeader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Configdata.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\goombarom.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -69,6 +60,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\pocketnesrom.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cli_Configdata.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cli_GoombaHeader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cli_Stateheader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,5 +1,5 @@
 #pragma once
-/* GoombaHeader.h - class to encapsulate a particular header within the GoombaSRAM object
+/* cli_GoombaHeader.h - class to encapsulate a particular header within the GoombaSRAM object
 
 This object will only remain valid while its GoombaSRAM has not yet been
 disposed/finalized. GoombaHeader objects can be obtained via the Headers

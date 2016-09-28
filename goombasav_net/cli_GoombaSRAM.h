@@ -1,5 +1,5 @@
 #pragma once
-/* GoombaSRAM.h - class to encapsulate Goomba / Goomba Color SRAM
+/* cli_GoombaSRAM.h - class to encapsulate Goomba / Goomba Color SRAM
 
 Copyright (C) 2014 libertyernie
 
@@ -18,8 +18,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 https://github.com/libertyernie/goombasav */
 
-#include "Configdata.h"
-#include "Stateheader.h"
+#include "cli_Configdata.h"
+#include "cli_Stateheader.h"
 #include <cstdlib>
 #include <cstring>
 
