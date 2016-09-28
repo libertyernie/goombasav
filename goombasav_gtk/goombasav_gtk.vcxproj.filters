@@ -21,7 +21,7 @@
     <ClCompile Include="..\goombasav.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\minilzo-2.06\minilzo.c">
+    <ClCompile Include="..\minilzo\minilzo.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\pocketnesrom.c">
@@ -32,13 +32,13 @@
     <ClInclude Include="..\goombasav.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\minilzo-2.06\lzoconf.h">
+    <ClInclude Include="..\minilzo\lzoconf.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\minilzo-2.06\lzodefs.h">
+    <ClInclude Include="..\minilzo\lzodefs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\minilzo-2.06\minilzo.h">
+    <ClInclude Include="..\minilzo\minilzo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\pocketnesrom.h">
