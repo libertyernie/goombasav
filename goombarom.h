@@ -21,6 +21,7 @@ as C++ code (Properties -> C/C++ -> Advanced -> Compile As.)
 */
 
 #include <stddef.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,6 +46,9 @@ string will be allocated in an internal 16-byte buffer which will be
 overwritten later. If buffer is not NULL, the title will be copied to buffer,
 and buffer will be returned. */
 const char* gb_get_title(const void* rom, char* buffer);
+
+/* Returns the checksum that Goomba would use for this ROM. */
+uint32_t gb_get_checksum(const void* rom, size_t length);
 
 #ifdef __cplusplus
 }

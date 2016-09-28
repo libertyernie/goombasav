@@ -76,9 +76,26 @@ const void* gb_next_rom(const void* data, size_t length, const void* rom) {
 	return gb_first_rom((const char*)rom + 0x134, effective_length - 0x134);
 }
 
+/* Returns a copy of the title from the ROM header. If buffer is NULL, the
+string will be allocated in an internal 16-byte buffer which will be
+overwritten later. If buffer is not NULL, the title will be copied to buffer,
+and buffer will be returned. */
 const char* gb_get_title(const void* rom, char* buffer) {
 	char* title = buffer != NULL ? buffer : gb_title_buffer;
 	title[15] = '\0';
 	memcpy(title, (char*)rom + 0x134, 15);
 	return title;
+}
+
+/* Returns the checksum that Goomba would use for this ROM. */
+uint32_t gb_get_checksum(const void* rom, size_t length) {
+	const uint8_t* p = (const uint8_t*)rom;
+
+	uint32_t sum = 0;
+	int i;
+	for (i = 0; i<128; i++) {
+		sum += *p | (*(p + 1) << 8) | (*(p + 2) << 16) | (*(p + 3) << 24);
+		p += 128;
+	}
+	return sum;
 }
