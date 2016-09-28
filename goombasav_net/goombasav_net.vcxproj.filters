@@ -71,5 +71,8 @@
     <ClInclude Include="cli_Stateheader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="cli_PocketNESROM.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

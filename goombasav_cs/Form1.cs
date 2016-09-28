@@ -122,6 +122,7 @@ namespace goombasav_cs {
 				d.Title = btnExtract.Text;
                 d.Filter =
                     h is GameBoyROM ? "Game Boy ROMs (*.gb, *.gbc)|*.gb,*.gbc|All files (*.*)|*.*"
+                    : h is PocketNESROM ? "NES/Famicom ROMs (*.nes)|*.nes|All files (*.*)|*.*"
                     : "All files (*.*)|*.*";
                 d.FileName = filePath == null || loaded_rom_contents.Count > 1
                     ? r.Name
@@ -137,10 +138,10 @@ namespace goombasav_cs {
 
 		private void listBox1_SelectedIndexChanged(object sender, EventArgs e) {
 			object o = listBox1.SelectedItem;
-			if (o is GameBoyROM) {
-				GameBoyROM r = (GameBoyROM)o;
+			if (o is ExtractedROM) {
+				ExtractedROM r = (ExtractedROM)o;
 				lblSizeVal.Text = r.Data.Length + " bytes";
-				lblTypeVal.Text = "GB ROM";
+				lblTypeVal.Text = "ROM image";
 				flpConfigdata.Visible = flpStateheader.Visible = panel1.Visible = false;
                 lblChecksumVal.Text = r.GetChecksum().ToString("X8");
                 lblTitleVal.Text = r.Name;
@@ -282,11 +283,13 @@ namespace goombasav_cs {
 			try {
 				byte[] arr = System.IO.File.ReadAllBytes(filename);
 
-				var extractedRoms = GameBoyROM.Extract(arr);
-				if (extractedRoms.Any()) {
+				var extractedRoms1 = GameBoyROM.Extract(arr);
+				var extractedRoms2 = PocketNESROM.Extract(arr);
+				if (extractedRoms1.Any() || extractedRoms2.Any()) {
 					loaded_sram = null;
-                    loaded_rom_contents = new List<ExtractedROM>(extractedRoms.Count);
-                    loaded_rom_contents.AddRange(extractedRoms);
+                    loaded_rom_contents = new List<ExtractedROM>();
+                    loaded_rom_contents.AddRange(extractedRoms1);
+                    loaded_rom_contents.AddRange(extractedRoms2);
 				} else {
 					if (arr.Length > GoombaSRAM.ExpectedSize) {
 						MessageBox.Show("This file is more than " + GoombaSRAM.ExpectedSize +

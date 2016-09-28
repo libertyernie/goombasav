@@ -1,5 +1,5 @@
 /* pocketnesrom.h - functions to find uncompressed NES ROM images
-stored within PocketNES ROMs
+stored within PocketNES ROMs (little endian only)
 
 Copyright (C) 2016 libertyernie
 
@@ -34,6 +34,19 @@ typedef struct {
 	uint32_t spritefollow;
 	uint32_t reserved;
 } pocketnes_romheader;
+
+/* Finds the first PocketNES ROM header in the given data block by looking for
+the segment 4E45531A (N,E,S,^Z). If no valid data is found, this method will
+return NULL. */
+const pocketnes_romheader* pocketnes_first_rom(const void* data, size_t length);
+
+/* Returns a pointer to the next PocketNES ROM header in the data. If the
+location where the next ROM header would be does not contain a 4E45531A
+segment, this method will return NULL. */
+const pocketnes_romheader* pocketnes_next_rom(const void* data, size_t length, const pocketnes_romheader* first_rom);
+
+/* Returns the checksum that PocketNES would use for this ROM. */
+uint32_t pocketnes_get_checksum(const void* rom, size_t length);
 
 #ifdef __cplusplus
 }
