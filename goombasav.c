@@ -45,7 +45,10 @@ const char* goomba_last_error() {
 }
 
 size_t goomba_set_last_error(const char* msg) {
-	size_t len = strnlen(msg, sizeof(last_error)-1);
+	size_t len = strlen(msg);
+	if (len > sizeof(last_error)-1) {
+		len = sizeof(last_error)-1;
+	}
 	memcpy(last_error, msg, len);
 	last_error[sizeof(last_error)-1] = '\0';
 	return len;

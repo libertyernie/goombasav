@@ -197,7 +197,7 @@ static void load(const char* path) {
 	char* cleaned = goomba_cleanup(loaded_sram);
 	if (cleaned == NULL) {
 		// this should not happen
-		error_msg(goomba_last_error());
+		error_msg("%s", goomba_last_error());
 		return;
 	} else if (cleaned != loaded_sram) {
 		GtkWidget* dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_NONE,
@@ -332,7 +332,7 @@ static void replace_click(GtkWidget* widget, gpointer data) {
 		void* new_data = goomba_new_sav(loaded_sram, sh, gbc_data, len);
 		free(gbc_data);
 		if (new_data == NULL) {
-			error_msg(goomba_last_error());
+			error_msg("%s", goomba_last_error());
 		} else {
 			memcpy(loaded_sram, new_data, GOOMBA_COLOR_SRAM_SIZE);
 			dirty = true;
@@ -375,7 +375,7 @@ static void selection_changed(GtkWidget* widget, gpointer data) {
 
 		if (ptr->size > sizeof(stateheader)) {
 			uint64_t ck = goomba_compressed_data_checksum(ptr, 3);
-			sprintf(buf, "Hash of compressed data: %6X", ck);
+			sprintf(buf, "Hash of compressed data: %6X", (unsigned int)ck);
 			gtk_label_set_text(GTK_LABEL(lblDataHash), buf);
 
 			GdkColor color;
