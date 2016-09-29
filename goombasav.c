@@ -147,7 +147,8 @@ const char* stateheader_summary_str(const stateheader* sh) {
 	return goomba_strbuf;
 }
 
-int stateheader_plausible(const stateheader* sh) {
+int stateheader_plausible(const void* ptr) {
+	const stateheader* sh = (const stateheader*)ptr;
 	uint16_t type = F16(sh->type);
 	if (type < 0 || type == 3 || type == 4 || type > 5) return 0;
 	return F16(sh->size) >= sizeof(stateheader) && // check size (at least 48)

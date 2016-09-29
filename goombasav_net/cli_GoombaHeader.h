@@ -42,7 +42,7 @@ namespace Goombasav {
 		}
 
 		bool IsPlausible() {
-			return stateheader_plausible((const stateheader*)ptr);
+			return stateheader_plausible(ptr);
 		}
 	public:
 		static uint16_t STATESAVE = GOOMBA_STATESAVE;

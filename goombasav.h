@@ -118,7 +118,7 @@ const char* stateheader_str(const stateheader* sh);
 */
 const char* stateheader_summary_str(const stateheader* sh);
 
-int stateheader_plausible(const stateheader* sh);
+int stateheader_plausible(const void* sh);
 
 /**
 * When given a pointer to a stateheader, returns a pointer to where the next
