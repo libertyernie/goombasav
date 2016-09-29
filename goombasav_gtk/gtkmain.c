@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <gtk/gtk.h>
 #include "../goombasav.h"
+#include "../goombarom.h"
 #include "../pocketnesrom.h"
 
 #define error_msg(...) { GtkWidget* dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, __VA_ARGS__); gtk_dialog_run(GTK_DIALOG(dialog)); gtk_widget_destroy(dialog); }
@@ -145,6 +146,12 @@ static void header_scan() {
 			gtk_list_store_append(listStore, &iter);
 			gtk_list_store_set(listStore, &iter, 0, n->name, 1, n, -1);
 			n = pocketnes_next_rom(loaded_file, loaded_file_size, n);
+		}
+		const void* g = gb_first_rom(loaded_file, loaded_file_size);
+		while (g != NULL) {
+			gtk_list_store_append(listStore, &iter);
+			gtk_list_store_set(listStore, &iter, 0, gb_get_title(g, NULL), 1, g, -1);
+			g = gb_next_rom(loaded_file, loaded_file_size, g);
 		}
 	}
 	set_all_labels();
@@ -295,7 +302,25 @@ static void export_click(GtkWidget* widget, gpointer data) {
 				g_free(path);
 			}
 			gtk_widget_destroy(dialog);
-		} else if (stateheader_plausible(ptr)) {
+		} else if (gb_is_rom(ptr)) {
+			GtkWidget* dialog = gtk_file_chooser_dialog_new("Export", GTK_WINDOW(window), GTK_FILE_CHOOSER_ACTION_SAVE, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, NULL);
+			gint res = gtk_dialog_run(GTK_DIALOG(dialog));
+
+			if (res == GTK_RESPONSE_ACCEPT) {
+				char* path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+				FILE* outfile = fopen(path, "wb");
+				if (outfile == NULL) {
+					error_msg("Could not open file: %s", strerror(errno));
+				}
+				else {
+					fwrite(ptr, 1, gb_rom_size(ptr), outfile);
+					fclose(outfile);
+				}
+				g_free(path);
+			}
+			gtk_widget_destroy(dialog);
+		}
+		else if (stateheader_plausible(ptr)) {
 			const stateheader* sh = (const stateheader*)ptr;
 			goomba_size_t len;
 			void* gbcsav = goomba_extract(loaded_file, sh, &len);
@@ -420,7 +445,34 @@ static void selection_changed(GtkWidget* widget, gpointer data) {
 
 			sprintf(buf, "ROM checksum: %08X", (unsigned int)pocketnes_get_checksum(ptr+1));
 			gtk_label_set_text(GTK_LABEL(lblChecksum), buf);
-		} else if (stateheader_plausible(voidptr)) {
+		} else if (gb_is_rom(voidptr)) {
+			char buf[256];
+
+			sprintf(buf, "Size: %u bytes    ", gb_rom_size(voidptr));
+			gtk_label_set_text(GTK_LABEL(lblSize), buf);
+
+			gtk_label_set_text(GTK_LABEL(lblType), "Type: Game Boy ROM (Goomba)");
+
+			sprintf(buf, "Title: %.16s", gb_get_title(voidptr, NULL));
+			gtk_label_set_text(GTK_LABEL(lblTitle), buf);
+
+			gtk_label_set_text(GTK_LABEL(lblDataHash), "");
+
+			gtk_widget_hide(dataHashColor);
+
+			gtk_widget_set_sensitive(btnExport, true);
+			gtk_widget_set_sensitive(btnReplace, false);
+
+			show_standard_rows();
+
+			gtk_label_set_text(GTK_LABEL(lblUncompSize), "");
+
+			gtk_label_set_text(GTK_LABEL(lblFramecount), "");
+
+			sprintf(buf, "ROM checksum: %08X", (unsigned int)gb_get_checksum(voidptr));
+			gtk_label_set_text(GTK_LABEL(lblChecksum), buf);
+		}
+		else if (stateheader_plausible(voidptr)) {
 			stateheader* ptr = (stateheader*)voidptr;
 			char buf[256];
 

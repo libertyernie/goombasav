@@ -27,6 +27,9 @@
     <ClCompile Include="..\pocketnesrom.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\goombarom.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\goombasav.h">
@@ -42,6 +45,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\pocketnesrom.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\goombarom.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

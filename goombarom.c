@@ -76,6 +76,12 @@ const void* gb_next_rom(const void* data, size_t length, const void* rom) {
 	return gb_first_rom((const char*)rom + 0x134, effective_length - 0x134);
 }
 
+/* Returns true if the given data region looks like a Game Boy ROM header
+(based on the Nintendo logo segment), or false otherwise. */
+int gb_is_rom(const void* data) {
+	return memcmp(NINTENDO_LOGO_GB, (const char*)data + 0x104, 48) == 0;
+}
+
 /* Returns a copy of the title from the ROM header. If buffer is NULL, the
 string will be allocated in an internal 16-byte buffer which will be
 overwritten later. If buffer is not NULL, the title will be copied to buffer,
@@ -88,7 +94,7 @@ const char* gb_get_title(const void* rom, char* buffer) {
 }
 
 /* Returns the checksum that Goomba would use for this ROM. */
-uint32_t gb_get_checksum(const void* rom, size_t length) {
+uint32_t gb_get_checksum(const void* rom) {
 	const uint8_t* p = (const uint8_t*)rom;
 
 	uint32_t sum = 0;

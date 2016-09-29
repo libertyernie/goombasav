@@ -90,12 +90,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\goombarom.c" />
     <ClCompile Include="..\goombasav.c" />
     <ClCompile Include="..\minilzo\minilzo.c" />
     <ClCompile Include="..\pocketnesrom.c" />
     <ClCompile Include="gtkmain.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\goombarom.h" />
     <ClInclude Include="..\goombasav.h" />
     <ClInclude Include="..\minilzo\lzoconf.h" />
     <ClInclude Include="..\minilzo\lzodefs.h" />

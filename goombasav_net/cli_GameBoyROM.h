@@ -54,7 +54,7 @@ namespace Goombasav {
 
 		virtual uint32_t GetChecksum() {
 			pin_ptr<unsigned char> p = &data[0];
-			return gb_get_checksum(p, data->Length);
+			return gb_get_checksum(p);
 		}
 
 		static List<GameBoyROM^>^ Extract(array<unsigned char>^ source) {
