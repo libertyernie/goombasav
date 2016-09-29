@@ -40,12 +40,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(GTKDIR)\lib\gtk-2.0\include;$(GTKDIR)\lib\glib-2.0\include;$(GTKDIR)\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(GTKDIR)\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\gtk\include\gtk-2.0;C:\gtk\include\glib-2.0;C:\gtk\include\cairo;C:\gtk\include\pango-1.0;C:\gtk\include\gdk-pixbuf-2.0;C:\gtk\include\atk-1.0;C:\gtk\lib\glib-2.0\include;C:\gtk\lib\gtk-2.0\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\gtk\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(GTKDIR)\lib\gtk-2.0\include;$(GTKDIR)\lib\glib-2.0\include;$(GTKDIR)\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(GTKDIR)\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\gtk\include\gtk-2.0;C:\gtk\include\glib-2.0;C:\gtk\include\cairo;C:\gtk\include\pango-1.0;C:\gtk\include\gdk-pixbuf-2.0;C:\gtk\include\atk-1.0;C:\gtk\lib\glib-2.0\include;C:\gtk\lib\gtk-2.0\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\gtk\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -62,6 +62,8 @@
       <EntryPointSymbol>main</EntryPointSymbol>
       <AdditionalOptions>/libpath:C:/gtk/lib gtk-win32-2.0.lib gdk-win32-2.0.lib atk-1.0.lib gio-2.0.lib pangowin32-1.0.lib gdi32.lib pangocairo-1.0.lib gdk_pixbuf-2.0.lib pango-1.0.lib cairo.lib gobject-2.0.lib gmodule-2.0.lib gthread-2.0.lib glib-2.0.lib intl.lib /ENTRY:mainCRTStartup </AdditionalOptions>
       <MinimumRequiredVersion>5.01</MinimumRequiredVersion>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -83,6 +85,8 @@
       <EntryPointSymbol>main</EntryPointSymbol>
       <AdditionalOptions>/libpath:C:/gtk/lib gtk-win32-2.0.lib gdk-win32-2.0.lib atk-1.0.lib gio-2.0.lib pangowin32-1.0.lib gdi32.lib pangocairo-1.0.lib gdk_pixbuf-2.0.lib pango-1.0.lib cairo.lib gobject-2.0.lib gmodule-2.0.lib gthread-2.0.lib glib-2.0.lib intl.lib /ENTRY:mainCRTStartup </AdditionalOptions>
       <MinimumRequiredVersion>5.01</MinimumRequiredVersion>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
