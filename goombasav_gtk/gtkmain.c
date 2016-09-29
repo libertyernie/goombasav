@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <gtk/gtk.h>
 #include "../goombasav.h"
+#include "../pocketnesrom.h"
 
 #define error_msg(...) { GtkWidget* dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, __VA_ARGS__); gtk_dialog_run(GTK_DIALOG(dialog)); gtk_widget_destroy(dialog); }
 #define note_msg(...) { GtkWidget* dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_CLOSE, __VA_ARGS__); gtk_dialog_run(GTK_DIALOG(dialog)); gtk_widget_destroy(dialog); }
@@ -35,6 +36,7 @@ const char* GPL_NOTICE = "Goomba Save Manager (GTK frontend)\n"
 
 #pragma region window-level variables
 static void* loaded_file = NULL;
+static size_t loaded_file_size;
 static char* _filePath = NULL;
 static bool dirty;
 
@@ -137,6 +139,13 @@ static void header_scan() {
 			gtk_list_store_set(listStore, &iter, 0, stateheader_summary_str(sh), 1, sh, -1);
 			sh = stateheader_advance(sh);
 		}
+	} else {
+		const pocketnes_romheader* n = pocketnes_first_rom(loaded_file, loaded_file_size);
+		while (n != NULL) {
+			gtk_list_store_append(listStore, &iter);
+			gtk_list_store_set(listStore, &iter, 0, n->name, 1, n, -1);
+			n = pocketnes_next_rom(loaded_file, loaded_file_size, n);
+		}
 	}
 	set_all_labels();
 }
@@ -181,6 +190,7 @@ static void load(const char* path) {
 		free(loaded_file);
 	}
 	loaded_file = (char*)malloc(filesize);
+	loaded_file_size = filesize;
 
 	fseek(f, 0, SEEK_SET);
 	size_t total_bytes_read = 0;
@@ -263,32 +273,54 @@ static void save_as_click(GtkWidget* widget, gpointer data) {
 
 static void export_click(GtkWidget* widget, gpointer data) {
 	GtkTreeIter iter;
-	stateheader* sh;
 	if (_filePath != NULL && gtk_tree_selection_get_selected(GTK_TREE_SELECTION(selection), NULL, &iter)) {
-		gtk_tree_model_get(GTK_TREE_MODEL(listStore), &iter, 1, &sh, -1);
-		goomba_size_t len;
-		void* gbcsav = goomba_extract(loaded_file, sh, &len);
-		if (gbcsav == NULL) {
-			error_msg("%s", goomba_last_error());
-			return;
-		}
+		const void* ptr;
+		gtk_tree_model_get(GTK_TREE_MODEL(listStore), &iter, 1, &ptr, -1);
+		if (pocketnes_is_romheader(ptr)) {
+			const pocketnes_romheader* r = (const pocketnes_romheader*)ptr;
 
-		GtkWidget* dialog = gtk_file_chooser_dialog_new("Export", GTK_WINDOW(window), GTK_FILE_CHOOSER_ACTION_SAVE, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, NULL);
-		gint res = gtk_dialog_run(GTK_DIALOG(dialog));
+			GtkWidget* dialog = gtk_file_chooser_dialog_new("Export", GTK_WINDOW(window), GTK_FILE_CHOOSER_ACTION_SAVE, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, NULL);
+			gint res = gtk_dialog_run(GTK_DIALOG(dialog));
 
-		if (res == GTK_RESPONSE_ACCEPT) {
-			char* path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-			FILE* outfile = fopen(path, "wb");
-			if (outfile == NULL) {
-				error_msg("Could not open file: %s", strerror(errno));
-			} else {
-				fwrite(gbcsav, 1, len, outfile);
-				fclose(outfile);
+			if (res == GTK_RESPONSE_ACCEPT) {
+				char* path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+				FILE* outfile = fopen(path, "wb");
+				if (outfile == NULL) {
+					error_msg("Could not open file: %s", strerror(errno));
+				}
+				else {
+					fwrite(r+1, 1, r->filesize, outfile);
+					fclose(outfile);
+				}
+				g_free(path);
 			}
-			g_free(path);
+			gtk_widget_destroy(dialog);
+		} else if (stateheader_plausible(ptr)) {
+			const stateheader* sh = (const stateheader*)ptr;
+			goomba_size_t len;
+			void* gbcsav = goomba_extract(loaded_file, sh, &len);
+			if (gbcsav == NULL) {
+				error_msg("%s", goomba_last_error());
+				return;
+			}
+
+			GtkWidget* dialog = gtk_file_chooser_dialog_new("Export", GTK_WINDOW(window), GTK_FILE_CHOOSER_ACTION_SAVE, GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT, NULL);
+			gint res = gtk_dialog_run(GTK_DIALOG(dialog));
+
+			if (res == GTK_RESPONSE_ACCEPT) {
+				char* path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+				FILE* outfile = fopen(path, "wb");
+				if (outfile == NULL) {
+					error_msg("Could not open file: %s", strerror(errno));
+				} else {
+					fwrite(gbcsav, 1, len, outfile);
+					fclose(outfile);
+				}
+				g_free(path);
+			}
+			gtk_widget_destroy(dialog);
+			free(gbcsav);
 		}
-		gtk_widget_destroy(dialog);
-		free(gbcsav);
 	}
 }
 
@@ -357,11 +389,39 @@ static void about_click(GtkWidget* widget, gpointer data) {
 
 static void selection_changed(GtkWidget* widget, gpointer data) {
 	GtkTreeIter iter;
-	stateheader* ptr;
+	void* voidptr;
 	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(widget), NULL, &iter)) {
-		gtk_tree_model_get(GTK_TREE_MODEL(listStore), &iter, 1, &ptr, -1);
+		gtk_tree_model_get(GTK_TREE_MODEL(listStore), &iter, 1, &voidptr, -1);
 
-		if (stateheader_plausible(ptr)) {
+		if (pocketnes_is_romheader(voidptr)) {
+			pocketnes_romheader* ptr = (pocketnes_romheader*)voidptr;
+			char buf[256];
+
+			sprintf(buf, "Size: %u bytes    ", ptr->filesize);
+			gtk_label_set_text(GTK_LABEL(lblSize), buf);
+
+			gtk_label_set_text(GTK_LABEL(lblType), "Type: NES ROM (PocketNES)");
+
+			sprintf(buf, "Title: %.32s", ptr->name);
+			gtk_label_set_text(GTK_LABEL(lblTitle), buf);
+
+			gtk_label_set_text(GTK_LABEL(lblDataHash), "");
+
+			gtk_widget_hide(dataHashColor);
+
+			gtk_widget_set_sensitive(btnExport, true);
+			gtk_widget_set_sensitive(btnReplace, false);
+
+			show_standard_rows();
+
+			gtk_label_set_text(GTK_LABEL(lblUncompSize), "");
+
+			gtk_label_set_text(GTK_LABEL(lblFramecount), "");
+
+			sprintf(buf, "ROM checksum: %08X", (unsigned int)pocketnes_get_checksum(ptr+1));
+			gtk_label_set_text(GTK_LABEL(lblChecksum), buf);
+		} else if (stateheader_plausible(voidptr)) {
+			stateheader* ptr = (stateheader*)voidptr;
 			char buf[256];
 
 			sprintf(buf, "Size: %u bytes    ", ptr->size);
