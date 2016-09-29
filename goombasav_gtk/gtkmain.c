@@ -37,7 +37,6 @@ const char* GPL_NOTICE = "Goomba Save Manager (GTK frontend)\n"
 static void* loaded_file = NULL;
 static char* _filePath = NULL;
 static bool dirty;
-static stateheader** headers = NULL;
 
 static GtkWidget* window;
 static GtkListStore* listStore;
@@ -130,14 +129,14 @@ static void update_titlebar(GtkWindow* window) {
 static void header_scan() {
 	gtk_list_store_clear(listStore);
 	GtkTreeIter iter;
-	if (headers != NULL) {
-		free(headers);
-	}
-	headers = stateheader_scan(loaded_file);
-	int i;
-	for (i = 0; headers[i] != NULL; i++) {
-		gtk_list_store_append(listStore, &iter);
-		gtk_list_store_set(listStore, &iter, 0, stateheader_summary_str(headers[i]), 1, headers[i], -1);
+	if (goomba_is_sram(loaded_file)) {
+		stateheader* sh = (stateheader*)((char*)loaded_file + 4);
+		int i;
+		while (stateheader_plausible(sh)) {
+			gtk_list_store_append(listStore, &iter);
+			gtk_list_store_set(listStore, &iter, 0, stateheader_summary_str(sh), 1, sh, -1);
+			sh = stateheader_advance(sh);
+		}
 	}
 	set_all_labels();
 }
@@ -362,70 +361,74 @@ static void selection_changed(GtkWidget* widget, gpointer data) {
 	if (gtk_tree_selection_get_selected(GTK_TREE_SELECTION(widget), NULL, &iter)) {
 		gtk_tree_model_get(GTK_TREE_MODEL(listStore), &iter, 1, &ptr, -1);
 
-		char buf[256];
+		if (stateheader_plausible(ptr)) {
+			char buf[256];
 
-		sprintf(buf, "Size: %u bytes    ", ptr->size);
-		gtk_label_set_text(GTK_LABEL(lblSize), buf);
+			sprintf(buf, "Size: %u bytes    ", ptr->size);
+			gtk_label_set_text(GTK_LABEL(lblSize), buf);
 
-		gtk_label_set_text(GTK_LABEL(lblType),
-			ptr->type == GOOMBA_STATESAVE ? "Type: Savestate"
-			: ptr->type == GOOMBA_SRAMSAVE ? "Type: SRAM"
-			: ptr->type == GOOMBA_CONFIGSAVE ? "Type: Configuration"
-			: "Type:");
+			gtk_label_set_text(GTK_LABEL(lblType),
+				ptr->type == GOOMBA_STATESAVE ? "Type: Savestate"
+				: ptr->type == GOOMBA_SRAMSAVE ? "Type: SRAM"
+				: ptr->type == GOOMBA_CONFIGSAVE ? "Type: Configuration"
+				: "Type:");
 
-		sprintf(buf, "Title: %.32s", ptr->title);
-		gtk_label_set_text(GTK_LABEL(lblTitle), buf);
+			sprintf(buf, "Title: %.32s", ptr->title);
+			gtk_label_set_text(GTK_LABEL(lblTitle), buf);
 
-		if (ptr->size > sizeof(stateheader)) {
-			uint64_t ck = goomba_compressed_data_checksum(ptr, 3);
-			sprintf(buf, "Hash of compressed data: %6X", (unsigned int)ck);
-			gtk_label_set_text(GTK_LABEL(lblDataHash), buf);
+			if (ptr->size > sizeof(stateheader)) {
+				uint64_t ck = goomba_compressed_data_checksum(ptr, 3);
+				sprintf(buf, "Hash of compressed data: %6X", (unsigned int)ck);
+				gtk_label_set_text(GTK_LABEL(lblDataHash), buf);
 
-			GdkColor color;
-			color.red = 0x101 * ((ck >> 16) & 0xFF);
-			color.green = 0x101 * ((ck >> 8) & 0xFF);
-			color.blue = 0x101 * (ck & 0xFF);
-			gtk_widget_show(dataHashColor);
-			gtk_widget_modify_bg(dataHashColor, GTK_STATE_NORMAL, &color);
+				GdkColor color;
+				color.red = 0x101 * ((ck >> 16) & 0xFF);
+				color.green = 0x101 * ((ck >> 8) & 0xFF);
+				color.blue = 0x101 * (ck & 0xFF);
+				gtk_widget_show(dataHashColor);
+				gtk_widget_modify_bg(dataHashColor, GTK_STATE_NORMAL, &color);
+			} else {
+				gtk_label_set_text(GTK_LABEL(lblDataHash), "");
+				gtk_widget_hide(dataHashColor);
+			}
+
+			gtk_widget_set_sensitive(btnExport, ptr->type == GOOMBA_SRAMSAVE);
+			gtk_widget_set_sensitive(btnReplace, ptr->type == GOOMBA_SRAMSAVE);
+
+			if (ptr->type == GOOMBA_CONFIGSAVE) {
+				show_configuration_rows();
+
+				configdata* cd = (configdata*)ptr;
+				sprintf(buf, "Border: %u", cd->bordercolor);
+				gtk_label_set_text(GTK_LABEL(lblBorder), buf);
+				sprintf(buf, "Palette: %u", cd->palettebank);
+				gtk_label_set_text(GTK_LABEL(lblPalette), buf);
+				configdata_misc_strings strs = configdata_get_misc(cd->misc);
+				sprintf(buf, "Sleep: %s", strs.sleep);
+				gtk_label_set_text(GTK_LABEL(lblSleep), buf);
+				sprintf(buf, "Gamma: %s", strs.gamma);
+				gtk_label_set_text(GTK_LABEL(lblGamma), buf);
+				sprintf(buf, "Autoload state: %s", strs.autoload_state);
+				gtk_label_set_text(GTK_LABEL(lblAutostate), buf);
+
+				sprintf(buf, "ROM checksum: %08X", cd->sram_checksum);
+				gtk_label_set_text(GTK_LABEL(lblChecksum), buf);
+			} else {
+				show_standard_rows();
+
+				sprintf(buf, "%sompressed size: %u bytes",
+					ptr->uncompressed_size < ptr->size ? "C" : "Unc",
+					ptr->uncompressed_size);
+				gtk_label_set_text(GTK_LABEL(lblUncompSize), buf);
+
+				sprintf(buf, "Frame count: %u", ptr->framecount);
+				gtk_label_set_text(GTK_LABEL(lblFramecount), buf);
+
+				sprintf(buf, "ROM checksum: %08X", ptr->checksum);
+				gtk_label_set_text(GTK_LABEL(lblChecksum), buf);
+			}
 		} else {
-			gtk_label_set_text(GTK_LABEL(lblDataHash), "");
-			gtk_widget_hide(dataHashColor);
-		}
-
-		gtk_widget_set_sensitive(btnExport, ptr->type == GOOMBA_SRAMSAVE);
-		gtk_widget_set_sensitive(btnReplace, ptr->type == GOOMBA_SRAMSAVE);
-
-		if (ptr->type == GOOMBA_CONFIGSAVE) {
-			show_configuration_rows();
-
-			configdata* cd = (configdata*)ptr;
-			sprintf(buf, "Border: %u", cd->bordercolor);
-			gtk_label_set_text(GTK_LABEL(lblBorder), buf);
-			sprintf(buf, "Palette: %u", cd->palettebank);
-			gtk_label_set_text(GTK_LABEL(lblPalette), buf);
-			configdata_misc_strings strs = configdata_get_misc(cd->misc);
-			sprintf(buf, "Sleep: %s", strs.sleep);
-			gtk_label_set_text(GTK_LABEL(lblSleep), buf);
-			sprintf(buf, "Gamma: %s", strs.gamma);
-			gtk_label_set_text(GTK_LABEL(lblGamma), buf);
-			sprintf(buf, "Autoload state: %s", strs.autoload_state);
-			gtk_label_set_text(GTK_LABEL(lblAutostate), buf);
-
-			sprintf(buf, "ROM checksum: %08X", cd->sram_checksum);
-			gtk_label_set_text(GTK_LABEL(lblChecksum), buf);
-		} else {
-			show_standard_rows();
-
-			sprintf(buf, "%sompressed size: %u bytes",
-				ptr->uncompressed_size < ptr->size ? "C" : "Unc",
-				ptr->uncompressed_size);
-			gtk_label_set_text(GTK_LABEL(lblUncompSize), buf);
-
-			sprintf(buf, "Frame count: %u", ptr->framecount);
-			gtk_label_set_text(GTK_LABEL(lblFramecount), buf);
-
-			sprintf(buf, "ROM checksum: %08X", ptr->checksum);
-			gtk_label_set_text(GTK_LABEL(lblChecksum), buf);
+			set_all_labels();
 		}
 	}
 }

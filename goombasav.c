@@ -165,7 +165,7 @@ stateheader* stateheader_advance(const stateheader* sh) {
 }
 
 stateheader** stateheader_scan(const void* gba_data) {
-	// Do not edit gba_data!
+	// Do not edit gba_data in this function!
 	// We are casting to non-const pointers so the client gets non-const pointers back.
 	const goomba_size_t psize = sizeof(stateheader*);
 	stateheader** headers = (stateheader**)malloc(psize * 64);
@@ -174,8 +174,8 @@ stateheader** stateheader_scan(const void* gba_data) {
 	uint32_t* check = (uint32_t*)gba_data;
 	uint32_t check_le = F32(*check);
 	if (check_le == GOOMBA_STATEID) check++;
-	if (check_le == POCKETNES_STATEID) check++;
-	if (check_le == POCKETNES_STATEID2) check++;
+	else if (check_le == POCKETNES_STATEID) check++;
+	else if (check_le == POCKETNES_STATEID2) check++;
 
 	stateheader* sh = (stateheader*)check;
 	int i = 0;
