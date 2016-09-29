@@ -61,7 +61,7 @@ namespace Goombasav {
 
 		virtual uint32_t GetChecksum() {
 			pin_ptr<unsigned char> p = &data[0];
-			return pocketnes_get_checksum(p, data->Length);
+			return pocketnes_get_checksum(p);
 		}
 
 		static List<PocketNESROM^>^ Extract(array<unsigned char>^ source) {

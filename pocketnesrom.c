@@ -62,7 +62,7 @@ const pocketnes_romheader* pocketnes_first_rom(const void* data, size_t length) 
 }
 
 /* Returns a pointer to the next PocketNES ROM header in the data. If the
-location where the next ROM header would be does not contain a 4E45531A
+location where the next ROM header would be does not contain a 'N,E,S,^Z'
 segment, this method will return NULL. */
 const pocketnes_romheader* pocketnes_next_rom(const void* data, size_t length, const pocketnes_romheader* first_rom) {
 	size_t diff = (const char*)first_rom - (const char*)data;
@@ -79,14 +79,21 @@ const pocketnes_romheader* pocketnes_next_rom(const void* data, size_t length, c
 		effective_length - 4 - sizeof(pocketnes_romheader));
 }
 
-/* Returns the checksum that PocketNES would use for this ROM. */
-uint32_t pocketnes_get_checksum(const void* rom, size_t length) {
+/* Returns true if the given data region looks like a PocketNES ROM header
+(based on the 'N,E,S,^Z' segment), or false otherwise. */
+int pocketnes_is_romheader(const void* data) {
+	const char* rom_ptr = (const char*)data + sizeof(pocketnes_romheader);
+	return memcmp(rom_ptr, NES_WORD, 4) == 0;
+}
+
+/* Returns the checksum that PocketNES would use for this ROM.
+You can pass the PocketNES ROM header or the NES ROM itself. */
+uint32_t pocketnes_get_checksum(const void* rom) {
 	const uint8_t* p = (const uint8_t*)rom;
 
 	// Checksum should not include NES ROM format header
-	if (length > 16 && memcmp(p, NES_WORD, 4) == 0) {
+	if (memcmp(p, NES_WORD, 4) == 0) {
 		p += 16;
-		length -= 16;
 	}
 
 	// TODO: add support for compressed roms

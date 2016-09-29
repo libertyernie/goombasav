@@ -41,12 +41,17 @@ return NULL. */
 const pocketnes_romheader* pocketnes_first_rom(const void* data, size_t length);
 
 /* Returns a pointer to the next PocketNES ROM header in the data. If the
-location where the next ROM header would be does not contain a 4E45531A
+location where the next ROM header would be does not contain a 'N,E,S,^Z'
 segment, this method will return NULL. */
 const pocketnes_romheader* pocketnes_next_rom(const void* data, size_t length, const pocketnes_romheader* first_rom);
 
-/* Returns the checksum that PocketNES would use for this ROM. */
-uint32_t pocketnes_get_checksum(const void* rom, size_t length);
+/* Returns true if the given data region looks like a PocketNES ROM header
+(based on the 'N,E,S,^Z' segment), or false otherwise. */
+int pocketnes_is_romheader(const void* data);
+
+/* Returns the checksum that PocketNES would use for this ROM.
+You can pass the PocketNES ROM header or the NES ROM itself. */
+uint32_t pocketnes_get_checksum(const void* rom);
 
 #ifdef __cplusplus
 }
