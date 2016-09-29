@@ -34,7 +34,7 @@ const char* GPL_NOTICE = "Goomba Save Manager (GTK frontend)\n"
 "along with this program. If not, see <http://www.gnu.org/licenses/>.\n";
 
 #pragma region window-level variables
-static char loaded_sram[GOOMBA_COLOR_SRAM_SIZE];
+static void* loaded_file = NULL;
 static char* _filePath = NULL;
 static bool dirty;
 static stateheader** headers = NULL;
@@ -133,7 +133,7 @@ static void header_scan() {
 	if (headers != NULL) {
 		free(headers);
 	}
-	headers = stateheader_scan(loaded_sram);
+	headers = stateheader_scan(loaded_file);
 	int i;
 	for (i = 0; headers[i] != NULL; i++) {
 		gtk_list_store_append(listStore, &iter);
@@ -150,7 +150,7 @@ static void save(const char* path) {
 		error_msg("Could not open file: %s", strerror(errno));
 		return;
 	}
-	fwrite(loaded_sram, 1, GOOMBA_COLOR_SRAM_SIZE, f);
+	fwrite(loaded_file, 1, GOOMBA_COLOR_SRAM_SIZE, f);
 	fclose(f);
 	if (path != _filePath) {
 		g_free(_filePath);
@@ -173,33 +173,36 @@ static void load(const char* path) {
 		error_msg("Could not open file %s", path);
 		return;
 	}
+	fseek(f, 0, SEEK_END);
+	size_t filesize = ftell(f);
+	// If the file is smaller than 64 KiB, pad the rest with zeroes. Some goombasav code expects a 64 KiB file.
+	if (filesize < GOOMBA_COLOR_SRAM_SIZE) filesize = GOOMBA_COLOR_SRAM_SIZE;
+
+	if (loaded_file != NULL) {
+		free(loaded_file);
+	}
+	loaded_file = (char*)malloc(filesize);
+
+	fseek(f, 0, SEEK_SET);
 	size_t total_bytes_read = 0;
-	while (total_bytes_read < GOOMBA_COLOR_SRAM_SIZE) {
-		size_t bytes_read = fread(loaded_sram, 1, GOOMBA_COLOR_SRAM_SIZE - total_bytes_read, f);
-		total_bytes_read += bytes_read;
+	while (total_bytes_read < filesize) {
+		size_t bytes_read = fread(loaded_file, 1, filesize - total_bytes_read, f);
 		if (bytes_read <= 0) {
 			fprintf(stderr, "Could only read %lu bytes from %s\n", (unsigned long)total_bytes_read, path);
-			memset(loaded_sram + total_bytes_read, 0, GOOMBA_COLOR_SRAM_SIZE - total_bytes_read);
-			total_bytes_read = GOOMBA_COLOR_SRAM_SIZE;
+			memset((char*)loaded_file + total_bytes_read, 0, filesize - total_bytes_read);
+			total_bytes_read = filesize;
+		} else {
+			total_bytes_read += bytes_read;
 		}
 	}
-	fseek(f, 0, SEEK_END);
-	uint32_t filesize = (uint32_t)ftell(f);
 	fclose(f);
-	if (filesize > GOOMBA_COLOR_SRAM_SIZE) {
-		GtkWidget* dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_CLOSE,
-			"This file is more than %u bytes. If you overwrite the file, the last %u bytes will be discarded.",
-			GOOMBA_COLOR_SRAM_SIZE, filesize - GOOMBA_COLOR_SRAM_SIZE);
-		gtk_dialog_run(GTK_DIALOG(dialog));
-		gtk_widget_destroy(dialog);
-	}
 
-	char* cleaned = goomba_cleanup(loaded_sram);
+	char* cleaned = goomba_cleanup(loaded_file);
 	if (cleaned == NULL) {
 		// this should not happen
 		error_msg("%s", goomba_last_error());
 		return;
-	} else if (cleaned != loaded_sram) {
+	} else if (cleaned != loaded_file) {
 		GtkWidget* dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_NONE,
 			"Uncompressed SRAM found at 0xE000. Would you like to move and compress it to the proper location? (Doing this is required to extract or replace the save data.)");
 		gtk_dialog_add_button(GTK_DIALOG(dialog), "Cancel", GTK_RESPONSE_CANCEL);
@@ -209,7 +212,7 @@ static void load(const char* path) {
 		gint res = gtk_dialog_run(GTK_DIALOG(dialog));
 		gtk_widget_destroy(dialog);
 		if (res == GTK_RESPONSE_YES) {
-			memcpy(loaded_sram, cleaned, GOOMBA_COLOR_SRAM_SIZE);
+			memcpy(loaded_file, cleaned, GOOMBA_COLOR_SRAM_SIZE);
 			dirty = true;
 		}
 		free(cleaned);
@@ -265,7 +268,7 @@ static void export_click(GtkWidget* widget, gpointer data) {
 	if (_filePath != NULL && gtk_tree_selection_get_selected(GTK_TREE_SELECTION(selection), NULL, &iter)) {
 		gtk_tree_model_get(GTK_TREE_MODEL(listStore), &iter, 1, &sh, -1);
 		goomba_size_t len;
-		void* gbcsav = goomba_extract(loaded_sram, sh, &len);
+		void* gbcsav = goomba_extract(loaded_file, sh, &len);
 		if (gbcsav == NULL) {
 			error_msg("%s", goomba_last_error());
 			return;
@@ -329,12 +332,12 @@ static void replace_click(GtkWidget* widget, gpointer data) {
 		fclose(f);
 
 		// only first X bytes will be used, where X is uncompressed size of current data
-		void* new_data = goomba_new_sav(loaded_sram, sh, gbc_data, len);
+		void* new_data = goomba_new_sav(loaded_file, sh, gbc_data, len);
 		free(gbc_data);
 		if (new_data == NULL) {
 			error_msg("%s", goomba_last_error());
 		} else {
-			memcpy(loaded_sram, new_data, GOOMBA_COLOR_SRAM_SIZE);
+			memcpy(loaded_file, new_data, GOOMBA_COLOR_SRAM_SIZE);
 			dirty = true;
 			free(new_data);
 
