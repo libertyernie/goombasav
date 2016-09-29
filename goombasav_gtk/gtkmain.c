@@ -35,6 +35,9 @@ const char* GPL_NOTICE = "Goomba Save Manager (GTK frontend)\n"
 "You should have received a copy of the GNU General Public License\n"
 "along with this program. If not, see <http://www.gnu.org/licenses/>.\n";
 
+#define F16 little_endian_conv_16
+#define F32 little_endian_conv_32
+
 #pragma region window-level variables
 static void* loaded_file = NULL;
 static size_t loaded_file_size;
@@ -476,7 +479,7 @@ static void selection_changed(GtkWidget* widget, gpointer data) {
 			stateheader* ptr = (stateheader*)voidptr;
 			char buf[256];
 
-			sprintf(buf, "Size: %u bytes    ", ptr->size);
+			sprintf(buf, "Size: %u bytes    ", F16(ptr->size));
 			gtk_label_set_text(GTK_LABEL(lblSize), buf);
 
 			gtk_label_set_text(GTK_LABEL(lblType),
@@ -504,8 +507,8 @@ static void selection_changed(GtkWidget* widget, gpointer data) {
 				gtk_widget_hide(dataHashColor);
 			}
 
-			gtk_widget_set_sensitive(btnExport, ptr->type == GOOMBA_SRAMSAVE);
-			gtk_widget_set_sensitive(btnReplace, ptr->type == GOOMBA_SRAMSAVE);
+			gtk_widget_set_sensitive(btnExport, F16(ptr->type) == GOOMBA_SRAMSAVE);
+			gtk_widget_set_sensitive(btnReplace, F16(ptr->type) == GOOMBA_SRAMSAVE);
 
 			if (ptr->type == GOOMBA_CONFIGSAVE) {
 				show_configuration_rows();
@@ -529,14 +532,14 @@ static void selection_changed(GtkWidget* widget, gpointer data) {
 				show_standard_rows();
 
 				sprintf(buf, "%sompressed size: %u bytes",
-					ptr->uncompressed_size < ptr->size ? "C" : "Unc",
-					ptr->uncompressed_size);
+					F32(ptr->uncompressed_size) < F32(ptr->size) ? "C" : "Unc",
+					F32(ptr->uncompressed_size));
 				gtk_label_set_text(GTK_LABEL(lblUncompSize), buf);
 
-				sprintf(buf, "Frame count: %u", ptr->framecount);
+				sprintf(buf, "Frame count: %u", F32(ptr->framecount));
 				gtk_label_set_text(GTK_LABEL(lblFramecount), buf);
 
-				sprintf(buf, "ROM checksum: %08X", ptr->checksum);
+				sprintf(buf, "ROM checksum: %08X", F32(ptr->checksum));
 				gtk_label_set_text(GTK_LABEL(lblChecksum), buf);
 			}
 		} else {
