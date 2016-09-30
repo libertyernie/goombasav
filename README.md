@@ -1,17 +1,13 @@
 Goomba Save Manager
 ===================
 
-This library is designed to edit the SRAM data of the Goomba and Goomba Color emulators. It can extract and replace the compressed Game Boy / Game Boy Color SRAM data. It can't edit savestate data or add new SRAM.
+This library is designed to edit the SRAM data of the PocketNES, Goomba, and Goomba Color emulators. It can extract and replace the compressed NES / Game Boy / Game Boy Color SRAM data. It can't edit savestate data or add new SRAM.
 
-Windows .exe files for the .NET and command-line apps are located in the "Release Binaries" folder. Linux / Cygwin users can build the command-line version of the application by using the Makefile or by running:
-
-  gcc -Wall -o goombasav main.c goombasav.c minilzo/minilzo.c
+Windows .exe files for the .NET and command-line apps (currently without PocketNES support) are located in the "Release Binaries" folder. Linux / Cygwin users can build the command-line version of the application by using the Makefile.
 
 Also, the directory "goombasav_gtk" has a GTK+ application you can compile and run, which works just like the .NET app and comes with its own Makefile.
 
 Make sure you back up your save data before using the application, just in case.
-
-Work on adding PocketNES and maybe SMSAdvance support is in progress.
 
 goombasav
 ---------
@@ -21,6 +17,15 @@ goombasav is a command-line program that can extract and replace save data, as w
 goombasav is written in C and is also valid C++. In Visual Studio, use the /TP switch to compile .c files as C++ code.
 
 See "example_usage.txt" for an example of how to use goombasav.
+
+gbaromextract
+-------------
+
+gbaromextract is a command-line program that can extract NES ROMs from compiled PocketNES ROMs and Game Boy ROMs from compiled Goomba / Goomba Color ROMs. It works similarily to goombasav, but cannot replace any data.
+
+gbaromextract can also extract Game Boy ROMs from any uncompressed source (e.g. .tar files); however, this is not true of NES ROMs.
+
+gbaromextract is written in C and is also valid C++. In Visual Studio, use the /TP switch to compile .c files as C++ code.
 
 Goomba Save Manager (goombasav_cs)
 ----------------------------------
