@@ -40,8 +40,17 @@ const pocketnes_romheader* pocketnes_first_rom(const void* data, size_t length) 
 			if (logo_pos == 4) { // matched all of GB logo - on last byte (0x133)
 				// check if length fits
 				const pocketnes_romheader* candidate = (pocketnes_romheader*)(ptr - 3 - sizeof(pocketnes_romheader));
-				const char* candidate_end_ptr = (ptr - 3) + candidate->filesize;
-				if (candidate_end_ptr < end) {
+				size_t filesize = candidate->filesize;
+				if (*(uint16_t *)"\0\xff" < 0x100) {
+					uint32_t buffer;
+					((char*)&buffer)[0] = ((char*)&filesize)[3];
+					((char*)&buffer)[1] = ((char*)&filesize)[2];
+					((char*)&buffer)[2] = ((char*)&filesize)[1];
+					((char*)&buffer)[3] = ((char*)&filesize)[0];
+					filesize = buffer;
+				}
+				const char* candidate_end_ptr = (ptr - 3) + filesize;
+				if (candidate_end_ptr <= end) {
 					return candidate;
 				} else {
 					// no match, try again

@@ -425,7 +425,7 @@ static void selection_changed(GtkWidget* widget, gpointer data) {
 			pocketnes_romheader* ptr = (pocketnes_romheader*)voidptr;
 			char buf[256];
 
-			sprintf(buf, "Size: %u bytes    ", ptr->filesize);
+			sprintf(buf, "Size: %u bytes    ", F32(ptr->filesize));
 			gtk_label_set_text(GTK_LABEL(lblSize), buf);
 
 			gtk_label_set_text(GTK_LABEL(lblType), "Type: NES ROM (PocketNES)");
