@@ -1,5 +1,5 @@
-/* pocketnesrom.c - functions to find uncompressed NES ROM images
-stored within PocketNES ROMs
+/* smsadvancerom.c - functions to find uncompressed Master System / Game Geat
+ROM images stored within SMSAdvance ROMs
 
 Copyright (C) 2016 libertyernie
 
@@ -22,24 +22,24 @@ as C++ code (Properties -> C/C++ -> Advanced -> Compile As.)
 
 #include <stdlib.h>
 #include <string.h>
-#include "pocketnesrom.h"
+#include "smsadvancerom.h"
 
-const char NES_WORD[4] = { 'N','E','S',0x1A };
+const char SMS_WORD[4] = { 'S','M','S',0x1A };
 
-/* Finds the first PocketNES ROM header in the given data block by looking for
-the segment 4E45531A (N,E,S,^Z) in the ROM itself. If no valid data is found,
-this method will return NULL. */
-const pocketnes_romheader* pocketnes_first_rom(const void* data, size_t length) {
+/* Finds the first SMSAdvance ROM header in the given data block by looking for
+the segment 534D531A (S,M,S,^Z). If no valid data is found, this method will
+return NULL. */
+const smsadvance_romheader* smsadvance_first_rom(const void* data, size_t length) {
 	const char* ptr = (const char*)data;
 	const char* end = ptr + length;
 	int logo_pos = 0;
 	while (ptr < end) {
-		if (*ptr == NES_WORD[logo_pos]) {
+		if (*ptr == SMS_WORD[logo_pos]) {
 			// match
 			logo_pos++;
 			if (logo_pos == 4) { // matched all of GB logo - on last byte (0x133)
 				// check if length fits
-				const pocketnes_romheader* candidate = (pocketnes_romheader*)(ptr - 3 - sizeof(pocketnes_romheader));
+				const smsadvance_romheader* candidate = (smsadvance_romheader*)(ptr - 3);
 				size_t filesize = candidate->filesize;
 				if (*(uint16_t *)"\0\xff" < 0x100) {
 					uint32_t buffer;
@@ -49,7 +49,7 @@ const pocketnes_romheader* pocketnes_first_rom(const void* data, size_t length) 
 					((char*)&buffer)[3] = ((char*)&filesize)[0];
 					filesize = buffer;
 				}
-				const char* candidate_end_ptr = (ptr - 3) + filesize;
+				const char* candidate_end_ptr = ptr - 3 + sizeof(smsadvance_romheader) + filesize;
 				if (candidate_end_ptr <= end) {
 					return candidate;
 				} else {
@@ -71,9 +71,9 @@ const pocketnes_romheader* pocketnes_first_rom(const void* data, size_t length) 
 }
 
 /* Returns a pointer to the next PocketNES ROM header in the data. If the
-location where the next ROM header would be does not contain a 'N,E,S,^Z'
-segment at the start of the ROM, this method will return NULL. */
-const pocketnes_romheader* pocketnes_next_rom(const void* data, size_t length, const pocketnes_romheader* first_rom) {
+location where the next ROM header would be does not contain a 'S,M,S,^Z'
+segment, this method will return NULL. */
+const smsadvance_romheader* smsadvance_next_rom(const void* data, size_t length, const smsadvance_romheader* first_rom) {
 	size_t diff = (const char*)first_rom - (const char*)data;
 	if (diff > length) {
 		return NULL;
@@ -83,29 +83,21 @@ const pocketnes_romheader* pocketnes_next_rom(const void* data, size_t length, c
 		// Assume there will never be a ROM this small
 		return NULL;
 	}
-	return pocketnes_first_rom(
-		(const char*)first_rom + 4 + sizeof(pocketnes_romheader),
-		effective_length - 4 - sizeof(pocketnes_romheader));
+	return smsadvance_first_rom(
+		(const char*)first_rom + 4 + sizeof(smsadvance_romheader),
+		effective_length - 4 - sizeof(smsadvance_romheader));
 }
 
-/* Returns true if the given data region looks like a PocketNES ROM header
-(based on the 'N,E,S,^Z' segment), or false otherwise. */
-int pocketnes_is_romheader(const void* data) {
-	const char* rom_ptr = (const char*)data + sizeof(pocketnes_romheader);
-	return memcmp(rom_ptr, NES_WORD, 4) == 0;
+/* Returns true if the given data region looks like a SMSAdvance ROM header
+(based on the 'S,M,S,^Z' segment), or false otherwise. */
+int smsadvance_is_romheader(const void* data) {
+	return memcmp(data, SMS_WORD, 4) == 0;
 }
 
-/* Returns the checksum that PocketNES would use for this ROM.
-You can pass the PocketNES ROM header or the NES ROM itself. */
-uint32_t pocketnes_get_checksum(const void* rom) {
-	const uint8_t* p = (const uint8_t*)rom;
-
-	// Checksum should not include NES ROM format header
-	if (memcmp(p, NES_WORD, 4) == 0) {
-		p += 16;
-	}
-
-	// TODO: add support for compressed roms
+/* Returns the checksum that SMSAdvance would use for this ROM.
+You can pass the SMSAdvance ROM header or the SMS/GG ROM itself. */
+uint32_t smsadvance_get_checksum(const void* rom) {
+	/*const uint8_t* p = (const uint8_t*)rom;
 
 	uint32_t sum = 0;
 	int i;
@@ -113,5 +105,6 @@ uint32_t pocketnes_get_checksum(const void* rom) {
 		sum += *p | (*(p + 1) << 8) | (*(p + 2) << 16) | (*(p + 3) << 24);
 		p += 128;
 	}
-	return sum;
+	return sum;*/
+	return 1;
 }

@@ -83,6 +83,7 @@
     <ClCompile Include="..\goombasav.c" />
     <ClCompile Include="..\minilzo\minilzo.c" />
     <ClCompile Include="..\pocketnesrom.c" />
+    <ClCompile Include="..\smsadvancerom.c" />
     <ClCompile Include="AssemblyInfo.cpp" />
     <ClCompile Include="expose.cpp" />
   </ItemGroup>
@@ -93,12 +94,14 @@
     <ClInclude Include="..\minilzo-2.06\lzodefs.h" />
     <ClInclude Include="..\minilzo-2.06\minilzo.h" />
     <ClInclude Include="..\pocketnesrom.h" />
+    <ClInclude Include="..\smsadvancerom.h" />
     <ClInclude Include="cli_ExtractedROM.h" />
     <ClInclude Include="cli_Configdata.h" />
     <ClInclude Include="cli_GoombaHeader.h" />
     <ClInclude Include="cli_GameBoyROM.h" />
     <ClInclude Include="cli_GoombaSRAM.h" />
     <ClInclude Include="cli_PocketNESROM.h" />
+    <ClInclude Include="cli_SMSAdvanceROM.h" />
     <ClInclude Include="cli_Stateheader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

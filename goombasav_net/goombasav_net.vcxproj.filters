@@ -33,6 +33,9 @@
     <ClCompile Include="..\pocketnesrom.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\smsadvancerom.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\goombasav.h">
@@ -72,6 +75,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="cli_PocketNESROM.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\smsadvancerom.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cli_SMSAdvanceROM.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

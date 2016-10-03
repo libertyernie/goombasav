@@ -62,7 +62,7 @@ namespace goombasav_cs {
 
 		private void openToolStripMenuItem_Click(object sender, EventArgs e) {
 			OpenFileDialog d = new OpenFileDialog();
-			d.Filter = "Goomba save data (*.sav)|*.sav|Goomba ROMs (*.gba)|*.gba|All files (*.*)|*.*";
+			d.Filter = "GBA save data (*.sav)|*.sav|GBA ROMs (*.gba)|*.gba|All files (*.*)|*.*";
 			if (d.ShowDialog() == DialogResult.OK) {
 				load(d.FileName);
 			}
@@ -74,7 +74,7 @@ namespace goombasav_cs {
 
 		private void saveAsToolStripMenuItem_Click(object sender, EventArgs e) {
 			SaveFileDialog d = new SaveFileDialog();
-			d.Filter = "Goomba save data (*.sav)|*.sav|Goomba ROMs (*.gba)|*.gba|All files (*.*)|*.*";
+			d.Filter = "GBA save data (*.sav)|*.sav|GBA ROMs (*.gba)|*.gba|All files (*.*)|*.*";
 			d.AddExtension = true;
 			if (d.ShowDialog() == DialogResult.OK) {
 				save(d.FileName);
@@ -92,7 +92,7 @@ namespace goombasav_cs {
 		private void btnReplace_Click(object sender, EventArgs e) {
 			OpenFileDialog d = new OpenFileDialog();
 			d.Title = btnReplace.Text;
-			d.Filter = "Game Boy save data (*.sav)|*.sav|All files (*.*)|*.*";
+			d.Filter = "Raw save data (*.sav)|*.sav|All files (*.*)|*.*";
 			if (d.ShowDialog() == DialogResult.OK) {
 				replace(d.FileName);
 			}
@@ -111,7 +111,7 @@ namespace goombasav_cs {
 				}
 				SaveFileDialog d = new SaveFileDialog();
 				d.Title = btnExtract.Text;
-				d.Filter = "Game Boy save data (*.sav)|*.sav|All files (*.*)|*.*";
+				d.Filter = "Raw save data (*.sav)|*.sav|All files (*.*)|*.*";
 				d.AddExtension = true;
 				if (d.ShowDialog() == DialogResult.OK) {
 					File.WriteAllBytes(d.FileName, data);
@@ -121,8 +121,9 @@ namespace goombasav_cs {
                 SaveFileDialog d = new SaveFileDialog();
 				d.Title = btnExtract.Text;
                 d.Filter =
-                    h is GameBoyROM ? "Game Boy ROMs (*.gb, *.gbc)|*.gb,*.gbc|All files (*.*)|*.*"
+                    h is GameBoyROM ? "Game Boy ROMs (*.gb, *.gbc)|*.gb;*.gbc|All files (*.*)|*.*"
                     : h is PocketNESROM ? "NES/Famicom ROMs (*.nes)|*.nes|All files (*.*)|*.*"
+                    : h is SMSAdvanceROM ? "Master System/Game Gear ROMs (*.sms, *.gg)|*.sms;*.gg|All files (*.*)|*.*"
                     : "All files (*.*)|*.*";
                 d.FileName = filePath == null || loaded_rom_contents.Count > 1
                     ? r.Name
@@ -281,15 +282,17 @@ namespace goombasav_cs {
 			if (!okToClose()) return;
 
 			try {
-				byte[] arr = System.IO.File.ReadAllBytes(filename);
+				byte[] arr = File.ReadAllBytes(filename);
 
 				var extractedRoms1 = GameBoyROM.Extract(arr);
 				var extractedRoms2 = PocketNESROM.Extract(arr);
-				if (extractedRoms1.Any() || extractedRoms2.Any()) {
+				var extractedRoms3 = SMSAdvanceROM.Extract(arr);
+				if (extractedRoms1.Any() || extractedRoms2.Any() || extractedRoms3.Any()) {
 					loaded_sram = null;
                     loaded_rom_contents = new List<ExtractedROM>();
                     loaded_rom_contents.AddRange(extractedRoms1);
                     loaded_rom_contents.AddRange(extractedRoms2);
+                    loaded_rom_contents.AddRange(extractedRoms3);
 				} else {
 					if (arr.Length > GoombaSRAM.ExpectedSize) {
 						MessageBox.Show("This file is more than " + GoombaSRAM.ExpectedSize +
@@ -336,7 +339,7 @@ namespace goombasav_cs {
 			if (loaded_rom_contents != null) {
 				listBox1.Items.AddRange(loaded_rom_contents.ToArray());
 				if (loaded_rom_contents.Count == 0) {
-					MessageBox.Show("No Game Boy ROMs were not found in this file. It may not be a valid Goomba ROM", "Note",
+					MessageBox.Show("No Game Boy, NES, or Sega ROMs were not found in this file. It may not be a valid emulator ROM.", "Note",
 						MessageBoxButtons.OK,
 						MessageBoxIcon.Information);
 				}
