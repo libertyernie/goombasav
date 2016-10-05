@@ -195,6 +195,7 @@ stateheader** stateheader_scan(const void* gba_data) {
 	if (check_le == GOOMBA_STATEID) check++;
 	else if (check_le == POCKETNES_STATEID) check++;
 	else if (check_le == POCKETNES_STATEID2) check++;
+	else if (check_le == SMSADVANCE_STATEID) check++;
 
 	stateheader* sh = (stateheader*)check;
 	int i = 0;
@@ -234,7 +235,8 @@ int goomba_is_sram(const void* data) {
 	uint32_t stateid_le = F32(*(uint32_t*)data);
 	return stateid_le == GOOMBA_STATEID
 		|| stateid_le == POCKETNES_STATEID
-		|| stateid_le == POCKETNES_STATEID2;
+		|| stateid_le == POCKETNES_STATEID2
+		|| stateid_le == SMSADVANCE_STATEID;
 }
 
 /**

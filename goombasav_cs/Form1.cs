@@ -175,11 +175,11 @@ namespace goombasav_cs {
 				hashBox.BackColor = Color.FromArgb((int)(hash | 0xFF000000));
 
 				btnExtract.Enabled = btnReplace.Enabled = (sh.Type == GoombaHeader.SRAMSAVE);
-			} else if (h is Configdata) {
+			} else if (h is GoombaConfigdata) {
 				flpConfigdata.Visible = true;
 				flpStateheader.Visible = false;
 
-				Configdata cd = (Configdata)h;
+				GoombaConfigdata cd = (GoombaConfigdata)h;
 				lblBorderVal.Text = cd.BorderColor.ToString();
 				lblPaletteVal.Text = cd.PaletteBank.ToString();
 				MiscStrings strs = cd.GetMiscStrings;

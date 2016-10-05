@@ -18,7 +18,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 https://github.com/libertyernie/goombasav */
 
-#include "cli_Configdata.h"
+#include "cli_GoombaConfigdata.h"
 #include "cli_Stateheader.h"
 #include <cstdlib>
 #include <cstring>
@@ -56,12 +56,26 @@ namespace Goombasav {
 				}
 			}
 
+			uint32_t tag = *(uint32_t*)this->data;
+
 			stateheader** headers = stateheader_scan(this->data);
 			if (headers == NULL) throw gcnew GoombaException(goomba_last_error());
 			List<GoombaHeader^>^ list = gcnew List<GoombaHeader^>;
 			for (int i = 0; headers[i] != NULL; i++) {
 				if (headers[i]->type == GOOMBA_CONFIGSAVE) {
-					list->Add(gcnew Configdata((goomba_configdata*)headers[i], this));
+					switch (tag) {
+					case POCKETNES_STATEID:
+					case POCKETNES_STATEID2:
+						break;
+					default:
+						configdata* cd = (configdata*)headers[i];
+						if (cd->size == sizeof(smsadvance_configdata)) {
+
+						} else {
+							list->Add(gcnew GoombaConfigdata((goomba_configdata*)headers[i], this));
+						}
+						break;
+					}
 				} else {
 					list->Add(gcnew Stateheader(headers[i], this));
 				}

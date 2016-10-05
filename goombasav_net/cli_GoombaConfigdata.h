@@ -55,11 +55,11 @@ namespace Goombasav {
 		}
 	};
 
-	public ref class Configdata : GoombaHeader {
+	public ref class GoombaConfigdata : GoombaHeader {
 	public:
 		// Constructs an object using the given header pointer and parent object.
 		// The parent is only used when the user tries to access the Parent property.
-		Configdata(const goomba_configdata* ptr, GoombaSRAM^ parent)
+		GoombaConfigdata(const goomba_configdata* ptr, GoombaSRAM^ parent)
 			: GoombaHeader(ptr, parent) { }
 
 #pragma region properties
@@ -79,28 +79,12 @@ namespace Goombasav {
 				return Pointer->palettebank;
 			}
 		}
-		/*property uint8_t Misc {
-			uint8_t get() {
-				return Pointer->misc;
-			}
-		}
-		property uint8_t Reserved3 {
-			uint8_t get() {
-				return Pointer->reserved3;
-			}
-		}*/
 
 		property uint32_t ROMChecksum {
 			uint32_t get() {
 				return Pointer->sram_checksum;
 			}
 		}
-
-		/*property uint32_t Zero {
-			uint32_t get() {
-				return Pointer->zero;
-			}
-		}*/
 
 		property MiscStrings^ GetMiscStrings {
 			MiscStrings^ get() {

@@ -65,9 +65,6 @@
     <ClInclude Include="..\pocketnesrom.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="cli_Configdata.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="cli_GoombaHeader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -81,6 +78,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="cli_SMSAdvanceROM.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cli_GoombaConfigdata.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

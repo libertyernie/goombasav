@@ -511,7 +511,7 @@ static void selection_changed(GtkWidget* widget, gpointer data) {
 				show_configuration_rows();
 
 				configdata* cd = (configdata*)ptr;
-				if (cd->size == sizeof(goomba_configdata)) {
+				if (cd->size == sizeof(goomba_configdata) && *(uint32_t*)loaded_file == GOOMBA_STATEID) {
 					goomba_configdata* gcd = (goomba_configdata*)cd;
 					sprintf(buf, "Border: %u", gcd->bordercolor);
 					gtk_label_set_text(GTK_LABEL(lblBorder), buf);
@@ -529,6 +529,19 @@ static void selection_changed(GtkWidget* widget, gpointer data) {
 					gtk_label_set_text(GTK_LABEL(lblChecksum), buf);
 
 					sprintf(buf, "Title: %.32s", gcd->reserved4);
+					gtk_label_set_text(GTK_LABEL(lblTitle), buf);
+				} else if (cd->size == sizeof(pocketnes_configdata)) {
+					pocketnes_configdata* pcd = (pocketnes_configdata*)cd;
+					gtk_label_set_text(GTK_LABEL(lblBorder), "");
+					gtk_label_set_text(GTK_LABEL(lblPalette), "");
+					gtk_label_set_text(GTK_LABEL(lblSleep), "");
+					gtk_label_set_text(GTK_LABEL(lblGamma), "");
+					gtk_label_set_text(GTK_LABEL(lblAutostate), "");
+
+					sprintf(buf, "ROM checksum: %08X", pcd->sram_checksum);
+					gtk_label_set_text(GTK_LABEL(lblChecksum), buf);
+
+					sprintf(buf, "Title: %.32s", pcd->reserved4);
 					gtk_label_set_text(GTK_LABEL(lblTitle), buf);
 				} else if (cd->size == sizeof(smsadvance_configdata)) {
 					smsadvance_configdata* scd = (smsadvance_configdata*)cd;
