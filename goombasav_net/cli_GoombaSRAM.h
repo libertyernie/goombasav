@@ -18,7 +18,9 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 https://github.com/libertyernie/goombasav */
 
+#include "cli_PocketNESConfigdata.h"
 #include "cli_GoombaConfigdata.h"
+#include "cli_SMSAdvanceConfigdata.h"
 #include "cli_Stateheader.h"
 #include <cstdlib>
 #include <cstring>
@@ -66,11 +68,12 @@ namespace Goombasav {
 					switch (tag) {
 					case POCKETNES_STATEID:
 					case POCKETNES_STATEID2:
+						list->Add(gcnew PocketNESConfigdata((pocketnes_configdata*)headers[i], this));
 						break;
 					default:
 						configdata* cd = (configdata*)headers[i];
 						if (cd->size == sizeof(smsadvance_configdata)) {
-
+							list->Add(gcnew SMSAdvanceConfigdata((smsadvance_configdata*)headers[i], this));
 						} else {
 							list->Add(gcnew GoombaConfigdata((goomba_configdata*)headers[i], this));
 						}

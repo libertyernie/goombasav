@@ -5,7 +5,7 @@ This object will only remain valid while its GoombaSRAM has not yet been
 disposed/finalized. GoombaHeader objects can be obtained via the Headers
 property of GoombaSRAM.
 
-Copyright (C) 2014 libertyernie
+Copyright (C) 2016 libertyernie
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -75,7 +75,7 @@ namespace Goombasav {
 			}
 		}
 
-		property String^ Title {
+		virtual property String^ Title {
 			String^ get() {
 				return gcnew String(((const stateheader*)ptr)->title);
 			}
@@ -92,6 +92,15 @@ namespace Goombasav {
 
 		String^ ToString() override {
 			return GetSummary();
+		}
+	};
+
+	public ref class Configdata abstract : GoombaHeader {
+	internal:
+		Configdata(const void* ptr, GoombaSRAM^ parent) : GoombaHeader(ptr, parent) {}
+	public:
+		virtual property uint32_t ROMChecksum {
+			uint32_t get() abstract;
 		}
 	};
 }

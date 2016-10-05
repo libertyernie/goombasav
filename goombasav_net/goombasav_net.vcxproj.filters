@@ -83,5 +83,11 @@
     <ClInclude Include="cli_GoombaConfigdata.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="cli_PocketNESConfigdata.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cli_SMSAdvanceConfigdata.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

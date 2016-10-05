@@ -1,5 +1,5 @@
 #pragma once
-/* cli_GoombaConfigdata.h - subclass for Goomba's configuration data
+/* cli_PocketNESConfigdata.h - subclass for Goomba's configuration data
 
 This object will only remain valid while its GoombaSRAM has not yet been
 disposed/finalized. GoombaHeader objects can be obtained via the Headers
@@ -27,68 +27,23 @@ https://github.com/libertyernie/goombasav */
 namespace Goombasav {
 	ref class GoombaSRAM;
 
-	public ref class MiscStrings {
-	private:
-		String^ sleepStr;
-		String^ autoloadStateStr;
-		String^ gammaStr;
-	public:
-		MiscStrings(configdata_misc_strings source) {
-			sleepStr = gcnew String(source.sleep);
-			autoloadStateStr = gcnew String(source.autoload_state);
-			gammaStr = gcnew String(source.gamma);
-		}
-		property String^ SleepStr {
-			String^ get() {
-				return sleepStr;
-			}
-		}
-		property String^ AutoloadStateStr {
-			String^ get() {
-				return autoloadStateStr;
-			}
-		}
-		property String^ GammaStr {
-			String^ get() {
-				return gammaStr;
-			}
-		}
-	};
-
-	public ref class GoombaConfigdata : Configdata {
+	public ref class PocketNESConfigdata : Configdata {
 	public:
 		// Constructs an object using the given header pointer and parent object.
 		// The parent is only used when the user tries to access the Parent property.
-		GoombaConfigdata(const goomba_configdata* ptr, GoombaSRAM^ parent)
+		PocketNESConfigdata(const pocketnes_configdata* ptr, GoombaSRAM^ parent)
 			: Configdata(ptr, parent) { }
 
 #pragma region properties
-		property const goomba_configdata* Pointer {
-			const goomba_configdata* get() {
-				return (const goomba_configdata*)VoidPointer;
-			}
-		}
-
-		property uint8_t BorderColor {
-			uint8_t get() {
-				return Pointer->bordercolor;
-			}
-		}
-		property uint8_t PaletteBank {
-			uint8_t get() {
-				return Pointer->palettebank;
+		property const pocketnes_configdata* Pointer {
+			const pocketnes_configdata* get() {
+				return (const pocketnes_configdata*)VoidPointer;
 			}
 		}
 
 		property uint32_t ROMChecksum {
 			uint32_t get() override {
 				return Pointer->sram_checksum;
-			}
-		}
-
-		property MiscStrings^ GetMiscStrings {
-			MiscStrings^ get() {
-				return gcnew MiscStrings(configdata_get_misc(this->Pointer->misc));
 			}
 		}
 #pragma endregion

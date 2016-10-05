@@ -117,17 +117,17 @@ namespace goombasav_cs {
 					File.WriteAllBytes(d.FileName, data);
 				}
 			} else if (h is ExtractedROM) {
-                ExtractedROM r = (ExtractedROM)h;
-                SaveFileDialog d = new SaveFileDialog();
+				ExtractedROM r = (ExtractedROM)h;
+				SaveFileDialog d = new SaveFileDialog();
 				d.Title = btnExtract.Text;
-                d.Filter =
-                    h is GameBoyROM ? "Game Boy ROMs (*.gb, *.gbc)|*.gb;*.gbc|All files (*.*)|*.*"
-                    : h is PocketNESROM ? "NES/Famicom ROMs (*.nes)|*.nes|All files (*.*)|*.*"
-                    : h is SMSAdvanceROM ? "Master System/Game Gear ROMs (*.sms, *.gg)|*.sms;*.gg|All files (*.*)|*.*"
-                    : "All files (*.*)|*.*";
-                d.FileName = filePath == null || loaded_rom_contents.Count > 1
-                    ? r.Name
-                    : Path.GetFileNameWithoutExtension(filePath);
+				d.Filter =
+					h is GameBoyROM ? "Game Boy ROMs (*.gb, *.gbc)|*.gb;*.gbc|All files (*.*)|*.*"
+					: h is PocketNESROM ? "NES/Famicom ROMs (*.nes)|*.nes|All files (*.*)|*.*"
+					: h is SMSAdvanceROM ? "Master System/Game Gear ROMs (*.sms, *.gg)|*.sms;*.gg|All files (*.*)|*.*"
+					: "All files (*.*)|*.*";
+				d.FileName = filePath == null || loaded_rom_contents.Count > 1
+					? r.Name
+					: Path.GetFileNameWithoutExtension(filePath);
 				d.AddExtension = true;
 				if (d.ShowDialog() == DialogResult.OK) {
 					File.WriteAllBytes(d.FileName, r.Data);
@@ -144,9 +144,9 @@ namespace goombasav_cs {
 				lblSizeVal.Text = r.Data.Length + " bytes";
 				lblTypeVal.Text = "ROM image";
 				flpConfigdata.Visible = flpStateheader.Visible = panel1.Visible = false;
-                lblChecksumVal.Text = r.GetChecksum().ToString("X8");
-                lblTitleVal.Text = r.Name;
-                btnExtract.Enabled = true;
+				lblChecksumVal.Text = r.GetChecksum().ToString("X8");
+				lblTitleVal.Text = r.Name;
+				btnExtract.Enabled = true;
 				btnReplace.Enabled = false;
 				return;
 			}
@@ -175,17 +175,27 @@ namespace goombasav_cs {
 				hashBox.BackColor = Color.FromArgb((int)(hash | 0xFF000000));
 
 				btnExtract.Enabled = btnReplace.Enabled = (sh.Type == GoombaHeader.SRAMSAVE);
-			} else if (h is GoombaConfigdata) {
-				flpConfigdata.Visible = true;
+			} else if (h is Configdata) {
 				flpStateheader.Visible = false;
 
-				GoombaConfigdata cd = (GoombaConfigdata)h;
-				lblBorderVal.Text = cd.BorderColor.ToString();
-				lblPaletteVal.Text = cd.PaletteBank.ToString();
-				MiscStrings strs = cd.GetMiscStrings;
-				lblSleepVal.Text = strs.SleepStr;
-				lblAutostateVal.Text = strs.AutoloadStateStr;
-				lblGammaVal.Text = strs.GammaStr;
+				Configdata cd = (Configdata)h;
+				if (h is GoombaConfigdata) {
+					flpConfigdata.Visible = true;
+					GoombaConfigdata gcd = (GoombaConfigdata)h;
+					lblBorderVal.Text = gcd.BorderColor.ToString();
+					lblPaletteVal.Text = gcd.PaletteBank.ToString();
+					MiscStrings strs = gcd.GetMiscStrings;
+					lblSleepVal.Text = strs.SleepStr;
+					lblAutostateVal.Text = strs.AutoloadStateStr;
+					lblGammaVal.Text = strs.GammaStr;
+				} else {
+					flpConfigdata.Visible = false;
+					lblBorderVal.Text = "";
+					lblPaletteVal.Text = "";
+					lblSleepVal.Text = "";
+					lblAutostateVal.Text = "";
+					lblGammaVal.Text = "";
+				}
 				lblChecksumVal.Text = cd.ROMChecksum.ToString("X8"); // The SRAM with this ROM checksum value is currently in 0xe000-0xffff
 
 				panel1.Visible = false;
@@ -289,10 +299,10 @@ namespace goombasav_cs {
 				var extractedRoms3 = SMSAdvanceROM.Extract(arr);
 				if (extractedRoms1.Any() || extractedRoms2.Any() || extractedRoms3.Any()) {
 					loaded_sram = null;
-                    loaded_rom_contents = new List<ExtractedROM>();
-                    loaded_rom_contents.AddRange(extractedRoms1);
-                    loaded_rom_contents.AddRange(extractedRoms2);
-                    loaded_rom_contents.AddRange(extractedRoms3);
+					loaded_rom_contents = new List<ExtractedROM>();
+					loaded_rom_contents.AddRange(extractedRoms1);
+					loaded_rom_contents.AddRange(extractedRoms2);
+					loaded_rom_contents.AddRange(extractedRoms3);
 				} else {
 					if (arr.Length > GoombaSRAM.ExpectedSize) {
 						MessageBox.Show("This file is more than " + GoombaSRAM.ExpectedSize +
