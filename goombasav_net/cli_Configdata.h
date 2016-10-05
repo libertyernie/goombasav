@@ -59,13 +59,13 @@ namespace Goombasav {
 	public:
 		// Constructs an object using the given header pointer and parent object.
 		// The parent is only used when the user tries to access the Parent property.
-		Configdata(const configdata* ptr, GoombaSRAM^ parent)
+		Configdata(const goomba_configdata* ptr, GoombaSRAM^ parent)
 			: GoombaHeader(ptr, parent) { }
 
 #pragma region properties
-		property const configdata* Pointer {
-			const configdata* get() {
-				return (const configdata*)VoidPointer;
+		property const goomba_configdata* Pointer {
+			const goomba_configdata* get() {
+				return (const goomba_configdata*)VoidPointer;
 			}
 		}
 

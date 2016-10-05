@@ -122,22 +122,40 @@ const char* stateheader_str(const stateheader* sh) {
 	j += sprintf(goomba_strbuf + j, "type: %s (%u)\n", stateheader_typestr(F16(sh->type)), F16(sh->type));
 	if (F16(sh->type) == GOOMBA_CONFIGSAVE) {
 		configdata* cd = (configdata*)sh;
-		j += sprintf(goomba_strbuf + j, "bordercolor: %u\n", cd->bordercolor);
-		j += sprintf(goomba_strbuf + j, "palettebank: %u\n", cd->palettebank);
-		configdata_misc_strings strs = configdata_get_misc(cd->misc);
-		j += sprintf(goomba_strbuf + j, "sleep: %s\n", strs.sleep);
-		j += sprintf(goomba_strbuf + j, "autoload state: %s\n", strs.autoload_state);
-		j += sprintf(goomba_strbuf + j, "gamma: %s\n", strs.gamma);
-		j += sprintf(goomba_strbuf + j, "rom checksum: %8X (0xE000-0xFFFF %s)\n", F32(cd->sram_checksum),
-			cd->sram_checksum != 0 ? "occupied" : "free");
+		if (cd->size == sizeof(goomba_configdata)) {
+			const goomba_configdata* gcd = (const goomba_configdata*)cd;
+			j += sprintf(goomba_strbuf + j, "(goomba) bordercolor: %u\n", gcd->bordercolor);
+			j += sprintf(goomba_strbuf + j, "(goomba) palettebank: %u\n", gcd->palettebank);
+			configdata_misc_strings strs = configdata_get_misc(gcd->misc);
+			j += sprintf(goomba_strbuf + j, "(goomba) sleep: %s\n", strs.sleep);
+			j += sprintf(goomba_strbuf + j, "(goomba) autoload state: %s\n", strs.autoload_state);
+			j += sprintf(goomba_strbuf + j, "(goomba) gamma: %s\n", strs.gamma);
+			const pocketnes_configdata* pcd = (const pocketnes_configdata*)cd;
+			j += sprintf(goomba_strbuf + j, "(pocketnes) displaytype: %u\n", pcd->displaytype);
+			j += sprintf(goomba_strbuf + j, "(pocketnes) misc: %u\n", pcd->misc);
+			j += sprintf(goomba_strbuf + j, "rom checksum: %8X (0xE000-0xFFFF %s)\n", F32(gcd->sram_checksum),
+				gcd->sram_checksum != 0 ? "occupied" : "free");
+			j += sprintf(goomba_strbuf + j, "title: %s", gcd->reserved4);
+		} else if (cd->size == sizeof(smsadvance_configdata)) {
+			const smsadvance_configdata* scd = (const smsadvance_configdata*)cd;
+			j += sprintf(goomba_strbuf + j, "displaytype: %u\n", scd->displaytype);
+			j += sprintf(goomba_strbuf + j, "gammavalue: %u\n", scd->gammavalue);
+			j += sprintf(goomba_strbuf + j, "region: %u\n", scd->region);
+			j += sprintf(goomba_strbuf + j, "sleepflick: %u\n", scd->sleepflick);
+			j += sprintf(goomba_strbuf + j, "config: %u\n", scd->config);
+			j += sprintf(goomba_strbuf + j, "bcolor: %u\n", scd->bcolor);
+			j += sprintf(goomba_strbuf + j, "rom checksum: %8X (0xE000-0xFFFF %s)\n", F32(scd->sram_checksum),
+				scd->sram_checksum != 0 ? "occupied" : "free");
+			j += sprintf(goomba_strbuf + j, "title: %s", scd->reserved3);
+		}
 	} else {
 		j += sprintf(goomba_strbuf + j, "%scompressed_size: %u\n",
 			(F32(sh->uncompressed_size) < F16(sh->size) ? "" : "un"),
 			F32(sh->uncompressed_size));
 		j += sprintf(goomba_strbuf + j, "framecount: %u\n", F32(sh->framecount));
 		j += sprintf(goomba_strbuf + j, "rom checksum: %8X\n", F32(sh->checksum));
+		j += sprintf(goomba_strbuf + j, "title: %s", sh->title);
 	}
-	j += sprintf(goomba_strbuf + j, "title: %s", sh->title);
 	return goomba_strbuf;
 }
 
@@ -235,7 +253,15 @@ int64_t goomba_get_configdata_checksum_field(const void* gba_data) {
 			// found configdata
 			const configdata* cd = (configdata*)headers[i];
 			free(headers);
-			return F32(cd->sram_checksum); // 0 = clean, postitive = unclean
+			if (cd->size == sizeof(goomba_configdata)) {
+				const goomba_configdata* gcd = (const goomba_configdata*)cd;
+				return F32(gcd->sram_checksum); // 0 = clean, postitive = unclean
+			} else if (cd->size == sizeof(smsadvance_configdata)) {
+				const smsadvance_configdata* scd = (const smsadvance_configdata*)cd;
+				return F32(scd->sram_checksum); // 0 = clean, postitive = unclean
+			} else {
+				return -1;
+			}
 		}
 	}
 
@@ -255,14 +281,27 @@ char* goomba_cleanup(const void* gba_data_param) {
 		if (F16(headers[i]->type) == GOOMBA_CONFIGSAVE) {
 			// found configdata
 			configdata* cd = (configdata*)headers[i];
-			const uint32_t checksum = F32(cd->sram_checksum);
+			uint32_t checksum = 0;
+
+			goomba_configdata* gcd;
+			smsadvance_configdata* scd;
+
+			if (cd->size == sizeof(goomba_configdata)) {
+				gcd = (goomba_configdata*)cd;
+				checksum = F32(gcd->sram_checksum); // 0 = clean, postitive = unclean
+			} else if (cd->size == sizeof(smsadvance_configdata)) {
+				scd = (smsadvance_configdata*)cd;
+				checksum = F32(scd->sram_checksum); // 0 = clean, postitive = unclean
+			}
+
 			for (j = 0; headers[j] != NULL; j++) {
 				stateheader* sh = headers[j];
 				if (F16(sh->type) == GOOMBA_SRAMSAVE && F32(sh->checksum) == checksum) {
 					// found stateheader
 					free(headers); // so make sure we return something before the loop goes around again!!
 
-					cd->sram_checksum = 0; // because we do this here, goomba_new_sav should not complain about an unclean file
+					if (gcd) gcd->sram_checksum = 0; // because we do this here, goomba_new_sav should not complain about an unclean file
+					if (scd) scd->sram_checksum = 0;
 
 					char gbc_data[GOOMBA_COLOR_SRAM_SIZE - GOOMBA_COLOR_AVAILABLE_SIZE];
 					memcpy(gbc_data,

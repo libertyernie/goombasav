@@ -488,9 +488,6 @@ static void selection_changed(GtkWidget* widget, gpointer data) {
 				: ptr->type == GOOMBA_CONFIGSAVE ? "Type: Configuration"
 				: "Type:");
 
-			sprintf(buf, "Title: %.32s", ptr->title);
-			gtk_label_set_text(GTK_LABEL(lblTitle), buf);
-
 			if (ptr->size > sizeof(stateheader)) {
 				uint64_t ck = goomba_compressed_data_checksum(ptr, 3);
 				sprintf(buf, "Hash of compressed data: %6X", (unsigned int)ck);
@@ -514,20 +511,39 @@ static void selection_changed(GtkWidget* widget, gpointer data) {
 				show_configuration_rows();
 
 				configdata* cd = (configdata*)ptr;
-				sprintf(buf, "Border: %u", cd->bordercolor);
-				gtk_label_set_text(GTK_LABEL(lblBorder), buf);
-				sprintf(buf, "Palette: %u", cd->palettebank);
-				gtk_label_set_text(GTK_LABEL(lblPalette), buf);
-				configdata_misc_strings strs = configdata_get_misc(cd->misc);
-				sprintf(buf, "Sleep: %s", strs.sleep);
-				gtk_label_set_text(GTK_LABEL(lblSleep), buf);
-				sprintf(buf, "Gamma: %s", strs.gamma);
-				gtk_label_set_text(GTK_LABEL(lblGamma), buf);
-				sprintf(buf, "Autoload state: %s", strs.autoload_state);
-				gtk_label_set_text(GTK_LABEL(lblAutostate), buf);
+				if (cd->size == sizeof(goomba_configdata)) {
+					goomba_configdata* gcd = (goomba_configdata*)cd;
+					sprintf(buf, "Border: %u", gcd->bordercolor);
+					gtk_label_set_text(GTK_LABEL(lblBorder), buf);
+					sprintf(buf, "Palette: %u", gcd->palettebank);
+					gtk_label_set_text(GTK_LABEL(lblPalette), buf);
+					configdata_misc_strings strs = configdata_get_misc(gcd->misc);
+					sprintf(buf, "Sleep: %s", strs.sleep);
+					gtk_label_set_text(GTK_LABEL(lblSleep), buf);
+					sprintf(buf, "Gamma: %s", strs.gamma);
+					gtk_label_set_text(GTK_LABEL(lblGamma), buf);
+					sprintf(buf, "Autoload state: %s", strs.autoload_state);
+					gtk_label_set_text(GTK_LABEL(lblAutostate), buf);
 
-				sprintf(buf, "ROM checksum: %08X", cd->sram_checksum);
-				gtk_label_set_text(GTK_LABEL(lblChecksum), buf);
+					sprintf(buf, "ROM checksum: %08X", gcd->sram_checksum);
+					gtk_label_set_text(GTK_LABEL(lblChecksum), buf);
+
+					sprintf(buf, "Title: %.32s", gcd->reserved4);
+					gtk_label_set_text(GTK_LABEL(lblTitle), buf);
+				} else if (cd->size == sizeof(smsadvance_configdata)) {
+					smsadvance_configdata* scd = (smsadvance_configdata*)cd;
+					gtk_label_set_text(GTK_LABEL(lblBorder), "");
+					gtk_label_set_text(GTK_LABEL(lblPalette), "");
+					gtk_label_set_text(GTK_LABEL(lblSleep), "");
+					gtk_label_set_text(GTK_LABEL(lblGamma), "");
+					gtk_label_set_text(GTK_LABEL(lblAutostate), "");
+
+					sprintf(buf, "ROM checksum: %08X", scd->sram_checksum);
+					gtk_label_set_text(GTK_LABEL(lblChecksum), buf);
+
+					sprintf(buf, "Title: %.32s", scd->reserved3);
+					gtk_label_set_text(GTK_LABEL(lblTitle), buf);
+				}
 			} else {
 				show_standard_rows();
 
@@ -541,6 +557,9 @@ static void selection_changed(GtkWidget* widget, gpointer data) {
 
 				sprintf(buf, "ROM checksum: %08X", F32(ptr->checksum));
 				gtk_label_set_text(GTK_LABEL(lblChecksum), buf);
+
+				sprintf(buf, "Title: %.32s", ptr->title);
+				gtk_label_set_text(GTK_LABEL(lblTitle), buf);
 			}
 		} else {
 			set_all_labels();

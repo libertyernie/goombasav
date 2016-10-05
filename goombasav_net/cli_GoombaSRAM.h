@@ -61,7 +61,7 @@ namespace Goombasav {
 			List<GoombaHeader^>^ list = gcnew List<GoombaHeader^>;
 			for (int i = 0; headers[i] != NULL; i++) {
 				if (headers[i]->type == GOOMBA_CONFIGSAVE) {
-					list->Add(gcnew Configdata((configdata*)headers[i], this));
+					list->Add(gcnew Configdata((goomba_configdata*)headers[i], this));
 				} else {
 					list->Add(gcnew Stateheader(headers[i], this));
 				}

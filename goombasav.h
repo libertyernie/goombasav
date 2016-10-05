@@ -30,6 +30,7 @@ as C++ code (Properties -> C/C++ -> Advanced -> Compile As.)
 #define GOOMBA_STATEID 0x57a731dc
 #define POCKETNES_STATEID 0x57a731d7
 #define POCKETNES_STATEID2 0x57a731d8
+#define SMSADVANCE_STATEID 0x57a731dc
 #define GOOMBA_STATESAVE 0
 #define GOOMBA_SRAMSAVE 1
 #define GOOMBA_CONFIGSAVE 2
@@ -53,8 +54,13 @@ after getting or before setting a value if your code might run on a big-endian
 processor (e.g. PowerPC.) */
 uint32_t little_endian_conv_32(uint32_t value);
 
-typedef struct {		//(modified stateheader)
+typedef struct {
 	uint16_t size;
+	uint16_t type;	//=CONFIGSAVE
+} configdata;
+
+typedef struct {
+	uint16_t size;  //=48 (0x30)
 	uint16_t type;	//=CONFIGSAVE
 	char bordercolor;
 	char palettebank;
@@ -63,7 +69,35 @@ typedef struct {		//(modified stateheader)
 	uint32_t sram_checksum;	//checksum of rom using SRAM e000-ffff	
 	uint32_t zero;	//=0
 	char reserved4[32];  //="CFG"
-} configdata;
+} goomba_configdata;
+
+typedef struct {
+	uint16_t size;  //=48 (0x30)
+	uint16_t type;	//=CONFIGSAVE
+	char displaytype;
+	char misc;
+	char reserved2;
+	char reserved3;
+	uint32_t sram_checksum;	//checksum of rom using SRAM e000-ffff	
+	uint32_t zero;	//=0
+	char reserved4[32];  //="CFG"
+} pocketnes_configdata;
+
+typedef struct {
+	uint16_t size;  //=52 (0x34)
+	uint16_t type;	//=CONFIGSAVE
+	char displaytype;
+	char gammavalue;
+	char region;			// bit 0 & 1 = region.
+	char sleepflick;
+	char config;
+	char bcolor;
+	char reserved1;
+	char reserved2;
+	uint32_t sram_checksum;	//checksum of rom using SRAM e000-ffff	
+	uint32_t zero;	//=0
+	char reserved3[32];	//="CFG"
+} smsadvance_configdata;
 
 typedef struct {
 	uint16_t size;	//header+data
