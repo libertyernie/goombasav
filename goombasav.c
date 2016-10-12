@@ -285,8 +285,8 @@ char* goomba_cleanup(const void* gba_data_param) {
 			configdata* cd = (configdata*)headers[i];
 			uint32_t checksum = 0;
 
-			goomba_configdata* gcd;
-			smsadvance_configdata* scd;
+			goomba_configdata* gcd = NULL;
+			smsadvance_configdata* scd = NULL;
 
 			if (cd->size == sizeof(goomba_configdata)) {
 				gcd = (goomba_configdata*)cd;
