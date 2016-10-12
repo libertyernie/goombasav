@@ -1,4 +1,4 @@
-/* gbaromextract.c - command line interface to goombarom and pocketnesrom
+/* gbaromextract.c - command line interface to goombarom, pocketnesrom, and smsadvancerom
 
 Copyright (C) 2014-2016 libertyernie
 
@@ -28,7 +28,7 @@ as C++ code (Properties -> C/C++ -> Advanced -> Compile As.)
 #include "pocketnesrom.h"
 #include "platformname.h"
 
-const char* USAGE = "gbaromextract (2016-09-30)\n"
+const char* USAGE = "gbaromextract (2016-10-12)\n"
 "Usage: gbaromextract {x/extract} in.gba out.bin\n"
 "       gbaromextract in.gba\n"
 "\n"

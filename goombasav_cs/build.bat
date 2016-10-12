@@ -8,7 +8,7 @@ set NSPACE=goombasav_cs
 call "%VCBIN%\vcvars32"
 
 @rem Compile C++
-"%VCBIN%\cl" /clr /LN /MD /TP ..\goombasav_net\expose.cpp ..\goombasav.c ..\minilzo\minilzo.c
+"%VCBIN%\cl" /clr /LN /MD /TP ..\goombasav_net\expose.cpp ..\goombasav.c ..\goombarom.c ..\pocketnesrom.c ..\smsadvancerom.c ..\minilzo\minilzo.c
 
 @rem Handle C# resx files
 "%SDKBIN%\resgen" Form1.resx %NSPACE%.Form1.resources /r:"C:/Program Files (x86)/Reference Assemblies/Microsoft/Framework/.NETFramework/v4.0/System.Drawing.dll"
@@ -18,7 +18,7 @@ call "%VCBIN%\vcvars32"
 "%CSBIN%\csc" /target:module /addmodule:expose.obj Form1.cs Form1.Designer.cs AboutForm.cs AboutForm.Designer.cs
 
 @rem Linker
-"%VCBIN%\link" /LTCG /CLRIMAGETYPE:IJW /ENTRY:goombasav_cs.Form1.Main /SUBSYSTEM:WINDOWS,5.01 /ASSEMBLYRESOURCE:%NSPACE%.Form1.resources /ASSEMBLYRESOURCE:%NSPACE%.AboutForm.resources /OUT:goombasav_cs.exe goombasav.obj minilzo.obj Form1.netmodule expose.obj
+"%VCBIN%\link" /LTCG /CLRIMAGETYPE:IJW /ENTRY:goombasav_cs.Form1.Main /SUBSYSTEM:WINDOWS,5.01 /ASSEMBLYRESOURCE:%NSPACE%.Form1.resources /ASSEMBLYRESOURCE:%NSPACE%.AboutForm.resources /OUT:goombasav_cs.exe goombasav.obj goombarom.obj pocketnesrom.obj smsadvancerom.obj minilzo.obj Form1.netmodule expose.obj
 
 @rem Cleanup
 @echo on
