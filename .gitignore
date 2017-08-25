@@ -9,3 +9,4 @@ ipch
 *.aps
 *.db
 *.opendb
+.vs

@@ -1,6 +1,6 @@
 /* goombasav.c - functions to handle Goomba / Goomba Color SRAM
 
-Copyright (C) 2016 libertyernie
+Copyright (C) 2014-2017 libertyernie
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -412,7 +412,10 @@ char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* g
 		uncompressed_size = F32(sh->uncompressed_size);
 	}
 	
-	if (gbc_length < uncompressed_size) {
+	if (gbc_length == 0) {
+		// Remove data instead of replacing it
+		uncompressed_size = 0;
+	} else if (gbc_length < uncompressed_size) {
 		goomba_error("Error: the length of the GBC data (%u) is too short - expected %u bytes.\n",
 			gbc_length, uncompressed_size);
 		return NULL;
@@ -449,32 +452,38 @@ char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* g
 	goomba_size_t backup_len = copy_until_invalid_header(backup, (stateheader*)(gba_header_ptr + F16(sh->size)));
 
 	// compress gbc sram
-	lzo_uint compressed_size;
-	unsigned char* dest = (unsigned char*)working;
-	void* wrkmem = malloc(LZO1X_1_MEM_COMPRESS);
-	lzo1x_1_compress((const unsigned char*)gbc_sram, uncompressed_size,
-		dest, &compressed_size,
-		wrkmem);
-	free(wrkmem);
-	working += compressed_size;
-	//fprintf(stderr, "Compressed %u bytes (compressed size: %lu)\n", uncompressed_size, compressed_size);
+	if (uncompressed_size == 0) {
+		// never mind about that header
+		working -= sizeof(stateheader);
+		memset(working, 0, sizeof(stateheader));
+	} else {
+		lzo_uint compressed_size;
+		unsigned char* dest = (unsigned char*)working;
+		void* wrkmem = malloc(LZO1X_1_MEM_COMPRESS);
+		lzo1x_1_compress((const unsigned char*)gbc_sram, uncompressed_size,
+			dest, &compressed_size,
+			wrkmem);
+		free(wrkmem);
+		working += compressed_size;
+		//fprintf(stderr, "Compressed %u bytes (compressed size: %lu)\n", uncompressed_size, compressed_size);
 
-	if (F16(sh->size) > F32(sh->uncompressed_size)) {
-		// Goomba header (not Goomba Color)
-		new_sh->uncompressed_size = F32(compressed_size);
-	}
+		if (F16(sh->size) > F32(sh->uncompressed_size)) {
+			// Goomba header (not Goomba Color)
+			new_sh->uncompressed_size = F32(compressed_size);
+		}
 
-	new_sh->size = F16((uint16_t)(compressed_size + sizeof(stateheader)));
-	// pad to 4 bytes!
-	// if I don't do this, goomba color might not load the palette settings, or seemingly 'forget' them later
-	// btw, the settings are stored in the configdata struct defined in goombasav.h
-	uint16_t s = F16(new_sh->size);
-	while (s % 4 != 0) {
-		*working = 0;
-		working++;
-		s++;
+		new_sh->size = F16((uint16_t)(compressed_size + sizeof(stateheader)));
+		// pad to 4 bytes!
+		// if I don't do this, goomba color might not load the palette settings, or seemingly 'forget' them later
+		// btw, the settings are stored in the configdata struct defined in goombasav.h
+		uint16_t s = F16(new_sh->size);
+		while (s % 4 != 0) {
+			*working = 0;
+			working++;
+			s++;
+		}
+		new_sh->size = F16(s);
 	}
-	new_sh->size = F16(s);
 
 	goomba_size_t used = working - goomba_new_sav;
 	if (used + backup_len > GOOMBA_COLOR_AVAILABLE_SIZE) {

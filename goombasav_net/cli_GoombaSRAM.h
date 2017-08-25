@@ -145,6 +145,13 @@ namespace Goombasav {
 			return gcnew GoombaSRAM(new_data, false);
 		}
 
+		GoombaSRAM^ CopyAndRemove(Stateheader^ header) {
+			void* new_data = goomba_new_sav(this->data, header->Pointer, NULL, 0);
+			if (new_data == NULL) throw gcnew GoombaException(goomba_last_error());
+
+			return gcnew GoombaSRAM(new_data, false);
+		}
+
 		array<unsigned char>^ ToArray() {
 			array<unsigned char>^ arr = gcnew array<unsigned char>(GOOMBA_COLOR_SRAM_SIZE);
 			pin_ptr<unsigned char> pin = &arr[0];

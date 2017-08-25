@@ -135,9 +135,29 @@ namespace goombasav_cs {
 			} else {
 				MessageBox.Show("Cannot export this type of data.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
-		}
+        }
 
-		private void listBox1_SelectedIndexChanged(object sender, EventArgs e) {
+        private void btnDelete_Click(object sender, EventArgs e) {
+            Stateheader sh = listBox1.SelectedItem as Stateheader;
+            if (sh == null) return;
+
+            string msg = $"Are you sure you want to remove the save data for {sh.Title} from this file? You will need to run Goomba if you want to add new save data later.";
+            if (MessageBox.Show(this, msg, Text, MessageBoxButtons.YesNo) == DialogResult.Yes) {
+                try {
+                    GoombaSRAM new_data = loaded_sram.CopyAndRemove(sh);
+                    loaded_sram = new_data;
+                    dirty = true;
+
+                    int sel = listBox1.SelectedIndex;
+                    headerScan();
+                    if (listBox1.Items.Count > sel) listBox1.SelectedIndex = sel;
+                } catch (GoombaException ex) {
+                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void listBox1_SelectedIndexChanged(object sender, EventArgs e) {
 			object o = listBox1.SelectedItem;
 			if (o is ExtractedROM) {
 				ExtractedROM r = (ExtractedROM)o;
@@ -355,5 +375,5 @@ namespace goombasav_cs {
 				}
 			}
 		}
-	}
+    }
 }

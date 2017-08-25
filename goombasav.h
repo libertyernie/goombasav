@@ -1,6 +1,6 @@
 /* goombasav.h - functions to handle Goomba / Goomba Color SRAM
 
-Copyright (C) 2016 libertyernie
+Copyright (C) 2014-2017 libertyernie
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -213,9 +213,10 @@ char* goomba_cleanup(const void* gba_data_param);
 void* goomba_extract(const void* gba_data, const stateheader* header_ptr, goomba_size_t* size_output);
 
 /**
-* Copies data from the source (which must point to a valid stateheader or
-* configdata) to dest, up to and including the first 48 bytes that do not
-* constitute a valid header.
+* Copies data from gba_data to a new buffer allocated with malloc, replacing
+* the data of the section pointed to by gba_header with a compressed version
+* of the data pointed to by gbc_sram. If gbc_length is 0, the section pointed
+* to by gba_header will be removed instead of replaced.
 */
 char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* gbc_sram, goomba_size_t gbc_length);
 
