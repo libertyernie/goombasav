@@ -3,16 +3,14 @@ Goomba Save Manager
 
 This library is designed to edit the SRAM data of the PocketNES, Goomba, and Goomba Color emulators. It can extract and replace the compressed NES / Game Boy / Game Boy Color SRAM data. It can't edit savestate data or add new SRAM.
 
-Windows .exe files for the .NET and command-line apps (currently without PocketNES support) are located in the "Release Binaries" folder. Linux / Cygwin users can build the command-line version of the application by using the Makefile.
-
-Also, the directory "goombasav_gtk" has a GTK+ application you can compile and run, which works just like the .NET app and comes with its own Makefile.
+Windows .exe files for the GUI and command-line apps (which support Goomba and Goomba Color only, not PocketNES) are located in the Releases section on GitHub. Unix / Linux / Cygwin users can build the command-line or GTK+ version of the application by using the Makefile. See below for information about these apps.
 
 Make sure you back up your save data before using the application, just in case.
 
 goombasav
 ---------
 
-goombasav is a command-line program that can extract and replace save data, as well as "clean" Goomba / Goomba Color save files. (Sometimes these emulators will store uncompressed save data in the range 0xE000-0xFFFF and not compress it to the normal location; in this case, the "clean" function will compress the data, update the marker in the configdata structure, and clear 0xE000.)
+goombasav is a command-line program that can extract and replace save data, as well as "clean" Goomba / Goomba Color save files. (Sometimes these emulators will store uncompressed save data in the range 0xE000-0xFFFF without compressing it to the normal location; in this case, the "clean" function will compress the data, update the marker in the configdata structure, and clear 0xE000.)
 
 goombasav is written in C and is also valid C++. In Visual Studio, use the /TP switch to compile .c files as C++ code.
 
@@ -43,4 +41,14 @@ This version of Goomba Save Manager wraps the backend code in a GTK interface, w
 
 You can compile it on GNU/Linux (etc.) using the Makefile in the goombasav_gtk folder - note that the files in the directory above it (goombasav.c, minilzo, and so on) ARE used, and so the best way is to check out the whole directory structure from git, cd to goombasav_gtk, and run make from there.
 
-To run this version in Visual Studio on Windows, you can get the GTK stack from https://github.com/hexchat/gtk-win32 (click the "32-bit" link under GTK+ Bundle), extract it to C:\gtk, and then rename libintl.lib to intl.lib. After building, you'll need to copy the .dll files in bin to the "Debug" folder that the built .exe ends up in.
+Other Applications
+------------------
+
+Besides the command-line and GUI applications listed above, the following apps also make use of the Goomba Save Manager libraries, allowing you to transparently use Goomba compressed save data.
+
+* [TGB Dual L](https://github.com/libertyernie/tgbdual_L) (Game Boy emulator for Windows)
+  * Link cable support and other features
+* [Visual Boy Advance GX](https://github.com/dborth/vbagx) (Game Boy emulator for GameCube/Wii)
+* [Unofficial NRage plugin fork](https://github.com/libertyernie/nrage-input) (N64 emulator plugin)
+  * Allows you to use Goomba save data for Transfer Pak emulation (Pokémon Stadium, etc.)
+  * Also requires original GB/GBC ROM
