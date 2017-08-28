@@ -168,7 +168,8 @@ namespace goombasav_cs {
 				lblTitleVal.Text = r.Name;
 				btnExtract.Enabled = true;
 				btnReplace.Enabled = false;
-				return;
+                btnDelete.Enabled = false;
+                return;
 			}
 
 			GoombaHeader h = (GoombaHeader)o;
