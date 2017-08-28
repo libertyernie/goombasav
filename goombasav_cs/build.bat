@@ -20,6 +20,9 @@ call "%VCBIN%\vcvars32"
 @rem Linker
 "%VCBIN%\link" /LTCG /CLRIMAGETYPE:IJW /ENTRY:goombasav_cs.Form1.Main /SUBSYSTEM:WINDOWS,5.01 /ASSEMBLYRESOURCE:%NSPACE%.Form1.resources /ASSEMBLYRESOURCE:%NSPACE%.AboutForm.resources /OUT:goombasav_cs.exe goombasav.obj goombarom.obj pocketnesrom.obj smsadvancerom.obj minilzo.obj Form1.netmodule expose.obj
 
+@rem Icon
+rcedit.exe goombasav_cs.exe --set-icon goombasav.ico
+
 @rem Cleanup
 @echo on
 del *.obj *.netmodule *.resources
