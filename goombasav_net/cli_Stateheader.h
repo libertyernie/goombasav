@@ -24,8 +24,6 @@ https://github.com/libertyernie/goombasav */
 
 #include "cli_GoombaHeader.h"
 
-using System::Tuple;
-
 namespace Goombasav {
 	ref class GoombaSRAM;
 
@@ -66,8 +64,9 @@ namespace Goombasav {
 #pragma endregion
 
 		// A three-byte hash of the compressed data - useful for showing on-screen as an RGB color.
-		uint32_t CompressedDataHash() {
-			uint64_t hash = goomba_compressed_data_checksum(this->Pointer, 3);
+		uint32_t CompressedDataChecksum(int outputBytes) {
+			if (outputBytes < 1 || outputBytes > 8) throw gcnew System::ArgumentException("outputBytes must be at least 1 and at most 8");
+			uint64_t hash = goomba_compressed_data_checksum(this->Pointer, outputBytes);
 			return (uint32_t)hash;
 		}
 	};

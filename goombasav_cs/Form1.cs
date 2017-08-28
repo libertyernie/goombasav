@@ -195,7 +195,7 @@ namespace goombasav_cs {
 				lblChecksumVal.Text = sh.ROMChecksum.ToString("X8");
 
 				panel1.Visible = true;
-				uint hash = sh.CompressedDataHash();
+				uint hash = sh.CompressedDataChecksum(3);
 				lblHashVal.Text = hash.ToString("X6");
 				hashBox.BackColor = Color.FromArgb((int)(hash | 0xFF000000));
 

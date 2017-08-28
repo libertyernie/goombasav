@@ -187,9 +187,8 @@ stateheader* stateheader_for(const void* gba_data, const char* gbc_title_ptr);
 int goomba_is_sram(const void* data);
 
 /**
-* Makes a hash of the compressed data that comes after the given header,
-* using output_bytes bytes. A three-byte hash can be displayed as a color to
-* give visual feedback of a change in the data. The maximum output_bytes is 8.
+* Computes a simple additive checksum of the compressed data that comes after
+* the given header, using anywhere from 1 to 8 bytes.
 */
 uint64_t goomba_compressed_data_checksum(const stateheader* sh, int output_bytes);
 
