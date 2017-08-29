@@ -262,6 +262,7 @@ int64_t goomba_get_configdata_checksum_field(const void* gba_data) {
 				const smsadvance_configdata* scd = (const smsadvance_configdata*)cd;
 				return F32(scd->sram_checksum); // 0 = clean, postitive = unclean
 			} else {
+				goomba_error("This is not a recognized type of configheader (by cd->size).");
 				return -1;
 			}
 		}
