@@ -60,7 +60,7 @@ namespace Goombasav {
 
 			uint32_t tag = *(uint32_t*)this->data;
 
-			stateheader** headers = stateheader_scan(this->data);
+			const stateheader** headers = stateheader_scan(this->data);
 			if (headers == NULL) throw gcnew GoombaException(goomba_last_error());
 			List<GoombaHeader^>^ list = gcnew List<GoombaHeader^>;
 			for (int i = 0; headers[i] != NULL; i++) {

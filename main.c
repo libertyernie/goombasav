@@ -27,7 +27,7 @@ as C++ code (Properties -> C/C++ -> Advanced -> Compile As.)
 #include "goombasav.h"
 #include "platformname.h"
 
-const char* USAGE = "goombasav (2016-10-12)\n"
+const char* USAGE = "goombasav (2017-08-29)\n"
 "Usage: goombasav {x/extract} gba.sav gbc.sav\n"
 "       goombasav {r/replace} gba.sav gbc.sav\n"
 "       goombasav {c/clean} gba-in.sav [gba-out.sav]\n"
@@ -49,7 +49,7 @@ const char* USAGE = "goombasav (2016-10-12)\n"
 "  /? or --help: print this message\n";
 
 const char* GPL_NOTICE = "goombasav - extract and replace Goomba/Goomba Color save files\n"
-"Copyright (C) 2014-2016 libertyernie\n"
+"Copyright (C) 2014-2017 libertyernie\n"
 "https://github.com/libertyernie/goombasav\n"
 "\n"
 "This program is free software: you can redistribute it and/or modify\n"
@@ -227,6 +227,14 @@ void list(const char* gbafile) {
 
 	char* gba_data = (char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
 	fread(gba_data, 1, GOOMBA_COLOR_SRAM_SIZE, gba);
+
+	int64_t uncompressed_data_checksum = goomba_get_configdata_checksum_field(gba_data);
+	if (uncompressed_data_checksum < 0) {
+		fprintf(stderr, "Error: %s", goomba_last_error());
+	} else if (uncompressed_data_checksum) {
+		printf("File is dirty: uncompressed data at 0xE000-0xFFFF for ROM with checksum %8X\n", uncompressed_data_checksum);
+	}
+
 	stateheader** headers = stateheader_scan(gba_data);
 	if (headers == NULL) {
 		fprintf(stderr, "Error: %s", goomba_last_error());
@@ -243,7 +251,7 @@ void list(const char* gbafile) {
 		printf("%s\n", stateheader_summary_str(headers[i]));
 		print_indent("  ", stateheader_str(headers[i]));
 		if (little_endian_conv_16(headers[i]->size) > sizeof(stateheader)) {
-			printf("  [3-byte compressed data hash: %6X]\n", goomba_compressed_data_checksum(headers[i], 3));
+			printf("  [3-byte compressed data checksum: %6X]\n", goomba_compressed_data_checksum(headers[i], 3));
 		}
 		i++;
 	}

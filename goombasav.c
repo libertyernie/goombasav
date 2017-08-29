@@ -183,13 +183,7 @@ stateheader* stateheader_advance(const stateheader* sh) {
 	return (stateheader*)c;
 }
 
-stateheader** stateheader_scan(const void* gba_data) {
-	// Do not edit gba_data in this function!
-	// We are casting to non-const pointers so the client gets non-const pointers back.
-	const goomba_size_t psize = sizeof(stateheader*);
-	stateheader** headers = (stateheader**)malloc(psize * 64);
-	memset(headers, 0, psize * 64);
-
+const stateheader* stateheader_first(const void* gba_data) {
 	uint32_t* check = (uint32_t*)gba_data;
 	uint32_t check_le = F32(*check);
 	if (check_le == GOOMBA_STATEID) check++;
@@ -197,7 +191,17 @@ stateheader** stateheader_scan(const void* gba_data) {
 	else if (check_le == POCKETNES_STATEID2) check++;
 	else if (check_le == SMSADVANCE_STATEID) check++;
 
-	stateheader* sh = (stateheader*)check;
+	return stateheader_plausible(check)
+		? (stateheader*)check
+		: NULL;
+}
+
+const stateheader** stateheader_scan(const void* gba_data) {
+	const goomba_size_t psize = sizeof(stateheader*);
+	const stateheader** headers = (const stateheader**)malloc(psize * 64);
+	memset(headers, 0, psize * 64);
+
+	const stateheader* sh = stateheader_first(gba_data);
 	int i = 0;
 	while (stateheader_plausible(sh) && i < 63) {
 		headers[i] = sh;
@@ -207,12 +211,12 @@ stateheader** stateheader_scan(const void* gba_data) {
 	return headers;
 }
 
-stateheader* stateheader_for(const void* gba_data, const char* gbc_title) {
+const stateheader* stateheader_for(const void* gba_data, const char* gbc_title) {
 	char title[0x10];
 	memcpy(title, gbc_title, 0x0F);
 	title[0x0F] = '\0';
-	stateheader* use_this = NULL;
-	stateheader** headers = stateheader_scan(gba_data);
+	const stateheader* use_this = NULL;
+	const stateheader** headers = stateheader_scan(gba_data);
 	int i;
 	for (i = 0; headers[i] != NULL; i++) {
 		if (strcmp(headers[i]->title, title) == 0 && headers[i]->type == GOOMBA_SRAMSAVE) {
@@ -240,25 +244,20 @@ int goomba_is_sram(const void* data) {
 }
 
 /**
- * Returns the 32-bit checksum (unsigned) in the configdata header, or -1 if
- * stateheader_scan returns NULL due to an error. When using this function,
- * first check if the value is less than 0, then (if not) cast to uint32_t.
- */
+* Returns the 32-bit checksum (unsigned) in the configdata header, or -1 if
+* an error occurred.
+*/
 int64_t goomba_get_configdata_checksum_field(const void* gba_data) {
-	// todo fix
-	stateheader** headers = stateheader_scan(gba_data);
-	if (headers == NULL) return -1;
+	const stateheader* sh = stateheader_first(gba_data);
 
-	int i;
-	for (i = 0; headers[i] != NULL; i++) {
-		if (F16(headers[i]->type) == GOOMBA_CONFIGSAVE) {
+	while (sh && stateheader_plausible(sh)) {
+		if (F16(sh->type) == GOOMBA_CONFIGSAVE) {
 			// found configdata
-			const configdata* cd = (configdata*)headers[i];
-			free(headers);
-			if (cd->size == sizeof(goomba_configdata)) {
+			const configdata* cd = (configdata*)sh;
+			if (F16(cd->size) == sizeof(goomba_configdata)) {
 				const goomba_configdata* gcd = (const goomba_configdata*)cd;
 				return F32(gcd->sram_checksum); // 0 = clean, postitive = unclean
-			} else if (cd->size == sizeof(smsadvance_configdata)) {
+			} else if (F16(cd->size) == sizeof(smsadvance_configdata)) {
 				const smsadvance_configdata* scd = (const smsadvance_configdata*)cd;
 				return F32(scd->sram_checksum); // 0 = clean, postitive = unclean
 			} else {
@@ -266,17 +265,18 @@ int64_t goomba_get_configdata_checksum_field(const void* gba_data) {
 				return -1;
 			}
 		}
+		sh = stateheader_advance(sh);
 	}
 
-	free(headers);
-	return -1; // not sure when this would happen
+	goomba_error("Unknown error (no configdata?)");
+	return -1;
 }
 
 char* goomba_cleanup(const void* gba_data_param) {
 	char gba_data[GOOMBA_COLOR_SRAM_SIZE]; // on stack - do not need to free
 	memcpy(gba_data, gba_data_param, GOOMBA_COLOR_SRAM_SIZE);
 
-	stateheader** headers = stateheader_scan(gba_data);
+	const stateheader** headers = stateheader_scan(gba_data);
 	if (headers == NULL) return NULL;
 
 	int i, j;
@@ -298,7 +298,7 @@ char* goomba_cleanup(const void* gba_data_param) {
 			}
 
 			for (j = 0; headers[j] != NULL; j++) {
-				stateheader* sh = headers[j];
+				const stateheader* sh = headers[j];
 				if (F16(sh->type) == GOOMBA_SRAMSAVE && F32(sh->checksum) == checksum) {
 					// found stateheader
 					free(headers); // so make sure we return something before the loop goes around again!!

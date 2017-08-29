@@ -28,7 +28,7 @@ as C++ code (Properties -> C/C++ -> Advanced -> Compile As.)
 #include "pocketnesrom.h"
 #include "platformname.h"
 
-const char* USAGE = "gbaromextract (2016-10-12)\n"
+const char* USAGE = "gbaromextract (2017-08-29)\n"
 "Usage: gbaromextract {x/extract} in.gba out.bin\n"
 "       gbaromextract in.gba\n"
 "\n"
@@ -41,7 +41,7 @@ const char* USAGE = "gbaromextract (2016-10-12)\n"
 "  /? or --help: print this message\n";
 
 const char* GPL_NOTICE = "gbaromextract - extract from Goomba and PocketNES ROMs\n"
-"Copyright (C) 2014-2016 libertyernie\n"
+"Copyright (C) 2014-2017 libertyernie\n"
 "https://github.com/libertyernie/goombasav\n"
 "\n"
 "This program is free software: you can redistribute it and/or modify\n"

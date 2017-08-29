@@ -172,19 +172,25 @@ stateheader* stateheader_advance(const stateheader* sh);
 * NOTE: the gba_data parameter can point to a valid header, or to a sequence
 * equal to GOOMBA_STATEID immediately before a valid header.
 */
-stateheader** stateheader_scan(const void* gba_data);
+const stateheader** stateheader_scan(const void* gba_data);
 
 /**
 * Returns the stateheader in gba_data with the title field = gbc_title,
 * or NULL if there is none. Only the first 15 bytes of gbc_title will be
 * used in the comparison.
 */
-stateheader* stateheader_for(const void* gba_data, const char* gbc_title_ptr);
+const stateheader* stateheader_for(const void* gba_data, const char* gbc_title_ptr);
 
 /**
 * Returns true if the given data starts with GOOMBA_STATEID (little endian.)
 */
 int goomba_is_sram(const void* data);
+
+/**
+ * Returns the 32-bit checksum (unsigned) in the configdata header, or -1 if
+ * an error occurred.
+ */
+int64_t goomba_get_configdata_checksum_field(const void* gba_data);
 
 /**
 * Computes a simple additive checksum of the compressed data that comes after
