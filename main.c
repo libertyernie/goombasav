@@ -98,8 +98,8 @@ void print_indent(const char* prefix, const char* multiline_str) {
 	putc('\n', stdout);
 }
 
-stateheader* ask(const void* first_header, const char* prompt) {
-	stateheader** headers = stateheader_scan(first_header);
+const stateheader* ask(const void* first_header, const char* prompt) {
+	const stateheader** headers = stateheader_scan(first_header);
 	if (headers == NULL) {
 		fprintf(stderr, "Error: %s", goomba_last_error());
 		exit(EXIT_FAILURE);
@@ -125,7 +125,7 @@ stateheader* ask(const void* first_header, const char* prompt) {
 		while ((dump = getchar()) != '\n');
 	}
 
-	stateheader* selected = headers[index];
+	const stateheader* selected = headers[index];
 	free(headers);
 	return selected;
 }
@@ -138,7 +138,7 @@ void extract(const char* gbafile, const char* gbcfile) {
 	fread(gba_data, 1, GOOMBA_COLOR_SRAM_SIZE, gba);
 	fclose(gba);
 
-	stateheader* sh = ask(gba_data + 4, "Extract: ");
+	const stateheader* sh = ask(gba_data + 4, "Extract: ");
 	fprintf(stderr, "%s\n", stateheader_str(sh));
 	goomba_size_t uncompressed_size;
 
@@ -170,7 +170,7 @@ void replace(const char* gbafile, const char* gbcfile) {
 	fread(gba_data, GOOMBA_COLOR_SRAM_SIZE, 1, gba);
 	fclose(gba);
 
-	stateheader* sh = ask(gba_data + 4, "Replace: ");
+	const stateheader* sh = ask(gba_data + 4, "Replace: ");
 	fprintf(stderr, "%s\n", stateheader_str(sh));
 	fseek(gbc, 0, SEEK_END);
 	size_t gbc_length = ftell(gbc);
@@ -235,7 +235,7 @@ void list(const char* gbafile) {
 		printf("File is dirty: uncompressed data at 0xE000-0xFFFF for ROM with checksum %8X\n", uncompressed_data_checksum);
 	}
 
-	stateheader** headers = stateheader_scan(gba_data);
+	const stateheader** headers = stateheader_scan(gba_data);
 	if (headers == NULL) {
 		fprintf(stderr, "Error: %s", goomba_last_error());
 		exit(EXIT_FAILURE);
