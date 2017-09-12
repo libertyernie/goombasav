@@ -96,7 +96,7 @@ namespace goombasav_cs {
 		private void btnReplace_Click(object sender, EventArgs e) {
 			OpenFileDialog d = new OpenFileDialog();
 			d.Title = btnReplace.Text;
-			d.Filter = "Raw save data (*.sav)|*.sav|All files (*.*)|*.*";
+			d.Filter = "Raw save data (*.sav, *.srm)|*.sav;*.srm|All files (*.*)|*.*";
 			if (d.ShowDialog() == DialogResult.OK) {
 				replace(d.FileName);
 			}
@@ -115,7 +115,7 @@ namespace goombasav_cs {
 				}
 				SaveFileDialog d = new SaveFileDialog();
 				d.Title = btnExtract.Text;
-				d.Filter = "Raw save data (*.sav)|*.sav|All files (*.*)|*.*";
+				d.Filter = "Raw save data (*.sav, *.srm)|*.sav;*.srm|All files (*.*)|*.*";
 				d.AddExtension = true;
 				if (d.ShowDialog() == DialogResult.OK) {
 					File.WriteAllBytes(d.FileName, data);
@@ -238,7 +238,7 @@ namespace goombasav_cs {
 				string[] arr = (string[])e.Data.GetData(DataFormats.FileDrop);
 				if (arr.Length == 1) {
 					string pathname = arr[0];
-					if (pathname.EndsWith(".sav", System.StringComparison.InvariantCultureIgnoreCase)) {
+					if (new[] { ".sav", ".srm" }.Any(s => pathname.EndsWith(s, StringComparison.InvariantCultureIgnoreCase))) {
 						e.Effect = DragDropEffects.Link;
 					}
 				}
