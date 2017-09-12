@@ -407,15 +407,18 @@ char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* g
 		fprintf(stderr, "File is unclean, but it shouldn't affect replacement of the data you asked for\n");
 	}
 
-	if (F16(sh->type) != GOOMBA_SRAMSAVE) {
-		goomba_error("Error - This program cannot replace non-SRAM data.\n");
+	if (F16(sh->type) != GOOMBA_SRAMSAVE && gbc_length != 0) {
+ 		goomba_error("Error - This program cannot replace non-SRAM data.\n");
 		return NULL;
 	}
 
 	// sh->uncompressed_size is valid for Goomba Color.
 	// For Goomba, it's actually compressed size (and will be less than sh->size).
 	goomba_size_t uncompressed_size;
-	if (F16(sh->size) > F32(sh->uncompressed_size)) {
+	if (gbc_length == 0) {
+		// Remove data instead of replacing it
+		uncompressed_size = 0;
+	} else if (F16(sh->size) > F32(sh->uncompressed_size)) {
 		// Uncompress to a temporary location, just so we can see how big it is
 		goomba_size_t output;
 		void* dump = goomba_extract(gba_data, sh, &output);
@@ -429,14 +432,7 @@ char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* g
 		uncompressed_size = F32(sh->uncompressed_size);
 	}
 	
-	if (gbc_length == 0) {
-		// Remove data instead of replacing it
-		uncompressed_size = 0;
-	} else if (gbc_length < uncompressed_size) {
-		goomba_error("Error: the length of the GBC data (%u) is too short - expected %u bytes.\n",
-			gbc_length, uncompressed_size);
-		return NULL;
-	} else if (gbc_length - 4 == uncompressed_size) {
+	if (gbc_length - 4 == uncompressed_size) {
 		goomba_error("Note: RTC data (TGB_Dual format) will not be copied\n");
 	} else if (gbc_length - 44 == uncompressed_size) {
 		goomba_error("Note: RTC data (old VBA format) will not be copied\n");
@@ -446,7 +442,7 @@ char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* g
 		goomba_error("Warning: unknown data at end of GBC save file - only first %u bytes will be used\n", uncompressed_size);
 	}
 
-	if (F16(sh->type) != GOOMBA_SRAMSAVE) {
+	if (F16(sh->type) != GOOMBA_SRAMSAVE && gbc_length != 0) {
 		goomba_error("The data at gba_header is not SRAM data.\n");
 		return NULL;
 	}
