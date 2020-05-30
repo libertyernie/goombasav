@@ -1,5 +1,5 @@
 #pragma once
-/* cli_PocketNESROM.h - class to encapsulate NES ROM extracted from PocketNES ROM
+/* SMSAdvanceROM.h - class to encapsulate Master System / Game Gear ROM extracted from SMSAdvance ROM
 
 Copyright (C) 2016-2020 libertyernie
 
@@ -18,8 +18,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 https://github.com/libertyernie/goombasav */
 
-#include "../../pocketnesrom.h"
-#include "cli_ExtractedROM.h"
+#include "../../smsadvancerom.h"
+#include "ExtractedROM.h"
 #include <cstdlib>
 #include <cstring>
 
@@ -28,20 +28,24 @@ using namespace System::Collections::Generic;
 using System::Collections::ObjectModel::ReadOnlyCollection;
 
 namespace GoombasavCore {
-	public ref class PocketNESROM : public ExtractedROM {
+	public ref class SMSAdvanceROM : public ExtractedROM {
 	private:
 		String^ name;
 		uint32_t flags;
 		uint32_t spritefollow;
-		uint32_t reserved;
+		array<uint32_t>^ reserved;
 
 		array<unsigned char>^ data;
 
-		PocketNESROM(pocketnes_romheader header, array<unsigned char>^ data) {
+		SMSAdvanceROM(smsadvance_romheader header, array<unsigned char>^ data) {
 			this->name = gcnew String(header.name);
 			this->flags = header.flags;
 			this->spritefollow = header.spritefollow;
-			this->reserved = header.reserved;
+			this->reserved = gcnew array<uint32_t>(4);
+			this->reserved[0] = header.reserved[0];
+			this->reserved[1] = header.reserved[1];
+			this->reserved[2] = header.reserved[2];
+			this->reserved[3] = header.reserved[3];
 			this->data = data;
 		}
 	public:
@@ -61,20 +65,20 @@ namespace GoombasavCore {
 
 		virtual uint32_t GetChecksum() {
 			pin_ptr<unsigned char> p = &data[0];
-			return pocketnes_get_checksum(p);
+			return smsadvance_get_checksum(p);
 		}
 
-		static List<PocketNESROM^>^ Extract(array<unsigned char>^ source) {
-			List<PocketNESROM^>^ list = gcnew List<PocketNESROM^>();
+		static List<SMSAdvanceROM^>^ Extract(array<unsigned char>^ source) {
+			List<SMSAdvanceROM^>^ list = gcnew List<SMSAdvanceROM^>();
 
 			pin_ptr<unsigned char> source_ptr = &source[0];
-			const pocketnes_romheader* ptr = pocketnes_first_rom(source_ptr, source->Length);
+			const smsadvance_romheader* ptr = smsadvance_first_rom(source_ptr, source->Length);
 			while (ptr) {
 				array<unsigned char>^ copy = gcnew array<unsigned char>(ptr->filesize);
 				pin_ptr<unsigned char> copy_ptr = &copy[0];
 				memmove(copy_ptr, ptr + 1, copy->Length);
-				list->Add(gcnew PocketNESROM(*ptr, copy));
-				ptr = pocketnes_next_rom(source_ptr, source->Length, ptr);
+				list->Add(gcnew SMSAdvanceROM(*ptr, copy));
+				ptr = smsadvance_next_rom(source_ptr, source->Length, ptr);
 			}
 
 			return list;

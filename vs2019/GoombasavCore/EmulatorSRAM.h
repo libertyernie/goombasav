@@ -1,5 +1,5 @@
 #pragma once
-/* cli_EmulatorSRAM.h - class to encapsulate Goomba / Goomba Color / PocketNES / SMSAdvance SRAM
+/* EmulatorSRAM.h - class to encapsulate Goomba / Goomba Color / PocketNES / SMSAdvance SRAM
 
 Copyright (C) 2014-2020 libertyernie
 
@@ -18,10 +18,10 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 https://github.com/libertyernie/goombasav */
 
-#include "cli_PocketNESConfigdata.h"
-#include "cli_GoombaConfigdata.h"
-#include "cli_SMSAdvanceConfigdata.h"
-#include "cli_Stateheader.h"
+#include "PocketNESConfigdata.h"
+#include "GoombaConfigdata.h"
+#include "SMSAdvanceConfigdata.h"
+#include "Stateheader.h"
 #include <cstdlib>
 #include <cstring>
 
@@ -42,7 +42,7 @@ namespace GoombasavCore {
 		void* data;
 		
 		// HeaderPtr objects are invalid after data is replaced in the SRAM.
-		ReadOnlyCollection<GoombaHeader^>^ headers;
+		ReadOnlyCollection<EmulatorSRAMHeader^>^ headers;
 
 		void init(const void* ptr, bool clean)  {
 			this->data = (char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
@@ -62,7 +62,7 @@ namespace GoombasavCore {
 
 			const stateheader** headers = stateheader_scan(this->data);
 			if (headers == NULL) throw gcnew GoombaException(goomba_last_error());
-			List<GoombaHeader^>^ list = gcnew List<GoombaHeader^>;
+			List<EmulatorSRAMHeader^>^ list = gcnew List<EmulatorSRAMHeader^>;
 			for (int i = 0; headers[i] != NULL; i++) {
 				if (headers[i]->type == GOOMBA_CONFIGSAVE) {
 					switch (tag) {
@@ -84,7 +84,7 @@ namespace GoombasavCore {
 				}
 			}
 			free(headers);
-			this->headers = gcnew ReadOnlyCollection<GoombaHeader^>(list);
+			this->headers = gcnew ReadOnlyCollection<EmulatorSRAMHeader^>(list);
 		}
 	public:
 		static int ExpectedSize = GOOMBA_COLOR_SRAM_SIZE;
@@ -115,8 +115,8 @@ namespace GoombasavCore {
 			}
 		}
 
-		property ReadOnlyCollection<GoombaHeader^>^ Headers {
-			ReadOnlyCollection<GoombaHeader^>^ get() {
+		property ReadOnlyCollection<EmulatorSRAMHeader^>^ Headers {
+			ReadOnlyCollection<EmulatorSRAMHeader^>^ get() {
 				return headers;
 			}
 		}

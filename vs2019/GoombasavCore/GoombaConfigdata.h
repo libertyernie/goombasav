@@ -1,8 +1,8 @@
 #pragma once
-/* cli_GoombaConfigdata.h - subclass for Goomba's configuration data
+/* GoombaConfigdata.h - subclass for Goomba's configuration data
 
 This object will only remain valid while its GoombaSRAM has not yet been
-disposed/finalized. GoombaHeader objects can be obtained via the Headers
+disposed/finalized. These objects can be obtained via the Headers
 property of GoombaSRAM.
 
 Copyright (C) 2016-2020 libertyernie
@@ -22,7 +22,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 https://github.com/libertyernie/goombasav */
 
-#include "cli_GoombaHeader.h"
+#include "EmulatorSRAMHeader.h"
 
 namespace GoombasavCore {
 	ref class GoombaSRAM;

@@ -1,9 +1,9 @@
 #pragma once
-/* cli_GoombaHeader.h - class to encapsulate a particular header within the GoombaSRAM object
+/* EmulatorSRAMHeader.h - class to encapsulate a particular header within the EmulatorSRAM object
 
-This object will only remain valid while its GoombaSRAM has not yet been
-disposed/finalized. GoombaHeader objects can be obtained via the Headers
-property of GoombaSRAM.
+This object will only remain valid while its EmulatorSRAM has not yet been
+disposed/finalized. These objects can be obtained via the Headers
+property of EmulatorSRAM.
 
 Copyright (C) 2016-2020 libertyernie
 
@@ -29,14 +29,14 @@ using System::String;
 namespace GoombasavCore {
 	ref class EmulatorSRAM;
 
-	public ref class GoombaHeader abstract {
+	public ref class EmulatorSRAMHeader abstract {
 	private:
 		const void* ptr;
 		EmulatorSRAM^ parent;
 	internal:
 		// Constructs an object using the given header pointer and parent object.
 		// The parent is only used when the user tries to access the Parent property.
-		GoombaHeader(const void* ptr, EmulatorSRAM^ parent) {
+		EmulatorSRAMHeader(const void* ptr, EmulatorSRAM^ parent) {
 			this->parent = parent;
 			this->ptr = (const stateheader*)ptr;
 		}
@@ -92,15 +92,6 @@ namespace GoombasavCore {
 
 		String^ ToString() override {
 			return GetSummary();
-		}
-	};
-
-	public ref class Configdata abstract : GoombaHeader {
-	internal:
-		Configdata(const void* ptr, EmulatorSRAM^ parent) : GoombaHeader(ptr, parent) {}
-	public:
-		virtual property uint32_t ROMChecksum {
-			uint32_t get() abstract;
 		}
 	};
 }

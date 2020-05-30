@@ -1,5 +1,5 @@
 #pragma once
-/* cli_ExtractedROM.h - interface to encapsulate ROM data extracted from another file
+/* ExtractedROM.h - interface to encapsulate ROM data extracted from another file
 
 Copyright (C) 2016-2020 libertyernie
 

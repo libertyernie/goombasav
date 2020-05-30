@@ -1,5 +1,5 @@
 #pragma once
-/* cli_GameBoyROM.h - class to encapsulate Game Boy ROM extracted from Goomba ROM or other data file
+/* GameBoyROM.h - class to encapsulate Game Boy ROM extracted from Goomba ROM or other data file
 
 Copyright (C) 2016-2020 libertyernie
 
@@ -19,7 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 https://github.com/libertyernie/goombasav */
 
 #include "../../goombarom.h"
-#include "cli_ExtractedROM.h"
+#include "ExtractedROM.h"
 #include <cstdlib>
 #include <cstring>
 
