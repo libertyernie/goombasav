@@ -1,7 +1,7 @@
-/* smsadvancerom.c - functions to find uncompressed Master System / Game Geat
+/* smsadvancerom.c - functions to find uncompressed Master System / Game Gear
 ROM images stored within SMSAdvance ROMs
 
-Copyright (C) 2016 libertyernie
+Copyright (C) 2016-2020 libertyernie
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -26,9 +26,16 @@ as C++ code (Properties -> C/C++ -> Advanced -> Compile As.)
 
 const char SMS_WORD[4] = { 'S','M','S',0x1A };
 
+int is_name_ascii(const char* name) {
+	for (int i = 0; i < 32; i++)
+		if (name[i] < 0)
+			return 0;
+	return 1;
+}
+
 /* Finds the first SMSAdvance ROM header in the given data block by looking for
-the segment 534D531A (S,M,S,^Z). If no valid data is found, this method will
-return NULL. */
+the segment 534D531A (S,M,S,^Z) and ensuring that the ROM name is valid ASCII.
+If no valid data is found, this method will return NULL. */
 const smsadvance_romheader* smsadvance_first_rom(const void* data, size_t length) {
 	const char* ptr = (const char*)data;
 	const char* end = ptr + length;
@@ -37,11 +44,12 @@ const smsadvance_romheader* smsadvance_first_rom(const void* data, size_t length
 		if (*ptr == SMS_WORD[logo_pos]) {
 			// match
 			logo_pos++;
-			if (logo_pos == 4) { // matched all of GB logo - on last byte (0x133)
+			if (logo_pos == 4) {
 				// check if length fits
 				const smsadvance_romheader* candidate = (smsadvance_romheader*)(ptr - 3);
 				size_t filesize = candidate->filesize;
-				if (*(uint16_t *)"\0\xff" < 0x100) {
+				const char* endian_check = "\0\xff";
+				if (*(uint16_t *)endian_check < 0x100) {
 					uint32_t buffer;
 					((char*)&buffer)[0] = ((char*)&filesize)[3];
 					((char*)&buffer)[1] = ((char*)&filesize)[2];
@@ -50,7 +58,7 @@ const smsadvance_romheader* smsadvance_first_rom(const void* data, size_t length
 					filesize = buffer;
 				}
 				const char* candidate_end_ptr = ptr - 3 + sizeof(smsadvance_romheader) + filesize;
-				if (candidate_end_ptr <= end) {
+				if (candidate_end_ptr <= end && is_name_ascii(candidate->name)) {
 					return candidate;
 				} else {
 					// no match, try again
@@ -70,7 +78,7 @@ const smsadvance_romheader* smsadvance_first_rom(const void* data, size_t length
 	return NULL;
 }
 
-/* Returns a pointer to the next PocketNES ROM header in the data. If the
+/* Returns a pointer to the next SMSAdvance ROM header in the data. If the
 location where the next ROM header would be does not contain a 'S,M,S,^Z'
 segment, this method will return NULL. */
 const smsadvance_romheader* smsadvance_next_rom(const void* data, size_t length, const smsadvance_romheader* first_rom) {

@@ -1,7 +1,7 @@
 /* pocketnesrom.c - functions to find uncompressed NES ROM images
 stored within PocketNES ROMs
 
-Copyright (C) 2016 libertyernie
+Copyright (C) 2016-2020 libertyernie
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -41,7 +41,8 @@ const pocketnes_romheader* pocketnes_first_rom(const void* data, size_t length) 
 				// check if length fits
 				const pocketnes_romheader* candidate = (pocketnes_romheader*)(ptr - 3 - sizeof(pocketnes_romheader));
 				size_t filesize = candidate->filesize;
-				if (*(uint16_t *)"\0\xff" < 0x100) {
+				const char* endian_check = "\0\xff";
+				if (*(uint16_t*)endian_check < 0x100) {
 					uint32_t buffer;
 					((char*)&buffer)[0] = ((char*)&filesize)[3];
 					((char*)&buffer)[1] = ((char*)&filesize)[2];
