@@ -1,6 +1,6 @@
 /* main.c - command line interface to goombasav
 
-Copyright (C) 2014-2016 libertyernie
+Copyright (C) 2014-2020 libertyernie
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ as C++ code (Properties -> C/C++ -> Advanced -> Compile As.)
 #include "goombasav.h"
 #include "platformname.h"
 
-const char* USAGE = "goombasav (2017-08-29)\n"
+const char* USAGE = "goombasav (2020-05-30)\n"
 "Usage: goombasav {x/extract} gba.sav gbc.sav\n"
 "       goombasav {r/replace} gba.sav gbc.sav\n"
 "       goombasav {c/clean} gba-in.sav [gba-out.sav]\n"
@@ -42,14 +42,14 @@ const char* USAGE = "goombasav (2017-08-29)\n"
 "  isok: check if the file begins with a four-byte sequence that identifies it\n"
 "        as a Goomba or PocketNES save file\n"
 "\n"
-"  one argument: view Goomba/PocketNES headers\n"
+"  one argument: view Goomba/SMSAdvance/PocketNES headers\n"
 "                (file can be - for stdin)\n"
 "\n"
 "  -L: license information\n"
 "  /? or --help: print this message\n";
 
 const char* GPL_NOTICE = "goombasav - extract and replace Goomba/Goomba Color save files\n"
-"Copyright (C) 2014-2017 libertyernie\n"
+"Copyright (C) 2014-2020 libertyernie\n"
 "https://github.com/libertyernie/goombasav\n"
 "\n"
 "This program is free software: you can redistribute it and/or modify\n"
@@ -250,9 +250,6 @@ void list(const char* gbafile) {
 		printf("%d. ", i);
 		printf("%s\n", stateheader_summary_str(headers[i]));
 		print_indent("  ", stateheader_str(headers[i]));
-		if (little_endian_conv_16(headers[i]->size) > sizeof(stateheader)) {
-			printf("  [3-byte compressed data checksum: %6X]\n", goomba_compressed_data_checksum(headers[i], 3));
-		}
 		i++;
 	}
 

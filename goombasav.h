@@ -1,6 +1,6 @@
 /* goombasav.h - functions to handle Goomba / Goomba Color SRAM
 
-Copyright (C) 2014-2017 libertyernie
+Copyright (C) 2014-2020 libertyernie
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -204,12 +204,6 @@ int goomba_is_sram(const void* data);
  * an error occurred.
  */
 int64_t goomba_get_configdata_checksum_field(const void* gba_data);
-
-/**
-* Computes a simple additive checksum of the compressed data that comes after
-* the given header, using anywhere from 1 to 8 bytes.
-*/
-uint64_t goomba_compressed_data_checksum(const stateheader* sh, int output_bytes);
 
 /**
 * If there is save data in 0xe000-0xffff (as signaled by the configdata),
