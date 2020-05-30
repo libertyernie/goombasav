@@ -1,6 +1,7 @@
 Debug
 Release
 /goombasav.exe
+/gbaromextract.exe
 *.sdf
 *.opensdf
 *.suo
