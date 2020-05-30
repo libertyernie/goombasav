@@ -1,7 +1,7 @@
 #pragma once
 /* cli_GoombaSRAM.h - class to encapsulate Goomba / Goomba Color SRAM
 
-Copyright (C) 2014 libertyernie
+Copyright (C) 2014-2020 libertyernie
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ using namespace System;
 using namespace System::Collections::Generic;
 using System::Collections::ObjectModel::ReadOnlyCollection;
 
-namespace Goombasav {
+namespace GoombasavCore {
 	public ref class GoombaException : System::Exception {
 	public:
 		GoombaException(String^ message) : Exception(message) {}

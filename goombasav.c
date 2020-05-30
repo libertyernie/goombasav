@@ -319,7 +319,7 @@ char* goomba_cleanup_internal(const void* gba_data_param, char* gba_data) {
 }
 
 char* goomba_cleanup(const void* gba_data_param) {
-	char* gba_data = malloc(GOOMBA_COLOR_SRAM_SIZE);
+	char* gba_data = (char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
 	char* result = goomba_cleanup_internal(gba_data_param, gba_data);
 	free(gba_data);
 	return result;

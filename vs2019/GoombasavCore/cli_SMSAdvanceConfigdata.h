@@ -1,11 +1,11 @@
 #pragma once
-/* cli_Stateheader.h - subclass for SRAM or savestate data
+/* cli_SMSAdvanceConfigdata.h - subclass for Goomba's configuration data
 
 This object will only remain valid while its GoombaSRAM has not yet been
 disposed/finalized. GoombaHeader objects can be obtained via the Headers
 property of GoombaSRAM.
 
-Copyright (C) 2014 libertyernie
+Copyright (C) 2016-2020 libertyernie
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -24,50 +24,34 @@ https://github.com/libertyernie/goombasav */
 
 #include "cli_GoombaHeader.h"
 
-namespace Goombasav {
+namespace GoombasavCore {
 	ref class GoombaSRAM;
 
-	public ref class Stateheader : GoombaHeader {
+	public ref class SMSAdvanceConfigdata : Configdata {
 	public:
 		// Constructs an object using the given header pointer and parent object.
 		// The parent is only used when the user tries to access the Parent property.
-		Stateheader(const stateheader* ptr, GoombaSRAM^ parent)
-			: GoombaHeader(ptr, parent) { }
+		SMSAdvanceConfigdata(const smsadvance_configdata* ptr, GoombaSRAM^ parent)
+			: Configdata(ptr, parent) { }
 
 #pragma region properties
-		property const stateheader* Pointer {
-			const stateheader* get() {
-				return (const stateheader*)VoidPointer;
-			}
-		}
-
-		///<summary>
-		///Compressed size of data in Goomba; uncompressed size in Goomba Color.
-		///</summary>
-		property uint32_t DataSize {
-			uint32_t get() {
-				return Pointer->uncompressed_size;
-			}
-		}
-
-		property uint32_t Framecount {
-			uint32_t get() {
-				return Pointer->framecount;
+		property const smsadvance_configdata* Pointer {
+			const smsadvance_configdata* get() {
+				return (const smsadvance_configdata*)VoidPointer;
 			}
 		}
 
 		property uint32_t ROMChecksum {
-			uint32_t get() {
-				return Pointer->checksum;
+			uint32_t get() override {
+				return Pointer->sram_checksum;
+			}
+		}
+
+		property String^ Title {
+			String^ get() override {
+				return gcnew String(Pointer->reserved3);
 			}
 		}
 #pragma endregion
-
-		// A three-byte hash of the compressed data - useful for showing on-screen as an RGB color.
-		uint32_t CompressedDataChecksum(int outputBytes) {
-			if (outputBytes < 1 || outputBytes > 8) throw gcnew System::ArgumentException("outputBytes must be at least 1 and at most 8");
-			uint64_t hash = goomba_compressed_data_checksum(this->Pointer, outputBytes);
-			return (uint32_t)hash;
-		}
 	};
 }

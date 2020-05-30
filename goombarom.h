@@ -1,7 +1,7 @@
 /* goombarom.h - functions to find uncompressed Game Boy ROM images
 stored within a larger file (e.g. Goomba Color ROMs, TAR archives)
 
-Copyright (C) 2016 libertyernie
+Copyright (C) 2016-2020 libertyernie
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

@@ -1,7 +1,7 @@
 #pragma once
 /* cli_ExtractedROM.h - interface to encapsulate ROM data extracted from another file
 
-Copyright (C) 2016 libertyernie
+Copyright (C) 2016-2020 libertyernie
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ using namespace System;
 using namespace System::Collections::Generic;
 using System::Collections::ObjectModel::ReadOnlyCollection;
 
-namespace Goombasav {
+namespace GoombasavCore {
 	public interface class ExtractedROM {
 	public:
 		property array<unsigned char>^ Data {

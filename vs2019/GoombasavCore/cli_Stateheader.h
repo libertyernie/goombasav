@@ -1,11 +1,11 @@
 #pragma once
-/* cli_PocketNESConfigdata.h - subclass for Goomba's configuration data
+/* cli_Stateheader.h - subclass for SRAM or savestate data
 
 This object will only remain valid while its GoombaSRAM has not yet been
 disposed/finalized. GoombaHeader objects can be obtained via the Headers
 property of GoombaSRAM.
 
-Copyright (C) 2016 libertyernie
+Copyright (C) 2014-2020 libertyernie
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -24,26 +24,41 @@ https://github.com/libertyernie/goombasav */
 
 #include "cli_GoombaHeader.h"
 
-namespace Goombasav {
+namespace GoombasavCore {
 	ref class GoombaSRAM;
 
-	public ref class PocketNESConfigdata : Configdata {
+	public ref class Stateheader : GoombaHeader {
 	public:
 		// Constructs an object using the given header pointer and parent object.
 		// The parent is only used when the user tries to access the Parent property.
-		PocketNESConfigdata(const pocketnes_configdata* ptr, GoombaSRAM^ parent)
-			: Configdata(ptr, parent) { }
+		Stateheader(const stateheader* ptr, GoombaSRAM^ parent)
+			: GoombaHeader(ptr, parent) { }
 
 #pragma region properties
-		property const pocketnes_configdata* Pointer {
-			const pocketnes_configdata* get() {
-				return (const pocketnes_configdata*)VoidPointer;
+		property const stateheader* Pointer {
+			const stateheader* get() {
+				return (const stateheader*)VoidPointer;
+			}
+		}
+
+		///<summary>
+		///Compressed size of data in Goomba; uncompressed size in Goomba Color.
+		///</summary>
+		property uint32_t DataSize {
+			uint32_t get() {
+				return Pointer->uncompressed_size;
+			}
+		}
+
+		property uint32_t Framecount {
+			uint32_t get() {
+				return Pointer->framecount;
 			}
 		}
 
 		property uint32_t ROMChecksum {
-			uint32_t get() override {
-				return Pointer->sram_checksum;
+			uint32_t get() {
+				return Pointer->checksum;
 			}
 		}
 #pragma endregion

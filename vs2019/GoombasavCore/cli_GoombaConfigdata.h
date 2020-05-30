@@ -5,7 +5,7 @@ This object will only remain valid while its GoombaSRAM has not yet been
 disposed/finalized. GoombaHeader objects can be obtained via the Headers
 property of GoombaSRAM.
 
-Copyright (C) 2016 libertyernie
+Copyright (C) 2016-2020 libertyernie
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ https://github.com/libertyernie/goombasav */
 
 #include "cli_GoombaHeader.h"
 
-namespace Goombasav {
+namespace GoombasavCore {
 	ref class GoombaSRAM;
 
 	public ref class MiscStrings {

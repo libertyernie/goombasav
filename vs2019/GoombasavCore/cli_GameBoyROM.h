@@ -1,7 +1,7 @@
 #pragma once
-/* cli_PocketNESROM.h - class to encapsulate NES ROM extracted from PocketNES ROM
+/* cli_GameBoyROM.h - class to encapsulate Game Boy ROM extracted from Goomba ROM or other data file
 
-Copyright (C) 2016 libertyernie
+Copyright (C) 2016-2020 libertyernie
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 https://github.com/libertyernie/goombasav */
 
-#include "../pocketnesrom.h"
+#include "../../goombarom.h"
 #include "cli_ExtractedROM.h"
 #include <cstdlib>
 #include <cstring>
@@ -27,27 +27,20 @@ using namespace System;
 using namespace System::Collections::Generic;
 using System::Collections::ObjectModel::ReadOnlyCollection;
 
-namespace Goombasav {
-	public ref class PocketNESROM : public ExtractedROM {
+namespace GoombasavCore {
+	public ref class GameBoyROM : public ExtractedROM {
 	private:
-		String^ name;
-		uint32_t flags;
-		uint32_t spritefollow;
-		uint32_t reserved;
-
 		array<unsigned char>^ data;
 
-		PocketNESROM(pocketnes_romheader header, array<unsigned char>^ data) {
-			this->name = gcnew String(header.name);
-			this->flags = header.flags;
-			this->spritefollow = header.spritefollow;
-			this->reserved = header.reserved;
+		GameBoyROM(array<unsigned char>^ data) {
 			this->data = data;
 		}
 	public:
 		property String^ Name {
 			virtual String^ get() {
-				return this->name;
+				pin_ptr<unsigned char> data_ptr = &data[0];
+				const char* name = gb_get_title(data_ptr, NULL);
+				return gcnew String(name);
 			}
 		}
 		property array<unsigned char>^ Data {
@@ -61,20 +54,20 @@ namespace Goombasav {
 
 		virtual uint32_t GetChecksum() {
 			pin_ptr<unsigned char> p = &data[0];
-			return pocketnes_get_checksum(p);
+			return gb_get_checksum(p);
 		}
 
-		static List<PocketNESROM^>^ Extract(array<unsigned char>^ source) {
-			List<PocketNESROM^>^ list = gcnew List<PocketNESROM^>();
+		static List<GameBoyROM^>^ Extract(array<unsigned char>^ source) {
+			List<GameBoyROM^>^ list = gcnew List<GameBoyROM^>();
 
 			pin_ptr<unsigned char> source_ptr = &source[0];
-			const pocketnes_romheader* ptr = pocketnes_first_rom(source_ptr, source->Length);
+			const void* ptr = gb_first_rom(source_ptr, source->Length);
 			while (ptr) {
-				array<unsigned char>^ copy = gcnew array<unsigned char>(ptr->filesize);
+				array<unsigned char>^ copy = gcnew array<unsigned char>(gb_rom_size(ptr));
 				pin_ptr<unsigned char> copy_ptr = &copy[0];
-				memmove(copy_ptr, ptr + 1, copy->Length);
-				list->Add(gcnew PocketNESROM(*ptr, copy));
-				ptr = pocketnes_next_rom(source_ptr, source->Length, ptr);
+				memmove(copy_ptr, ptr, copy->Length);
+				list->Add(gcnew GameBoyROM(copy));
+				ptr = gb_next_rom(source_ptr, source->Length, ptr);
 			}
 
 			return list;
