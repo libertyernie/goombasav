@@ -1,5 +1,5 @@
 #pragma once
-/* cli_GoombaSRAM.h - class to encapsulate Goomba / Goomba Color SRAM
+/* cli_EmulatorSRAM.h - class to encapsulate Goomba / Goomba Color / PocketNES / SMSAdvance SRAM
 
 Copyright (C) 2014-2020 libertyernie
 
@@ -36,7 +36,7 @@ namespace GoombasavCore {
 		GoombaException(const char* message) : GoombaException(gcnew String(message)) {}
 	};
 
-	public ref class GoombaSRAM {
+	public ref class EmulatorSRAM {
 	private:
 		// always GOOMBA_COLOR_SRAM_SIZE bytes, allocated with malloc
 		void* data;
@@ -90,7 +90,7 @@ namespace GoombasavCore {
 		static int ExpectedSize = GOOMBA_COLOR_SRAM_SIZE;
 
 		// arr must be at least ExpectedSize bytes. If it is more, the extra bytes will be ignored.
-		GoombaSRAM(array<unsigned char>^ arr, bool clean) {
+		EmulatorSRAM(array<unsigned char>^ arr, bool clean) {
 			if (arr->Length < GOOMBA_COLOR_SRAM_SIZE) {
 				array<unsigned char>^ arr2 = gcnew array<unsigned char>(GOOMBA_COLOR_SRAM_SIZE);
 				Array::Copy(arr, arr2, arr->Length);
@@ -100,15 +100,15 @@ namespace GoombasavCore {
 			init(pin, clean);
 		}
 
-		GoombaSRAM(const void* ptr, bool clean) {
+		EmulatorSRAM(const void* ptr, bool clean) {
 			init(ptr, clean);
 		}
 
-		~GoombaSRAM() {
-			this->!GoombaSRAM(); // call finalizer
+		~EmulatorSRAM() {
+			this->!EmulatorSRAM(); // call finalizer
 		}
 
-		!GoombaSRAM() {
+		!EmulatorSRAM() {
 			if (data != NULL) { // safe to run more than once, because Dispose() will call it
 				free(data);
 				data = NULL;
@@ -137,19 +137,19 @@ namespace GoombasavCore {
 			return arr;
 		}
 
-		GoombaSRAM^ CopyAndReplace(Stateheader^ header, array<unsigned char>^ data) {
+		EmulatorSRAM^ CopyAndReplace(Stateheader^ header, array<unsigned char>^ data) {
 			pin_ptr<unsigned char> pin = &data[0];
 			void* new_data = goomba_new_sav(this->data, header->Pointer, pin, data->Length);
 			if (new_data == NULL) throw gcnew GoombaException(goomba_last_error());
 
-			return gcnew GoombaSRAM(new_data, false);
+			return gcnew EmulatorSRAM(new_data, false);
 		}
 
-		GoombaSRAM^ CopyAndRemove(Stateheader^ header) {
+		EmulatorSRAM^ CopyAndRemove(Stateheader^ header) {
 			void* new_data = goomba_new_sav(this->data, header->Pointer, NULL, 0);
 			if (new_data == NULL) throw gcnew GoombaException(goomba_last_error());
 
-			return gcnew GoombaSRAM(new_data, false);
+			return gcnew EmulatorSRAM(new_data, false);
 		}
 
 		array<unsigned char>^ ToArray() {

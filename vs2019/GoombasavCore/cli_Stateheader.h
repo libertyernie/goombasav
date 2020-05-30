@@ -31,7 +31,7 @@ namespace GoombasavCore {
 	public:
 		// Constructs an object using the given header pointer and parent object.
 		// The parent is only used when the user tries to access the Parent property.
-		Stateheader(const stateheader* ptr, GoombaSRAM^ parent)
+		Stateheader(const stateheader* ptr, EmulatorSRAM^ parent)
 			: GoombaHeader(ptr, parent) { }
 
 #pragma region properties

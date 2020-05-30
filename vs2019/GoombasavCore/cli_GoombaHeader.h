@@ -27,16 +27,16 @@ https://github.com/libertyernie/goombasav */
 using System::String;
 
 namespace GoombasavCore {
-	ref class GoombaSRAM;
+	ref class EmulatorSRAM;
 
 	public ref class GoombaHeader abstract {
 	private:
 		const void* ptr;
-		GoombaSRAM^ parent;
+		EmulatorSRAM^ parent;
 	internal:
 		// Constructs an object using the given header pointer and parent object.
 		// The parent is only used when the user tries to access the Parent property.
-		GoombaHeader(const void* ptr, GoombaSRAM^ parent) {
+		GoombaHeader(const void* ptr, EmulatorSRAM^ parent) {
 			this->parent = parent;
 			this->ptr = (const stateheader*)ptr;
 		}
@@ -57,8 +57,8 @@ namespace GoombasavCore {
 			}
 		}
 
-		property GoombaSRAM^ Parent {
-			GoombaSRAM^ get() {
+		property EmulatorSRAM^ Parent {
+			EmulatorSRAM^ get() {
 				return this->parent;
 			}
 		}
@@ -97,7 +97,7 @@ namespace GoombasavCore {
 
 	public ref class Configdata abstract : GoombaHeader {
 	internal:
-		Configdata(const void* ptr, GoombaSRAM^ parent) : GoombaHeader(ptr, parent) {}
+		Configdata(const void* ptr, EmulatorSRAM^ parent) : GoombaHeader(ptr, parent) {}
 	public:
 		virtual property uint32_t ROMChecksum {
 			uint32_t get() abstract;

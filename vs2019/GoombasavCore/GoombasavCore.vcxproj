@@ -127,7 +127,7 @@
     <ClInclude Include="cli_GameBoyROM.h" />
     <ClInclude Include="cli_GoombaConfigdata.h" />
     <ClInclude Include="cli_GoombaHeader.h" />
-    <ClInclude Include="cli_GoombaSRAM.h" />
+    <ClInclude Include="cli_EmulatorSRAM.h" />
     <ClInclude Include="cli_PocketNESConfigdata.h" />
     <ClInclude Include="cli_PocketNESROM.h" />
     <ClInclude Include="cli_SMSAdvanceConfigdata.h" />

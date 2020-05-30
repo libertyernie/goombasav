@@ -31,7 +31,7 @@ namespace GoombasavCore {
 	public:
 		// Constructs an object using the given header pointer and parent object.
 		// The parent is only used when the user tries to access the Parent property.
-		PocketNESConfigdata(const pocketnes_configdata* ptr, GoombaSRAM^ parent)
+		PocketNESConfigdata(const pocketnes_configdata* ptr, EmulatorSRAM^ parent)
 			: Configdata(ptr, parent) { }
 
 #pragma region properties
