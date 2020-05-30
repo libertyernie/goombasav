@@ -22,7 +22,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 https://github.com/libertyernie/goombasav */
 
-#include "EmulatorSRAMHeader.h"
+#include "Configdata.h"
 
 namespace GoombasavCore {
 	ref class GoombaSRAM;

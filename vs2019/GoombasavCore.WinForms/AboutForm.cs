@@ -9,11 +9,11 @@ namespace goombasav_cs {
 		}
 
 		private void button1_Click(object sender, EventArgs e) {
-			Process.Start("http://www.gnu.org/licenses/gpl-3.0.html");
+			Process.Start("cmd", "/C start http://www.gnu.org/licenses/gpl-3.0.html");
 		}
 
 		private void button2_Click(object sender, EventArgs e) {
-			Process.Start("https://github.com/libertyernie/goombasav");
+			Process.Start("cmd", "/C start https://github.com/libertyernie/goombasav");
 		}
 	}
 }

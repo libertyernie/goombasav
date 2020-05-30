@@ -61,10 +61,7 @@
             this.lblTitle = new System.Windows.Forms.Label();
             this.lblTitleVal = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
-            this.panel1 = new System.Windows.Forms.Panel();
             this.hashBox = new System.Windows.Forms.Label();
-            this.lblHashVal = new System.Windows.Forms.Label();
-            this.lblHash = new System.Windows.Forms.Label();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.btnReplace = new System.Windows.Forms.Button();
             this.btnExtract = new System.Windows.Forms.Button();
@@ -77,7 +74,6 @@
             this.flowLayoutPanel2.SuspendLayout();
             this.flpConfigdata.SuspendLayout();
             this.flpStateheader.SuspendLayout();
-            this.panel1.SuspendLayout();
             this.flowLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -167,7 +163,6 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.flowLayoutPanel2);
-            this.splitContainer1.Panel2.Controls.Add(this.panel1);
             this.splitContainer1.Panel2.Controls.Add(this.flowLayoutPanel1);
             this.splitContainer1.Size = new System.Drawing.Size(380, 157);
             this.splitContainer1.SplitterDistance = 97;
@@ -441,18 +436,6 @@
             this.label2.Size = new System.Drawing.Size(0, 13);
             this.label2.TabIndex = 9;
             // 
-            // panel1
-            // 
-            this.panel1.Controls.Add(this.hashBox);
-            this.panel1.Controls.Add(this.lblHashVal);
-            this.panel1.Controls.Add(this.lblHash);
-            this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panel1.Location = new System.Drawing.Point(0, 114);
-            this.panel1.Margin = new System.Windows.Forms.Padding(2);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(280, 14);
-            this.panel1.TabIndex = 0;
-            // 
             // hashBox
             // 
             this.hashBox.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -461,27 +444,6 @@
             this.hashBox.Name = "hashBox";
             this.hashBox.Size = new System.Drawing.Size(149, 14);
             this.hashBox.TabIndex = 1;
-            // 
-            // lblHashVal
-            // 
-            this.lblHashVal.AutoSize = true;
-            this.lblHashVal.Dock = System.Windows.Forms.DockStyle.Left;
-            this.lblHashVal.Location = new System.Drawing.Point(131, 0);
-            this.lblHashVal.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.lblHashVal.Name = "lblHashVal";
-            this.lblHashVal.Size = new System.Drawing.Size(0, 13);
-            this.lblHashVal.TabIndex = 2;
-            // 
-            // lblHash
-            // 
-            this.lblHash.AutoSize = true;
-            this.lblHash.Dock = System.Windows.Forms.DockStyle.Left;
-            this.lblHash.Location = new System.Drawing.Point(0, 0);
-            this.lblHash.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.lblHash.Name = "lblHash";
-            this.lblHash.Size = new System.Drawing.Size(131, 13);
-            this.lblHash.TabIndex = 0;
-            this.lblHash.Text = "Hash of compressed data:";
             // 
             // flowLayoutPanel1
             // 
@@ -539,7 +501,7 @@
             this.MainMenuStrip = this.menuStrip1;
             this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "Goomba Save Manager";
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.splitContainer1.Panel1.ResumeLayout(false);
@@ -550,8 +512,6 @@
             this.flowLayoutPanel2.PerformLayout();
             this.flpConfigdata.ResumeLayout(false);
             this.flpStateheader.ResumeLayout(false);
-            this.panel1.ResumeLayout(false);
-            this.panel1.PerformLayout();
             this.flowLayoutPanel1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -571,9 +531,7 @@
 		private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
 		private System.Windows.Forms.SplitContainer splitContainer1;
 		private System.Windows.Forms.ListBox listBox1;
-		private System.Windows.Forms.Panel panel1;
 		private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
-		private System.Windows.Forms.Label lblHash;
 		private System.Windows.Forms.Label hashBox;
 		private System.Windows.Forms.Button btnReplace;
 		private System.Windows.Forms.Button btnExtract;
@@ -603,7 +561,6 @@
 		private System.Windows.Forms.Label lblTitle;
 		private System.Windows.Forms.Label lblTitleVal;
 		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.Label lblHashVal;
         private System.Windows.Forms.Button btnDelete;
     }
 }

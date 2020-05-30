@@ -1,4 +1,4 @@
-﻿using Goombasav;
+﻿using GoombasavCore;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -25,7 +25,7 @@ namespace goombasav_cs {
 
 		const string TITLE = "Goomba Save Manager";
 
-		private GoombaSRAM loaded_sram;
+		private EmulatorSRAM loaded_sram;
 		private List<ExtractedROM> loaded_rom_contents;
 
 		private string filePath;
@@ -148,7 +148,7 @@ namespace goombasav_cs {
             string msg = $"Are you sure you want to remove the save data for {sh.Title} from this file? You will need to run Goomba if you want to add new save data later.";
             if (MessageBox.Show(this, msg, Text, MessageBoxButtons.YesNo) == DialogResult.Yes) {
                 try {
-                    GoombaSRAM new_data = loaded_sram.CopyAndRemove(sh);
+                    EmulatorSRAM new_data = loaded_sram.CopyAndRemove(sh);
                     loaded_sram = new_data;
                     dirty = true;
 
@@ -167,7 +167,7 @@ namespace goombasav_cs {
 				ExtractedROM r = (ExtractedROM)o;
 				lblSizeVal.Text = r.Data.Length + " bytes";
 				lblTypeVal.Text = "ROM image";
-				flpConfigdata.Visible = flpStateheader.Visible = panel1.Visible = false;
+				flpConfigdata.Visible = flpStateheader.Visible = false;
 				lblChecksumVal.Text = r.GetChecksum().ToString("X8");
 				lblTitleVal.Text = r.Name;
 				btnExtract.Enabled = true;
@@ -176,11 +176,11 @@ namespace goombasav_cs {
                 return;
 			}
 
-			GoombaHeader h = (GoombaHeader)o;
+			EmulatorSRAMHeader h = (EmulatorSRAMHeader)o;
 			lblSizeVal.Text = h.Size + " bytes";
-			lblTypeVal.Text = h.Type == GoombaHeader.STATESAVE ? "Savestate"
-				: h.Type == GoombaHeader.SRAMSAVE ? "SRAM"
-				: h.Type == GoombaHeader.CONFIGSAVE ? "Config"
+			lblTypeVal.Text = h.Type == EmulatorSRAMHeader.STATESAVE ? "Savestate"
+				: h.Type == EmulatorSRAMHeader.SRAMSAVE ? "SRAM"
+				: h.Type == EmulatorSRAMHeader.CONFIGSAVE ? "Config"
 				: "Unknown";
 			if (h is Stateheader) {
 				Stateheader sh = (Stateheader)h;
@@ -194,12 +194,7 @@ namespace goombasav_cs {
 				lblFramecountVal.Text = sh.Framecount.ToString();
 				lblChecksumVal.Text = sh.ROMChecksum.ToString("X8");
 
-				panel1.Visible = true;
-				uint hash = sh.CompressedDataChecksum(3);
-				lblHashVal.Text = hash.ToString("X6");
-				hashBox.BackColor = Color.FromArgb((int)(hash | 0xFF000000));
-
-				btnExtract.Enabled = btnReplace.Enabled = (sh.Type == GoombaHeader.SRAMSAVE);
+				btnExtract.Enabled = btnReplace.Enabled = (sh.Type == EmulatorSRAMHeader.SRAMSAVE);
 			} else if (h is Configdata) {
 				flpStateheader.Visible = false;
 
@@ -223,10 +218,9 @@ namespace goombasav_cs {
 				}
 				lblChecksumVal.Text = cd.ROMChecksum.ToString("X8"); // The SRAM with this ROM checksum value is currently in 0xe000-0xffff
 
-				panel1.Visible = false;
 				btnExtract.Enabled = btnReplace.Enabled = false;
 			} else {
-				flpConfigdata.Visible = flpStateheader.Visible = panel1.Visible = false;
+				flpConfigdata.Visible = flpStateheader.Visible = false;
 				btnExtract.Enabled = btnReplace.Enabled = false;
 			}
 			lblTitleVal.Text = h.Title;
@@ -253,7 +247,7 @@ namespace goombasav_cs {
 					first += stream.ReadByte() << 8 * i;
 				}
 			}
-			if ((uint)first == GoombaHeader.STATEID) {
+			if ((uint)first == EmulatorSRAMHeader.STATEID) {
 				// try open file
 				load(arr[0]);
 			} else {
@@ -270,7 +264,7 @@ namespace goombasav_cs {
 				return;
 			} else if (h is Stateheader) {
 				try {
-					GoombaSRAM new_data = loaded_sram.CopyAndReplace((Stateheader)h, gbc_data_arr);
+					EmulatorSRAM new_data = loaded_sram.CopyAndReplace((Stateheader)h, gbc_data_arr);
 					loaded_sram = new_data;
 					dirty = true;
 
@@ -297,7 +291,6 @@ namespace goombasav_cs {
 			lblFramecountVal.Text = "";
 			lblChecksumVal.Text = "";
 			lblTitleVal.Text = "";
-			panel1.Visible = false;
 		}
 
 		private bool okToClose() {
@@ -329,12 +322,12 @@ namespace goombasav_cs {
 					loaded_rom_contents.AddRange(extractedRoms2);
 					loaded_rom_contents.AddRange(extractedRoms3);
 				} else {
-					if (arr.Length > GoombaSRAM.ExpectedSize) {
-						MessageBox.Show("This file is more than " + GoombaSRAM.ExpectedSize +
-							" bytes. If you overwrite the file, the last " + (arr.Length - GoombaSRAM.ExpectedSize) +
+					if (arr.Length > EmulatorSRAM.ExpectedSize) {
+						MessageBox.Show("This file is more than " + EmulatorSRAM.ExpectedSize +
+							" bytes. If you overwrite the file, the last " + (arr.Length - EmulatorSRAM.ExpectedSize) +
 							" bytes will be discarded.", "Note", MessageBoxButtons.OK, MessageBoxIcon.Information);
 					}
-					loaded_sram = new GoombaSRAM(arr, true);
+					loaded_sram = new EmulatorSRAM(arr, true);
 					loaded_rom_contents = null;
 					dirty = false;
 				}
