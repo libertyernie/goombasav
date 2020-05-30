@@ -16,9 +16,6 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 https://github.com/libertyernie/goombasav
-
-When compiling in Visual Studio, set the project to compile
-as C++ code (Properties -> C/C++ -> Advanced -> Compile As.)
 */
 
 #include <stdio.h>

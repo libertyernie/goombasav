@@ -16,9 +16,6 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 https://github.com/libertyernie/goombasav
-
-When compiling in Visual Studio, set all goombasav files to compile
-as C++ code (Properties -> C/C++ -> Advanced -> Compile As.)
 */
 
 #include <stdio.h>
@@ -30,20 +27,17 @@ as C++ code (Properties -> C/C++ -> Advanced -> Compile As.)
 const char* USAGE = "goombasav (2020-05-30)\n"
 "Usage: goombasav {x/extract} gba.sav gbc.sav\n"
 "       goombasav {r/replace} gba.sav gbc.sav\n"
-"       goombasav {c/clean} gba-in.sav [gba-out.sav]\n"
+"       goombasav {c/clean} gba-in.sav gba-out.sav\n"
 "       goombasav isok [file1.sav [file2.sav [...]]]\n"
 "       goombasav gba.sav\n"
 "\n"
 "  x:    extract save data from first file -> store in second file\n"
-"        (\"gbc.sav\" can be - for stdout)\n"
 "  r:    replace data in first file <- read from second file\n"
-"  c:    clean sram at 0xE000 in 1st file -> write to 2nd file if specified,\n"
-"        replace first file otherwise (second file can be - for stdout)\n"
+"  c:    read first file -> clean any sram at 0xE000 -> write to second file\n"
 "  isok: check if the file begins with a four-byte sequence that identifies it\n"
-"        as a Goomba or PocketNES save file\n"
+"        as a Goomba/SMSAdvance/PocketNES save file\n"
 "\n"
 "  one argument: view Goomba/SMSAdvance/PocketNES headers\n"
-"                (file can be - for stdin)\n"
 "\n"
 "  -L: license information\n"
 "  /? or --help: print this message\n";
@@ -283,11 +277,7 @@ int main(int argc, char** argv) {
 			list(argv[1]);
 		}
 	} else if (argc == 3) {
-		if (strcmp("c", argv[1]) == 0 || strcmp("clean", argv[1]) == 0) {
-			clean(argv[2], argv[2]);
-		} else {
-			usage();
-		}
+		usage();
 	} else if (strcmp("x", argv[1]) == 0 || strcmp("extract", argv[1]) == 0) {
 		extract(argv[2], argv[3]);
 	} else if (strcmp("r", argv[1]) == 0 || strcmp("replace", argv[1]) == 0) {
