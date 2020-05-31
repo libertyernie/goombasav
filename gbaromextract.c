@@ -1,6 +1,6 @@
 /* gbaromextract.c - command line interface to goombarom, pocketnesrom, and smsadvancerom
 
-Copyright (C) 2014-2016 libertyernie
+Copyright (C) 2014-2020 libertyernie
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -16,9 +16,6 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 https://github.com/libertyernie/goombasav
-
-When compiling in Visual Studio, set the project to compile
-as C++ code (Properties -> C/C++ -> Advanced -> Compile As.)
 */
 
 #include <stdio.h>
@@ -26,22 +23,22 @@ as C++ code (Properties -> C/C++ -> Advanced -> Compile As.)
 #include <string.h>
 #include "goombarom.h"
 #include "pocketnesrom.h"
+#include "smsadvancerom.h"
 #include "platformname.h"
 
-const char* USAGE = "gbaromextract (2017-08-29)\n"
+const char* USAGE = "gbaromextract (2020-05-30)\n"
 "Usage: gbaromextract {x/extract} in.gba out.bin\n"
 "       gbaromextract in.gba\n"
 "\n"
 "  x:    extract ROM from first file -> store in second file\n"
-"        (\"out.bin\" can be - for stdout)\n"
 "\n"
-"  one argument: view Goomba/PocketNES headers\n"
+"  one argument: view Goomba/SMSAdvance/PocketNES headers\n"
 "\n"
 "  -L: license information\n"
 "  /? or --help: print this message\n";
 
-const char* GPL_NOTICE = "gbaromextract - extract from Goomba and PocketNES ROMs\n"
-"Copyright (C) 2014-2017 libertyernie\n"
+const char* GPL_NOTICE = "gbaromextract - extract from Goomba, SMSAdvance, and PocketNES ROMs\n"
+"Copyright (C) 2014-2020 libertyernie\n"
 "https://github.com/libertyernie/goombasav\n"
 "\n"
 "This program is free software: you can redistribute it and/or modify\n"
@@ -95,14 +92,23 @@ const void* ask(const void* gba_data, size_t size, const char* prompt) {
 	int romsFound = 0;
 
 	for (const pocketnes_romheader* ptr = pocketnes_first_rom(gba_data, size);
-		ptr != NULL;
+		ptr != NULL && romsFound < 1024;
 		ptr = pocketnes_next_rom(gba_data, size, ptr))
 	{
 		list[romsFound] = ptr;
 		fprintf(stderr, "%d. %s\n", romsFound++, ptr->name);
 	}
+
+	for (const smsadvance_romheader* ptr = smsadvance_first_rom(gba_data, size);
+		ptr != NULL && romsFound < 1024;
+		ptr = smsadvance_next_rom(gba_data, size, ptr))
+	{
+		list[romsFound] = ptr;
+		fprintf(stderr, "%d. %s\n", romsFound++, ptr->name);
+	}
+
 	for (const void* ptr = gb_first_rom(gba_data, size);
-		ptr != NULL;
+		ptr != NULL && romsFound < 1024;
 		ptr = gb_next_rom(gba_data, size, ptr))
 	{
 		list[romsFound] = ptr;
@@ -142,9 +148,13 @@ void extract(const char* gbafile, const char* gbcfile) {
 
 	const void* ptr = ask(gba_data, size, "Extract: ");
 
-	size_t extracted_size;
+	size_t extracted_size = 0;
 	if (pocketnes_is_romheader(ptr)) {
 		pocketnes_romheader* r = (pocketnes_romheader*)ptr;
+		extracted_size = r->filesize;
+		ptr = r + 1;
+	} else if (smsadvance_is_romheader(ptr)) {
+		smsadvance_romheader* r = (smsadvance_romheader*)ptr;
 		extracted_size = r->filesize;
 		ptr = r + 1;
 	} else if (gb_is_rom(ptr)) {
@@ -186,6 +196,18 @@ void list(const char* gbafile) {
 			(char*)(ptr + 1) - gba_data, 
 			ptr->filesize);
 	}
+
+	for (const smsadvance_romheader* ptr = smsadvance_first_rom(gba_data, size);
+		ptr != NULL;
+		ptr = smsadvance_next_rom(gba_data, size, ptr))
+	{
+		printf("%d. %s\n", romsFound++, ptr->name);
+		printf("     %p: header\n", (char*)ptr - gba_data);
+		printf("     %p: data (%d bytes)\n",
+			(char*)(ptr + 1) - gba_data,
+			ptr->filesize);
+	}
+
 	for (const void* ptr = gb_first_rom(gba_data, size);
 		ptr != NULL;
 		ptr = gb_next_rom(gba_data, size, ptr))

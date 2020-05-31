@@ -1,6 +1,6 @@
 /* goombasav.c - functions to handle Goomba / Goomba Color SRAM
 
-Copyright (C) 2014-2017 libertyernie
+Copyright (C) 2014-2020 libertyernie
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -54,23 +54,9 @@ size_t goomba_set_last_error(const char* msg) {
 	return len;
 }
 
-// For making a checksum of the compressed data.
-// output_bytes is limited to 8 at maximum
-uint64_t checksum_slow(const void* ptr, size_t length, int output_bytes) {
-	const unsigned char* p = (const unsigned char*)ptr;
-	uint64_t sum=0;
-	char* sumptr = (char*)&sum;
-	size_t j;
-	for (j=0;j<length;j++) {
-		int index = j%output_bytes;
-		sumptr[index] += *p;
-		p++;
-	}
-	return sum;
-}
-
 uint16_t little_endian_conv_16(uint16_t value) {
-	if (*(uint16_t *)"\0\xff" < 0x100) {
+	const char* endian_check = "\0\xff";
+	if (*(uint16_t*)endian_check < 0x100) {
 		uint16_t buffer;
 		((char*)&buffer)[0] = ((char*)&value)[1];
 		((char*)&buffer)[1] = ((char*)&value)[0];
@@ -81,7 +67,8 @@ uint16_t little_endian_conv_16(uint16_t value) {
 }
 
 uint32_t little_endian_conv_32(uint32_t value) {
-	if (*(uint16_t *)"\0\xff" < 0x100) {
+	const char* endian_check = "\0\xff";
+	if (*(uint16_t*)endian_check < 0x100) {
 		uint32_t buffer;
 		((char*)&buffer)[0] = ((char*)&value)[3];
 		((char*)&buffer)[1] = ((char*)&value)[2];
@@ -201,8 +188,8 @@ const stateheader* stateheader_first(const void* gba_data) {
 
 const stateheader** stateheader_scan(const void* gba_data) {
 	const goomba_size_t psize = sizeof(stateheader*);
-	const stateheader** headers = (const stateheader**)malloc(psize * 64);
-	memset(headers, 0, psize * 64);
+	const stateheader** headers = (const stateheader**)malloc(psize * (size_t)64);
+	memset(headers, 0, psize * (size_t)64);
 
 	const stateheader* sh = stateheader_first(gba_data);
 	if (sh == NULL) {
@@ -245,12 +232,6 @@ const stateheader* stateheader_for_checksum(const void* gba_data, uint32_t check
 	return NULL;
 }
 
-// Uses checksum_slow, and looks at the compressed data (not the header).
-// output_bytes is limited to 8 at maximum
-uint64_t goomba_compressed_data_checksum(const stateheader* sh, int output_bytes) {
-	return checksum_slow(sh+1, F16(sh->size) - sizeof(stateheader), output_bytes);
-}
-
 int goomba_is_sram(const void* data) {
 	uint32_t stateid_le = F32(*(uint32_t*)data);
 	return stateid_le == GOOMBA_STATEID
@@ -288,8 +269,7 @@ int64_t goomba_get_configdata_checksum_field(const void* gba_data) {
 	return -1;
 }
 
-char* goomba_cleanup(const void* gba_data_param) {
-	char gba_data[GOOMBA_COLOR_SRAM_SIZE]; // on stack - do not need to free
+char* goomba_cleanup_internal(const void* gba_data_param, char* gba_data) {
 	memcpy(gba_data, gba_data_param, GOOMBA_COLOR_SRAM_SIZE);
 
 	const stateheader* first = stateheader_first(gba_data);
@@ -336,6 +316,13 @@ char* goomba_cleanup(const void* gba_data_param) {
 	}
 
 	return (char*)gba_data_param;
+}
+
+char* goomba_cleanup(const void* gba_data_param) {
+	char* gba_data = (char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
+	char* result = goomba_cleanup_internal(gba_data_param, gba_data);
+	free(gba_data);
+	return result;
 }
 
 void* goomba_extract(const void* gba_data, const stateheader* header_ptr, goomba_size_t* size_output) {

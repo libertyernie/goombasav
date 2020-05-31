@@ -1,6 +1,6 @@
 /* main.c - command line interface to goombasav
 
-Copyright (C) 2014-2016 libertyernie
+Copyright (C) 2014-2020 libertyernie
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -16,9 +16,6 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 https://github.com/libertyernie/goombasav
-
-When compiling in Visual Studio, set all goombasav files to compile
-as C++ code (Properties -> C/C++ -> Advanced -> Compile As.)
 */
 
 #include <stdio.h>
@@ -27,29 +24,26 @@ as C++ code (Properties -> C/C++ -> Advanced -> Compile As.)
 #include "goombasav.h"
 #include "platformname.h"
 
-const char* USAGE = "goombasav (2017-08-29)\n"
+const char* USAGE = "goombasav (2020-05-30)\n"
 "Usage: goombasav {x/extract} gba.sav gbc.sav\n"
 "       goombasav {r/replace} gba.sav gbc.sav\n"
-"       goombasav {c/clean} gba-in.sav [gba-out.sav]\n"
+"       goombasav {c/clean} gba-in.sav gba-out.sav\n"
 "       goombasav isok [file1.sav [file2.sav [...]]]\n"
 "       goombasav gba.sav\n"
 "\n"
 "  x:    extract save data from first file -> store in second file\n"
-"        (\"gbc.sav\" can be - for stdout)\n"
 "  r:    replace data in first file <- read from second file\n"
-"  c:    clean sram at 0xE000 in 1st file -> write to 2nd file if specified,\n"
-"        replace first file otherwise (second file can be - for stdout)\n"
-"  isok: check if the file begins with a four-byte sequence that identifies it\n"
-"        as a Goomba or PocketNES save file\n"
+"  c:    read first file -> clean any sram at 0xE000 -> write to second file\n"
+"  isok: check if the files begin with a four-byte sequence that identifies them\n"
+"        as Goomba/SMSAdvance/PocketNES save files\n"
 "\n"
-"  one argument: view Goomba/PocketNES headers\n"
-"                (file can be - for stdin)\n"
+"  one argument: view Goomba/SMSAdvance/PocketNES headers\n"
 "\n"
 "  -L: license information\n"
 "  /? or --help: print this message\n";
 
 const char* GPL_NOTICE = "goombasav - extract and replace Goomba/Goomba Color save files\n"
-"Copyright (C) 2014-2017 libertyernie\n"
+"Copyright (C) 2014-2020 libertyernie\n"
 "https://github.com/libertyernie/goombasav\n"
 "\n"
 "This program is free software: you can redistribute it and/or modify\n"
@@ -250,9 +244,6 @@ void list(const char* gbafile) {
 		printf("%d. ", i);
 		printf("%s\n", stateheader_summary_str(headers[i]));
 		print_indent("  ", stateheader_str(headers[i]));
-		if (little_endian_conv_16(headers[i]->size) > sizeof(stateheader)) {
-			printf("  [3-byte compressed data checksum: %6X]\n", goomba_compressed_data_checksum(headers[i], 3));
-		}
 		i++;
 	}
 
@@ -286,11 +277,7 @@ int main(int argc, char** argv) {
 			list(argv[1]);
 		}
 	} else if (argc == 3) {
-		if (strcmp("c", argv[1]) == 0 || strcmp("clean", argv[1]) == 0) {
-			clean(argv[2], argv[2]);
-		} else {
-			usage();
-		}
+		usage();
 	} else if (strcmp("x", argv[1]) == 0 || strcmp("extract", argv[1]) == 0) {
 		extract(argv[2], argv[3]);
 	} else if (strcmp("r", argv[1]) == 0 || strcmp("replace", argv[1]) == 0) {

@@ -18,11 +18,7 @@ const char* goomba_basename(const char* c) {
 	return i1 > i2 ? i1 : i2;
 }
 
-const char* GPL_NOTICE = "Goomba Save Manager (GTK frontend)\n"
-"Copyright (C) 2016 libertyernie\n"
-"http://github.com/libertyernie/goombasav\n"
-"\n"
-"This program is free software: you can redistribute it and/or modify\n"
+const char* GPL_NOTICE = "This program is free software: you can redistribute it and/or modify\n"
 "it under the terms of the GNU General Public License as published by\n"
 "the Free Software Foundation, either version 2 of the License, or\n"
 "(at your option) any later version.\n"
@@ -66,9 +62,6 @@ static GtkWidget* lblGamma;
 static GtkWidget* lblAutostate;
 static GtkWidget* lblChecksum;
 static GtkWidget* lblTitle;
-
-static GtkWidget* dataHashColor;
-static GtkWidget* lblDataHash;
 #pragma endregion
 
 #pragma region gtk helper functions
@@ -115,9 +108,6 @@ static void set_all_labels() {
 	lblset(&lblChecksum, "ROM checksum:", normal_rows[3]);
 
 	lblset(&lblTitle, "Title:", normal_rows[4]);
-
-	if (lblDataHash != NULL) gtk_label_set_text(GTK_LABEL(lblDataHash), "");
-	if (dataHashColor != NULL) gtk_widget_hide(dataHashColor);
 }
 
 static void update_titlebar(GtkWindow* window) {
@@ -136,7 +126,7 @@ static void header_scan() {
 	gtk_list_store_clear(listStore);
 	GtkTreeIter iter;
 	if (goomba_is_sram(loaded_file)) {
-		stateheader* sh = (stateheader*)((char*)loaded_file + 4);
+		const stateheader* sh = (stateheader*)((char*)loaded_file + 4);
 		int i;
 		while (stateheader_plausible(sh)) {
 			gtk_list_store_append(listStore, &iter);
@@ -407,11 +397,11 @@ static void replace_click(GtkWidget* widget, gpointer data) {
 
 static void about_click(GtkWidget* widget, gpointer data) {
 	gtk_show_about_dialog(GTK_WINDOW(window),
-		"copyright", "Copyright (C) 2014-2016 libertyernie",
+		"copyright", "Copyright (C) 2014-2020 libertyernie",
 		"license", GPL_NOTICE,
 		"program-name", "Goomba Save Manager",
 		"website", "http://github.com/libertyernie/goombasav",
-		"comments", "version 2016-10-12",
+		"comments", "version 2020-05-30",
 		NULL);
 }
 
@@ -432,10 +422,6 @@ static void selection_changed(GtkWidget* widget, gpointer data) {
 
 			sprintf(buf, "Title: %.32s", ptr->name);
 			gtk_label_set_text(GTK_LABEL(lblTitle), buf);
-
-			gtk_label_set_text(GTK_LABEL(lblDataHash), "");
-
-			gtk_widget_hide(dataHashColor);
 
 			gtk_widget_set_sensitive(btnExport, true);
 			gtk_widget_set_sensitive(btnReplace, false);
@@ -458,10 +444,6 @@ static void selection_changed(GtkWidget* widget, gpointer data) {
 
 			sprintf(buf, "Title: %.16s", gb_get_title(voidptr, NULL));
 			gtk_label_set_text(GTK_LABEL(lblTitle), buf);
-
-			gtk_label_set_text(GTK_LABEL(lblDataHash), "");
-
-			gtk_widget_hide(dataHashColor);
 
 			gtk_widget_set_sensitive(btnExport, true);
 			gtk_widget_set_sensitive(btnReplace, false);
@@ -487,22 +469,6 @@ static void selection_changed(GtkWidget* widget, gpointer data) {
 				: ptr->type == GOOMBA_SRAMSAVE ? "Type: SRAM"
 				: ptr->type == GOOMBA_CONFIGSAVE ? "Type: Configuration"
 				: "Type:");
-
-			if (ptr->size > sizeof(stateheader)) {
-				uint64_t ck = goomba_compressed_data_checksum(ptr, 3);
-				sprintf(buf, "Hash of compressed data: %6X", (unsigned int)ck);
-				gtk_label_set_text(GTK_LABEL(lblDataHash), buf);
-
-				GdkColor color;
-				color.red = 0x101 * ((ck >> 16) & 0xFF);
-				color.green = 0x101 * ((ck >> 8) & 0xFF);
-				color.blue = 0x101 * (ck & 0xFF);
-				gtk_widget_show(dataHashColor);
-				gtk_widget_modify_bg(dataHashColor, GTK_STATE_NORMAL, &color);
-			} else {
-				gtk_label_set_text(GTK_LABEL(lblDataHash), "");
-				gtk_widget_hide(dataHashColor);
-			}
 
 			gtk_widget_set_sensitive(btnExport, F16(ptr->type) == GOOMBA_SRAMSAVE);
 			gtk_widget_set_sensitive(btnReplace, F16(ptr->type) == GOOMBA_SRAMSAVE);
@@ -720,19 +686,6 @@ GtkWidget* build_window() {
 	gtk_box_pack_start(GTK_BOX(button_hbox), btnExport, FALSE, FALSE, 0);
 	gtk_widget_show(btnExport);
 	g_signal_connect(btnExport, "clicked", G_CALLBACK(export_click), NULL);
-
-	// little hash
-	lblDataHash = gtk_label_new("");
-	gtk_misc_set_alignment(GTK_MISC(lblDataHash), 0, 0.5);
-
-	dataHashColor = gtk_event_box_new();
-
-	GtkWidget* hash_hbox = gtk_hbox_new(FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(hash_hbox), lblDataHash, FALSE, FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(hash_hbox), dataHashColor, TRUE, TRUE, 8);
-
-	gtk_box_pack_end(GTK_BOX(vbox2), hash_hbox, FALSE, FALSE, 0);
-	gtk_widget_show_all(hash_hbox);
 
 	// show things
 	gtk_widget_show(vbox2);

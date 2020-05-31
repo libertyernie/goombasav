@@ -1,7 +1,7 @@
-/* smsadvancerom.h - functions to find uncompressed Master System / Game Geat
+/* smsadvancerom.h - functions to find uncompressed Master System / Game Gear
 ROM images stored within SMSAdvance ROMs
 
-Copyright (C) 2016 libertyernie
+Copyright (C) 2016-2020 libertyernie
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ the segment 534D531A (S,M,S,^Z). If no valid data is found, this method will
 return NULL. */
 const smsadvance_romheader* smsadvance_first_rom(const void* data, size_t length);
 
-/* Returns a pointer to the next PocketNES ROM header in the data. If the
+/* Returns a pointer to the next SMSAdvance ROM header in the data. If the
 location where the next ROM header would be does not contain a 'S,M,S,^Z'
 segment, this method will return NULL. */
 const smsadvance_romheader* smsadvance_next_rom(const void* data, size_t length, const smsadvance_romheader* first_rom);

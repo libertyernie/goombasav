@@ -1,0 +1,118 @@
+{
+  "version": 3,
+  "targets": {
+    ".NETCoreApp,Version=v3.1": {
+      "GBARomExtractCore/1.0.0": {
+        "type": "project",
+        "compile": {
+          "bin/placeholder/GBARomExtractCore.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/GBARomExtractCore.dll": {}
+        }
+      },
+      "GoombasavCore/1.0.0": {
+        "type": "project",
+        "compile": {
+          "bin/placeholder/GoombasavCore.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/GoombasavCore.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "GBARomExtractCore/1.0.0": {
+      "type": "project",
+      "path": "../GBARomExtractCore/GBARomExtractCore.vcxproj",
+      "msbuildProject": "../GBARomExtractCore/GBARomExtractCore.vcxproj"
+    },
+    "GoombasavCore/1.0.0": {
+      "type": "project",
+      "path": "../GoombasavCore/GoombasavCore.vcxproj",
+      "msbuildProject": "../GoombasavCore/GoombasavCore.vcxproj"
+    }
+  },
+  "projectFileDependencyGroups": {
+    ".NETCoreApp,Version=v3.1": [
+      "GBARomExtractCore >= 1.0.0",
+      "GoombasavCore >= 1.0.0"
+    ]
+  },
+  "packageFolders": {
+    "C:\\Users\\admin\\.nuget\\packages\\": {},
+    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "C:\\Users\\admin\\Documents\\Visual Studio 2015\\Projects\\goombasav\\vs2019\\GoombasavCore.WinForms\\GoombasavCore.WinForms.csproj",
+      "projectName": "GoombasavCore.WinForms",
+      "projectPath": "C:\\Users\\admin\\Documents\\Visual Studio 2015\\Projects\\goombasav\\vs2019\\GoombasavCore.WinForms\\GoombasavCore.WinForms.csproj",
+      "packagesPath": "C:\\Users\\admin\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\admin\\Documents\\Visual Studio 2015\\Projects\\goombasav\\vs2019\\GoombasavCore.WinForms\\obj\\",
+      "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+      ],
+      "configFilePaths": [
+        "C:\\Users\\admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+      ],
+      "originalTargetFrameworks": [
+        "netcoreapp3.1"
+      ],
+      "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "netcoreapp3.1": {
+          "projectReferences": {
+            "C:\\Users\\admin\\Documents\\Visual Studio 2015\\Projects\\goombasav\\vs2019\\GBARomExtractCore\\GBARomExtractCore.vcxproj": {
+              "projectPath": "C:\\Users\\admin\\Documents\\Visual Studio 2015\\Projects\\goombasav\\vs2019\\GBARomExtractCore\\GBARomExtractCore.vcxproj"
+            },
+            "C:\\Users\\admin\\Documents\\Visual Studio 2015\\Projects\\goombasav\\vs2019\\GoombasavCore\\GoombasavCore.vcxproj": {
+              "projectPath": "C:\\Users\\admin\\Documents\\Visual Studio 2015\\Projects\\goombasav\\vs2019\\GoombasavCore\\GoombasavCore.vcxproj"
+            }
+          }
+        }
+      },
+      "warningProperties": {
+        "warnAsError": [
+          "NU1605"
+        ]
+      }
+    },
+    "frameworks": {
+      "netcoreapp3.1": {
+        "imports": [
+          "net461",
+          "net462",
+          "net47",
+          "net471",
+          "net472",
+          "net48"
+        ],
+        "assetTargetFallback": true,
+        "warn": true,
+        "downloadDependencies": [
+          {
+            "name": "Microsoft.AspNetCore.App.Ref",
+            "version": "[3.1.2, 3.1.2]"
+          }
+        ],
+        "frameworkReferences": {
+          "Microsoft.NETCore.App": {
+            "privateAssets": "all"
+          },
+          "Microsoft.WindowsDesktop.App.WindowsForms": {
+            "privateAssets": "none"
+          }
+        },
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.300\\RuntimeIdentifierGraph.json"
+      }
+    }
+  }
+}
