@@ -88,7 +88,7 @@
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(127, 13);
             this.label4.TabIndex = 4;
-            this.label4.Text = "(C) 2014-2020 libertyernie";
+            this.label4.Text = "(C) 2014-2021 libertyernie";
             // 
             // button2
             // 

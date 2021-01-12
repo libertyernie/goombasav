@@ -1,14 +1,8 @@
 ﻿using GoombasavCore;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace goombasav_cs {
@@ -96,7 +90,9 @@ namespace goombasav_cs {
 		private void btnReplace_Click(object sender, EventArgs e) {
 			OpenFileDialog d = new OpenFileDialog();
 			d.Title = btnReplace.Text;
-			d.Filter = "Raw save data (*.sav, *.srm)|*.sav;*.srm|All files (*.*)|*.*";
+			d.Filter = (listBox1.SelectedItem as Stateheader)?.Type == EmulatorSRAMHeader.STATESAVE
+				? "Savestate (*.savestate)|*.savestate|All files (*.*)|*.*"
+				: "Raw save data (*.sav, *.srm)|*.sav;*.srm|All files (*.*)|*.*";
 			if (d.ShowDialog() == DialogResult.OK) {
 				replace(d.FileName);
 			}
@@ -115,7 +111,9 @@ namespace goombasav_cs {
 				}
 				SaveFileDialog d = new SaveFileDialog();
 				d.Title = btnExtract.Text;
-				d.Filter = "Raw save data (*.sav, *.srm)|*.sav;*.srm|All files (*.*)|*.*";
+				d.Filter = sh.Type == EmulatorSRAMHeader.STATESAVE
+                    ? "Savestate (*.savestate)|*.savestate|All files (*.*)|*.*"
+					: "Raw save data (*.sav, *.srm)|*.sav;*.srm|All files (*.*)|*.*";
 				d.AddExtension = true;
 				if (d.ShowDialog() == DialogResult.OK) {
 					File.WriteAllBytes(d.FileName, data);
@@ -194,7 +192,7 @@ namespace goombasav_cs {
 				lblFramecountVal.Text = sh.Framecount.ToString();
 				lblChecksumVal.Text = sh.ROMChecksum.ToString("X8");
 
-				btnExtract.Enabled = btnReplace.Enabled = (sh.Type == EmulatorSRAMHeader.SRAMSAVE);
+				btnExtract.Enabled = btnReplace.Enabled = sh.Type == EmulatorSRAMHeader.SRAMSAVE || sh.Type == EmulatorSRAMHeader.STATESAVE;
 			} else if (h is Configdata) {
 				flpStateheader.Visible = false;
 

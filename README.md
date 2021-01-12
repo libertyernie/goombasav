@@ -1,9 +1,7 @@
 Goomba Save Manager
 ===================
 
-This library is designed to edit the SRAM data of the Goomba and Goomba Color emulators. It can extract and replace the compressed Game Boy / Game Boy Color SRAM or savestate data. It can't add new SRAM.
-
-PocketNES and SMSAdvance save data might work, but is not officially supported.
+This library is designed to edit the SRAM data of the Goomba, Goomba Color, PocketNES, and SMSAdvance emulators, all of which run on the Game Boy Advance. The library can extract and replace the compressed SRAM or savestate data of the game being emulated. It can't add new SRAM.
 
 Windows .exe files for the GUI and command-line apps are located in the Releases section on GitHub. Unix / Linux / Cygwin / WSL users can also build the command-line apps by using the Makefile. See below for information about these apps.
 
@@ -23,9 +21,9 @@ gbaromextract
 
 gbaromextract is a command-line program that can:
 
-* extract uncompressed Game Boy ROMs from compiled Goomba / Goomba Color ROMs or any other uncompressed archive file
-* extract NES ROMs from compiled PocketNES ROMs
-* extract Master System / Game Gear ROMs from compiled SMSAdvance ROMs
+* extract uncompressed Game Boy ROMs from compiled Goomba / Goomba Color ROMs, or any other uncompressed archive file (Game Boy ROMs have a standard header format that makes this possible)
+* extract uncompressed NES ROMs from compiled PocketNES ROMs
+* extract uncompressed Master System / Game Gear ROMs from compiled SMSAdvance ROMs
 
 It cannot replace any data in the input file.
 
