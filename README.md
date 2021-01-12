@@ -29,10 +29,10 @@ It cannot replace any data in the input file.
 
 gbaromextract is written in C. In Visual Studio, use the /TP switch to compile as C++ code.
 
-Goomba Save Manager (goombasav_cs)
-----------------------------------
+Goomba Save Manager (GoombasavCore)
+-----------------------------------
 
-Goomba Save Manager (goombasav_cs.exe, goombasav_net.dll) wraps the backend code in a class-oriented C++/CLI library, and makes that available through a GUI written in C#.
+Goomba Save Manager wraps the backend code in a class-oriented C++/CLI library, and makes that available through a GUI written in C#.
 
 Use the Open and Save/Save As options from the File menu to open Goomba / Goomba Color save files, and use the Extract and Replace buttons to edit the SRAM. If the file needs to be "cleaned" (see above), the program will let you know when you open it. (If you clean the file, the changes won't be saved until you choose Save or Save As.)
 
