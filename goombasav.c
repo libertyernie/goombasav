@@ -332,7 +332,7 @@ char* goomba_cleanup(const void* gba_data_param) {
 void* goomba_extract(const void* gba_data, const stateheader* header_ptr, goomba_size_t* size_output) {
 	const stateheader* sh = (const stateheader*)header_ptr;
 
-	if (F16(sh->type) != GOOMBA_SRAMSAVE) {
+	if (F16(sh->type) != GOOMBA_SRAMSAVE && F16(sh->type) != GOOMBA_STATESAVE) {
 		goomba_error("Error: this program can only extract SRAM data.\n");
 		return NULL;
 	}
@@ -348,7 +348,7 @@ void* goomba_extract(const void* gba_data, const stateheader* header_ptr, goomba
 	}
 	
 	lzo_uint compressed_size = F16(sh->size) - sizeof(stateheader);
-	lzo_uint output_size = 32768;
+	lzo_uint output_size = 0x10000;
 	const unsigned char* compressed_data = (unsigned char*)header_ptr + sizeof(stateheader);
 	unsigned char* uncompressed_data = (unsigned char*)malloc(output_size);
 	int r = lzo1x_decompress_safe(compressed_data, compressed_size,
@@ -398,8 +398,8 @@ char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* g
 		fprintf(stderr, "File is unclean, but it shouldn't affect replacement of the data you asked for\n");
 	}
 
-	if (F16(sh->type) != GOOMBA_SRAMSAVE && gbc_length != 0) {
- 		goomba_error("Error - This program cannot replace non-SRAM data.\n");
+	if (F16(sh->type) != GOOMBA_SRAMSAVE && F16(sh->type) != GOOMBA_STATESAVE && gbc_length != 0) {
+ 		goomba_error("This program can only replace SRAM or savestate data.\n");
 		return NULL;
 	}
 
@@ -431,11 +431,6 @@ char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* g
 		goomba_error("Note: RTC data (new VBA format) will not be copied\n");
 	} else if (gbc_length > uncompressed_size) {
 		goomba_error("Warning: unknown data at end of GBC save file - only first %u bytes will be used\n", uncompressed_size);
-	}
-
-	if (F16(sh->type) != GOOMBA_SRAMSAVE && gbc_length != 0) {
-		goomba_error("The data at gba_header is not SRAM data.\n");
-		return NULL;
 	}
 
 	char* const goomba_new_sav = (char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
