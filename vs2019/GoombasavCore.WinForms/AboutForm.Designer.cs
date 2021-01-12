@@ -53,7 +53,7 @@
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(61, 13);
             this.label2.TabIndex = 1;
-            this.label2.Text = "2020-05-30";
+            this.label2.Text = "2021-01-12";
             // 
             // label3
             // 
@@ -88,7 +88,7 @@
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(127, 13);
             this.label4.TabIndex = 4;
-            this.label4.Text = "(C) 2014-2020 libertyernie";
+            this.label4.Text = "(C) 2014-2021 libertyernie";
             // 
             // button2
             // 

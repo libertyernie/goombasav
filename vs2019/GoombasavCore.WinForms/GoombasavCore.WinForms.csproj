@@ -12,7 +12,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GBARomExtractCore\GBARomExtractCore.vcxproj" />
     <ProjectReference Include="..\GoombasavCore\GoombasavCore.vcxproj" />
   </ItemGroup>
 

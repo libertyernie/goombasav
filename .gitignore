@@ -1,5 +1,7 @@
 Debug
 Release
+bin
+obj
 /goombasav.exe
 /gbaromextract.exe
 *.sdf

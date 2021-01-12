@@ -1,14 +1,8 @@
 ﻿using GoombasavCore;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace goombasav_cs {
@@ -25,7 +19,7 @@ namespace goombasav_cs {
 
 		const string TITLE = "Goomba Save Manager";
 
-		private EmulatorSRAM loaded_sram;
+		private GameBoyAdvanceSRAM loaded_sram;
 		private List<ExtractedROM> loaded_rom_contents;
 
 		private string filePath;
@@ -86,17 +80,19 @@ namespace goombasav_cs {
 		}
 
 		private void aboutToolStripMenuItem_Click(object sender, EventArgs e) {
-            using (AboutForm a = new AboutForm() {
-                Icon = Icon
-            }) {
-                a.ShowDialog(this);
-            }
+			using (AboutForm a = new AboutForm() {
+				Icon = Icon
+			}) {
+				a.ShowDialog(this);
+			}
 		}
 
 		private void btnReplace_Click(object sender, EventArgs e) {
 			OpenFileDialog d = new OpenFileDialog();
 			d.Title = btnReplace.Text;
-			d.Filter = "Raw save data (*.sav, *.srm)|*.sav;*.srm|All files (*.*)|*.*";
+			d.Filter = (listBox1.SelectedItem as Stateheader)?.Type == GameBoyAdvanceSRAMHeader.STATESAVE
+				? "Savestate (*.savestate)|*.savestate|All files (*.*)|*.*"
+				: "Raw save data (*.sav, *.srm)|*.sav;*.srm|All files (*.*)|*.*";
 			if (d.ShowDialog() == DialogResult.OK) {
 				replace(d.FileName);
 			}
@@ -115,7 +111,9 @@ namespace goombasav_cs {
 				}
 				SaveFileDialog d = new SaveFileDialog();
 				d.Title = btnExtract.Text;
-				d.Filter = "Raw save data (*.sav, *.srm)|*.sav;*.srm|All files (*.*)|*.*";
+				d.Filter = sh.Type == GameBoyAdvanceSRAMHeader.STATESAVE
+					? "Savestate (*.savestate)|*.savestate|All files (*.*)|*.*"
+					: "Raw save data (*.sav, *.srm)|*.sav;*.srm|All files (*.*)|*.*";
 				d.AddExtension = true;
 				if (d.ShowDialog() == DialogResult.OK) {
 					File.WriteAllBytes(d.FileName, data);
@@ -139,29 +137,29 @@ namespace goombasav_cs {
 			} else {
 				MessageBox.Show("Cannot export this type of data.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
-        }
+		}
 
-        private void btnDelete_Click(object sender, EventArgs e) {
-            Stateheader sh = listBox1.SelectedItem as Stateheader;
-            if (sh == null) return;
+		private void btnDelete_Click(object sender, EventArgs e) {
+			Stateheader sh = listBox1.SelectedItem as Stateheader;
+			if (sh == null) return;
 
-            string msg = $"Are you sure you want to remove the save data for {sh.Title} from this file? You will need to run Goomba if you want to add new save data later.";
-            if (MessageBox.Show(this, msg, Text, MessageBoxButtons.YesNo) == DialogResult.Yes) {
-                try {
-                    EmulatorSRAM new_data = loaded_sram.CopyAndRemove(sh);
-                    loaded_sram = new_data;
-                    dirty = true;
+			string msg = $"Are you sure you want to remove the save data for {sh.Title} from this file? You will need to run Goomba if you want to add new save data later.";
+			if (MessageBox.Show(this, msg, Text, MessageBoxButtons.YesNo) == DialogResult.Yes) {
+				try {
+					GameBoyAdvanceSRAM new_data = loaded_sram.CopyAndRemove(sh);
+					loaded_sram = new_data;
+					dirty = true;
 
-                    int sel = listBox1.SelectedIndex;
-                    headerScan();
-                    if (listBox1.Items.Count > sel) listBox1.SelectedIndex = sel;
-                } catch (GoombaException ex) {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-        }
+					int sel = listBox1.SelectedIndex;
+					headerScan();
+					if (listBox1.Items.Count > sel) listBox1.SelectedIndex = sel;
+				} catch (GoombaException ex) {
+					MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				}
+			}
+		}
 
-        private void listBox1_SelectedIndexChanged(object sender, EventArgs e) {
+		private void listBox1_SelectedIndexChanged(object sender, EventArgs e) {
 			object o = listBox1.SelectedItem;
 			if (o is ExtractedROM) {
 				ExtractedROM r = (ExtractedROM)o;
@@ -172,15 +170,15 @@ namespace goombasav_cs {
 				lblTitleVal.Text = r.Name;
 				btnExtract.Enabled = true;
 				btnReplace.Enabled = false;
-                btnDelete.Enabled = false;
-                return;
+				btnDelete.Enabled = false;
+				return;
 			}
 
-			EmulatorSRAMHeader h = (EmulatorSRAMHeader)o;
+			GameBoyAdvanceSRAMHeader h = (GameBoyAdvanceSRAMHeader)o;
 			lblSizeVal.Text = h.Size + " bytes";
-			lblTypeVal.Text = h.Type == EmulatorSRAMHeader.STATESAVE ? "Savestate"
-				: h.Type == EmulatorSRAMHeader.SRAMSAVE ? "SRAM"
-				: h.Type == EmulatorSRAMHeader.CONFIGSAVE ? "Config"
+			lblTypeVal.Text = h.Type == GameBoyAdvanceSRAMHeader.STATESAVE ? "Savestate"
+				: h.Type == GameBoyAdvanceSRAMHeader.SRAMSAVE ? "SRAM"
+				: h.Type == GameBoyAdvanceSRAMHeader.CONFIGSAVE ? "Config"
 				: "Unknown";
 			if (h is Stateheader) {
 				Stateheader sh = (Stateheader)h;
@@ -194,7 +192,7 @@ namespace goombasav_cs {
 				lblFramecountVal.Text = sh.Framecount.ToString();
 				lblChecksumVal.Text = sh.ROMChecksum.ToString("X8");
 
-				btnExtract.Enabled = btnReplace.Enabled = (sh.Type == EmulatorSRAMHeader.SRAMSAVE);
+				btnExtract.Enabled = btnReplace.Enabled = sh.Type == GameBoyAdvanceSRAMHeader.SRAMSAVE || sh.Type == GameBoyAdvanceSRAMHeader.STATESAVE;
 			} else if (h is Configdata) {
 				flpStateheader.Visible = false;
 
@@ -247,7 +245,7 @@ namespace goombasav_cs {
 					first += stream.ReadByte() << 8 * i;
 				}
 			}
-			if ((uint)first == EmulatorSRAMHeader.STATEID) {
+			if ((uint)first == GameBoyAdvanceSRAMHeader.STATEID) {
 				// try open file
 				load(arr[0]);
 			} else {
@@ -264,7 +262,7 @@ namespace goombasav_cs {
 				return;
 			} else if (h is Stateheader) {
 				try {
-					EmulatorSRAM new_data = loaded_sram.CopyAndReplace((Stateheader)h, gbc_data_arr);
+					GameBoyAdvanceSRAM new_data = loaded_sram.CopyAndReplace((Stateheader)h, gbc_data_arr);
 					loaded_sram = new_data;
 					dirty = true;
 
@@ -322,12 +320,12 @@ namespace goombasav_cs {
 					loaded_rom_contents.AddRange(extractedRoms2);
 					loaded_rom_contents.AddRange(extractedRoms3);
 				} else {
-					if (arr.Length > EmulatorSRAM.ExpectedSize) {
-						MessageBox.Show("This file is more than " + EmulatorSRAM.ExpectedSize +
-							" bytes. If you overwrite the file, the last " + (arr.Length - EmulatorSRAM.ExpectedSize) +
+					if (arr.Length > GameBoyAdvanceSRAM.ExpectedSize) {
+						MessageBox.Show("This file is more than " + GameBoyAdvanceSRAM.ExpectedSize +
+							" bytes. If you overwrite the file, the last " + (arr.Length - GameBoyAdvanceSRAM.ExpectedSize) +
 							" bytes will be discarded.", "Note", MessageBoxButtons.OK, MessageBoxIcon.Information);
 					}
-					loaded_sram = new EmulatorSRAM(arr, true);
+					loaded_sram = new GameBoyAdvanceSRAM(arr, true);
 					loaded_rom_contents = null;
 					dirty = false;
 				}
@@ -373,5 +371,5 @@ namespace goombasav_cs {
 				}
 			}
 		}
-    }
+	}
 }
