@@ -80,11 +80,11 @@ namespace goombasav_cs {
 		}
 
 		private void aboutToolStripMenuItem_Click(object sender, EventArgs e) {
-            using (AboutForm a = new AboutForm() {
-                Icon = Icon
-            }) {
-                a.ShowDialog(this);
-            }
+			using (AboutForm a = new AboutForm() {
+				Icon = Icon
+			}) {
+				a.ShowDialog(this);
+			}
 		}
 
 		private void btnReplace_Click(object sender, EventArgs e) {
@@ -112,7 +112,7 @@ namespace goombasav_cs {
 				SaveFileDialog d = new SaveFileDialog();
 				d.Title = btnExtract.Text;
 				d.Filter = sh.Type == GameBoyAdvanceSRAMHeader.STATESAVE
-                    ? "Savestate (*.savestate)|*.savestate|All files (*.*)|*.*"
+					? "Savestate (*.savestate)|*.savestate|All files (*.*)|*.*"
 					: "Raw save data (*.sav, *.srm)|*.sav;*.srm|All files (*.*)|*.*";
 				d.AddExtension = true;
 				if (d.ShowDialog() == DialogResult.OK) {
@@ -137,29 +137,29 @@ namespace goombasav_cs {
 			} else {
 				MessageBox.Show("Cannot export this type of data.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
-        }
+		}
 
-        private void btnDelete_Click(object sender, EventArgs e) {
-            Stateheader sh = listBox1.SelectedItem as Stateheader;
-            if (sh == null) return;
+		private void btnDelete_Click(object sender, EventArgs e) {
+			Stateheader sh = listBox1.SelectedItem as Stateheader;
+			if (sh == null) return;
 
-            string msg = $"Are you sure you want to remove the save data for {sh.Title} from this file? You will need to run Goomba if you want to add new save data later.";
-            if (MessageBox.Show(this, msg, Text, MessageBoxButtons.YesNo) == DialogResult.Yes) {
-                try {
-                    GameBoyAdvanceSRAM new_data = loaded_sram.CopyAndRemove(sh);
-                    loaded_sram = new_data;
-                    dirty = true;
+			string msg = $"Are you sure you want to remove the save data for {sh.Title} from this file? You will need to run Goomba if you want to add new save data later.";
+			if (MessageBox.Show(this, msg, Text, MessageBoxButtons.YesNo) == DialogResult.Yes) {
+				try {
+					GameBoyAdvanceSRAM new_data = loaded_sram.CopyAndRemove(sh);
+					loaded_sram = new_data;
+					dirty = true;
 
-                    int sel = listBox1.SelectedIndex;
-                    headerScan();
-                    if (listBox1.Items.Count > sel) listBox1.SelectedIndex = sel;
-                } catch (GoombaException ex) {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-        }
+					int sel = listBox1.SelectedIndex;
+					headerScan();
+					if (listBox1.Items.Count > sel) listBox1.SelectedIndex = sel;
+				} catch (GoombaException ex) {
+					MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				}
+			}
+		}
 
-        private void listBox1_SelectedIndexChanged(object sender, EventArgs e) {
+		private void listBox1_SelectedIndexChanged(object sender, EventArgs e) {
 			object o = listBox1.SelectedItem;
 			if (o is ExtractedROM) {
 				ExtractedROM r = (ExtractedROM)o;
@@ -170,8 +170,8 @@ namespace goombasav_cs {
 				lblTitleVal.Text = r.Name;
 				btnExtract.Enabled = true;
 				btnReplace.Enabled = false;
-                btnDelete.Enabled = false;
-                return;
+				btnDelete.Enabled = false;
+				return;
 			}
 
 			GameBoyAdvanceSRAMHeader h = (GameBoyAdvanceSRAMHeader)o;
@@ -371,5 +371,5 @@ namespace goombasav_cs {
 				}
 			}
 		}
-    }
+	}
 }
