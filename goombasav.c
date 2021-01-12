@@ -1,6 +1,6 @@
 /* goombasav.c - functions to handle Goomba / Goomba Color SRAM
 
-Copyright (C) 2014-2020 libertyernie
+Copyright (C) 2014-2021 libertyernie
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -189,6 +189,10 @@ const stateheader* stateheader_first(const void* gba_data) {
 const stateheader** stateheader_scan(const void* gba_data) {
 	const goomba_size_t psize = sizeof(stateheader*);
 	const stateheader** headers = (const stateheader**)malloc(psize * (size_t)64);
+	if (headers == NULL) {
+		return NULL;
+	}
+
 	memset(headers, 0, psize * (size_t)64);
 
 	const stateheader* sh = stateheader_first(gba_data);
@@ -435,6 +439,11 @@ char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* g
 	}
 
 	char* const goomba_new_sav = (char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
+	if (goomba_new_sav == NULL) {
+		goomba_error("Failed to allocate memory for goomba_new_sav.\n");
+		return NULL;
+	}
+
 	memset(goomba_new_sav, 0, GOOMBA_COLOR_SRAM_SIZE);
 	char* working = goomba_new_sav; // will be incremented throughout
 
@@ -448,8 +457,12 @@ char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* g
 	working += sizeof(stateheader);
 
 	// backup data that comes after this header
-	unsigned char* backup = (unsigned char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
-	goomba_size_t backup_len = copy_until_invalid_header(backup, (stateheader*)(gba_header_ptr + F16(sh->size)));
+	unsigned char* data_after_modified = (unsigned char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
+	if (data_after_modified == NULL) {
+		goomba_error("Failed to allocate memory for data_after_modified.\n");
+		return NULL;
+	}
+	goomba_size_t backup_len = copy_until_invalid_header(data_after_modified, (stateheader*)(gba_header_ptr + F16(sh->size)));
 
 	// compress gbc sram
 	if (uncompressed_size == 0) {
@@ -488,13 +501,13 @@ char* goomba_new_sav(const void* gba_data, const void* gba_header, const void* g
 	goomba_size_t used = working - goomba_new_sav;
 	if (used + backup_len > GOOMBA_COLOR_AVAILABLE_SIZE) {
 		goomba_error("Not enough room in file for the new save data (0xe000-0xffff must be kept free, I think)\n");
-		free(backup);
+		free(data_after_modified);
 		free(goomba_new_sav);
 		return NULL;
 	}
 	// restore the backup - just assume we have enough space
-	memcpy(working, backup, backup_len);
-	free(backup);
+	memcpy(working, data_after_modified, backup_len);
+	free(data_after_modified);
 
 	// restore data from 0xe000 to 0xffff
 	memcpy(goomba_new_sav + GOOMBA_COLOR_AVAILABLE_SIZE,
