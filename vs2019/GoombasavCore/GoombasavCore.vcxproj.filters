@@ -30,9 +30,6 @@
     <ClInclude Include="GoombaConfigdata.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="EmulatorSRAM.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="PocketNESConfigdata.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -40,9 +37,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SMSAdvanceConfigdata.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="EmulatorSRAMHeader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Configdata.h">
@@ -67,6 +61,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\smsadvancerom.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameBoyAdvanceSRAM.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameBoyAdvanceSRAMHeader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

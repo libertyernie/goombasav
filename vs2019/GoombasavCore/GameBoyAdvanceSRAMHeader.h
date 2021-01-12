@@ -1,11 +1,11 @@
 #pragma once
-/* EmulatorSRAMHeader.h - class to encapsulate a particular header within the EmulatorSRAM object
+/* GameBoyAdvanceSRAMHeader.h - class to encapsulate a particular header within the GameBoyAdvanceSRAM object
 
-This object will only remain valid while its EmulatorSRAM has not yet been
-disposed/finalized. These objects can be obtained via the Headers
-property of EmulatorSRAM.
+This object will only remain valid while its GameBoyAdvanceSRAM has not yet
+been disposed/finalized. GameBoyAdvanceSRAMHeader objects can be obtained via
+the Headers property of GameBoyAdvanceSRAM.
 
-Copyright (C) 2016-2020 libertyernie
+Copyright (C) 2016-2021 libertyernie
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -27,16 +27,16 @@ https://github.com/libertyernie/goombasav */
 using System::String;
 
 namespace GoombasavCore {
-	ref class EmulatorSRAM;
+	ref class GameBoyAdvanceSRAM;
 
-	public ref class EmulatorSRAMHeader abstract {
+	public ref class GameBoyAdvanceSRAMHeader abstract {
 	private:
 		const void* ptr;
-		EmulatorSRAM^ parent;
+		GameBoyAdvanceSRAM^ parent;
 	internal:
 		// Constructs an object using the given header pointer and parent object.
 		// The parent is only used when the user tries to access the Parent property.
-		EmulatorSRAMHeader(const void* ptr, EmulatorSRAM^ parent) {
+		GameBoyAdvanceSRAMHeader(const void* ptr, GameBoyAdvanceSRAM^ parent) {
 			this->parent = parent;
 			this->ptr = (const stateheader*)ptr;
 		}
@@ -57,8 +57,8 @@ namespace GoombasavCore {
 			}
 		}
 
-		property EmulatorSRAM^ Parent {
-			EmulatorSRAM^ get() {
+		property GameBoyAdvanceSRAM^ Parent {
+			GameBoyAdvanceSRAM^ get() {
 				return this->parent;
 			}
 		}

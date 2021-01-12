@@ -19,7 +19,7 @@ namespace goombasav_cs {
 
 		const string TITLE = "Goomba Save Manager";
 
-		private EmulatorSRAM loaded_sram;
+		private GameBoyAdvanceSRAM loaded_sram;
 		private List<ExtractedROM> loaded_rom_contents;
 
 		private string filePath;
@@ -90,7 +90,7 @@ namespace goombasav_cs {
 		private void btnReplace_Click(object sender, EventArgs e) {
 			OpenFileDialog d = new OpenFileDialog();
 			d.Title = btnReplace.Text;
-			d.Filter = (listBox1.SelectedItem as Stateheader)?.Type == EmulatorSRAMHeader.STATESAVE
+			d.Filter = (listBox1.SelectedItem as Stateheader)?.Type == GameBoyAdvanceSRAMHeader.STATESAVE
 				? "Savestate (*.savestate)|*.savestate|All files (*.*)|*.*"
 				: "Raw save data (*.sav, *.srm)|*.sav;*.srm|All files (*.*)|*.*";
 			if (d.ShowDialog() == DialogResult.OK) {
@@ -111,7 +111,7 @@ namespace goombasav_cs {
 				}
 				SaveFileDialog d = new SaveFileDialog();
 				d.Title = btnExtract.Text;
-				d.Filter = sh.Type == EmulatorSRAMHeader.STATESAVE
+				d.Filter = sh.Type == GameBoyAdvanceSRAMHeader.STATESAVE
                     ? "Savestate (*.savestate)|*.savestate|All files (*.*)|*.*"
 					: "Raw save data (*.sav, *.srm)|*.sav;*.srm|All files (*.*)|*.*";
 				d.AddExtension = true;
@@ -146,7 +146,7 @@ namespace goombasav_cs {
             string msg = $"Are you sure you want to remove the save data for {sh.Title} from this file? You will need to run Goomba if you want to add new save data later.";
             if (MessageBox.Show(this, msg, Text, MessageBoxButtons.YesNo) == DialogResult.Yes) {
                 try {
-                    EmulatorSRAM new_data = loaded_sram.CopyAndRemove(sh);
+                    GameBoyAdvanceSRAM new_data = loaded_sram.CopyAndRemove(sh);
                     loaded_sram = new_data;
                     dirty = true;
 
@@ -174,11 +174,11 @@ namespace goombasav_cs {
                 return;
 			}
 
-			EmulatorSRAMHeader h = (EmulatorSRAMHeader)o;
+			GameBoyAdvanceSRAMHeader h = (GameBoyAdvanceSRAMHeader)o;
 			lblSizeVal.Text = h.Size + " bytes";
-			lblTypeVal.Text = h.Type == EmulatorSRAMHeader.STATESAVE ? "Savestate"
-				: h.Type == EmulatorSRAMHeader.SRAMSAVE ? "SRAM"
-				: h.Type == EmulatorSRAMHeader.CONFIGSAVE ? "Config"
+			lblTypeVal.Text = h.Type == GameBoyAdvanceSRAMHeader.STATESAVE ? "Savestate"
+				: h.Type == GameBoyAdvanceSRAMHeader.SRAMSAVE ? "SRAM"
+				: h.Type == GameBoyAdvanceSRAMHeader.CONFIGSAVE ? "Config"
 				: "Unknown";
 			if (h is Stateheader) {
 				Stateheader sh = (Stateheader)h;
@@ -192,7 +192,7 @@ namespace goombasav_cs {
 				lblFramecountVal.Text = sh.Framecount.ToString();
 				lblChecksumVal.Text = sh.ROMChecksum.ToString("X8");
 
-				btnExtract.Enabled = btnReplace.Enabled = sh.Type == EmulatorSRAMHeader.SRAMSAVE || sh.Type == EmulatorSRAMHeader.STATESAVE;
+				btnExtract.Enabled = btnReplace.Enabled = sh.Type == GameBoyAdvanceSRAMHeader.SRAMSAVE || sh.Type == GameBoyAdvanceSRAMHeader.STATESAVE;
 			} else if (h is Configdata) {
 				flpStateheader.Visible = false;
 
@@ -245,7 +245,7 @@ namespace goombasav_cs {
 					first += stream.ReadByte() << 8 * i;
 				}
 			}
-			if ((uint)first == EmulatorSRAMHeader.STATEID) {
+			if ((uint)first == GameBoyAdvanceSRAMHeader.STATEID) {
 				// try open file
 				load(arr[0]);
 			} else {
@@ -262,7 +262,7 @@ namespace goombasav_cs {
 				return;
 			} else if (h is Stateheader) {
 				try {
-					EmulatorSRAM new_data = loaded_sram.CopyAndReplace((Stateheader)h, gbc_data_arr);
+					GameBoyAdvanceSRAM new_data = loaded_sram.CopyAndReplace((Stateheader)h, gbc_data_arr);
 					loaded_sram = new_data;
 					dirty = true;
 
@@ -320,12 +320,12 @@ namespace goombasav_cs {
 					loaded_rom_contents.AddRange(extractedRoms2);
 					loaded_rom_contents.AddRange(extractedRoms3);
 				} else {
-					if (arr.Length > EmulatorSRAM.ExpectedSize) {
-						MessageBox.Show("This file is more than " + EmulatorSRAM.ExpectedSize +
-							" bytes. If you overwrite the file, the last " + (arr.Length - EmulatorSRAM.ExpectedSize) +
+					if (arr.Length > GameBoyAdvanceSRAM.ExpectedSize) {
+						MessageBox.Show("This file is more than " + GameBoyAdvanceSRAM.ExpectedSize +
+							" bytes. If you overwrite the file, the last " + (arr.Length - GameBoyAdvanceSRAM.ExpectedSize) +
 							" bytes will be discarded.", "Note", MessageBoxButtons.OK, MessageBoxIcon.Information);
 					}
-					loaded_sram = new EmulatorSRAM(arr, true);
+					loaded_sram = new GameBoyAdvanceSRAM(arr, true);
 					loaded_rom_contents = null;
 					dirty = false;
 				}

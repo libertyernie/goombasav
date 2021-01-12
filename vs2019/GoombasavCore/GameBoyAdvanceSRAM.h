@@ -1,5 +1,5 @@
 #pragma once
-/* EmulatorSRAM.h - class to encapsulate Goomba / Goomba Color / PocketNES / SMSAdvance SRAM
+/* GameBoyAdvanceSRAM.h - class to encapsulate Goomba / Goomba Color / PocketNES / SMSAdvance SRAM
 
 Copyright (C) 2014-2020 libertyernie
 
@@ -36,13 +36,13 @@ namespace GoombasavCore {
 		GoombaException(const char* message) : GoombaException(gcnew String(message)) {}
 	};
 
-	public ref class EmulatorSRAM {
+	public ref class GameBoyAdvanceSRAM {
 	private:
 		// always GOOMBA_COLOR_SRAM_SIZE bytes, allocated with malloc
 		void* data;
 		
 		// HeaderPtr objects are invalid after data is replaced in the SRAM.
-		ReadOnlyCollection<EmulatorSRAMHeader^>^ headers;
+		ReadOnlyCollection<GameBoyAdvanceSRAMHeader^>^ headers;
 
 		void init(const void* ptr, bool clean)  {
 			this->data = (char*)malloc(GOOMBA_COLOR_SRAM_SIZE);
@@ -62,7 +62,7 @@ namespace GoombasavCore {
 
 			const stateheader** headers = stateheader_scan(this->data);
 			if (headers == NULL) throw gcnew GoombaException(goomba_last_error());
-			List<EmulatorSRAMHeader^>^ list = gcnew List<EmulatorSRAMHeader^>;
+			List<GameBoyAdvanceSRAMHeader^>^ list = gcnew List<GameBoyAdvanceSRAMHeader^>;
 			for (int i = 0; headers[i] != NULL; i++) {
 				if (headers[i]->type == GOOMBA_CONFIGSAVE) {
 					switch (tag) {
@@ -84,13 +84,13 @@ namespace GoombasavCore {
 				}
 			}
 			free(headers);
-			this->headers = gcnew ReadOnlyCollection<EmulatorSRAMHeader^>(list);
+			this->headers = gcnew ReadOnlyCollection<GameBoyAdvanceSRAMHeader^>(list);
 		}
 	public:
 		static int ExpectedSize = GOOMBA_COLOR_SRAM_SIZE;
 
 		// arr must be at least ExpectedSize bytes. If it is more, the extra bytes will be ignored.
-		EmulatorSRAM(array<unsigned char>^ arr, bool clean) {
+		GameBoyAdvanceSRAM(array<unsigned char>^ arr, bool clean) {
 			if (arr->Length < GOOMBA_COLOR_SRAM_SIZE) {
 				array<unsigned char>^ arr2 = gcnew array<unsigned char>(GOOMBA_COLOR_SRAM_SIZE);
 				Array::Copy(arr, arr2, arr->Length);
@@ -100,23 +100,23 @@ namespace GoombasavCore {
 			init(pin, clean);
 		}
 
-		EmulatorSRAM(const void* ptr, bool clean) {
+		GameBoyAdvanceSRAM(const void* ptr, bool clean) {
 			init(ptr, clean);
 		}
 
-		~EmulatorSRAM() {
-			this->!EmulatorSRAM(); // call finalizer
+		~GameBoyAdvanceSRAM() {
+			this->!GameBoyAdvanceSRAM(); // call finalizer
 		}
 
-		!EmulatorSRAM() {
+		!GameBoyAdvanceSRAM() {
 			if (data != NULL) { // safe to run more than once, because Dispose() will call it
 				free(data);
 				data = NULL;
 			}
 		}
 
-		property ReadOnlyCollection<EmulatorSRAMHeader^>^ Headers {
-			ReadOnlyCollection<EmulatorSRAMHeader^>^ get() {
+		property ReadOnlyCollection<GameBoyAdvanceSRAMHeader^>^ Headers {
+			ReadOnlyCollection<GameBoyAdvanceSRAMHeader^>^ get() {
 				return headers;
 			}
 		}
@@ -137,19 +137,19 @@ namespace GoombasavCore {
 			return arr;
 		}
 
-		EmulatorSRAM^ CopyAndReplace(Stateheader^ header, array<unsigned char>^ data) {
+		GameBoyAdvanceSRAM^ CopyAndReplace(Stateheader^ header, array<unsigned char>^ data) {
 			pin_ptr<unsigned char> pin = &data[0];
 			void* new_data = goomba_new_sav(this->data, header->Pointer, pin, data->Length);
 			if (new_data == NULL) throw gcnew GoombaException(goomba_last_error());
 
-			return gcnew EmulatorSRAM(new_data, false);
+			return gcnew GameBoyAdvanceSRAM(new_data, false);
 		}
 
-		EmulatorSRAM^ CopyAndRemove(Stateheader^ header) {
+		GameBoyAdvanceSRAM^ CopyAndRemove(Stateheader^ header) {
 			void* new_data = goomba_new_sav(this->data, header->Pointer, NULL, 0);
 			if (new_data == NULL) throw gcnew GoombaException(goomba_last_error());
 
-			return gcnew EmulatorSRAM(new_data, false);
+			return gcnew GameBoyAdvanceSRAM(new_data, false);
 		}
 
 		array<unsigned char>^ ToArray() {

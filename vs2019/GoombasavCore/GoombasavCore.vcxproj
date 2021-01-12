@@ -127,8 +127,8 @@
     <ClInclude Include="ExtractedROM.h" />
     <ClInclude Include="GameBoyROM.h" />
     <ClInclude Include="GoombaConfigdata.h" />
-    <ClInclude Include="EmulatorSRAMHeader.h" />
-    <ClInclude Include="EmulatorSRAM.h" />
+    <ClInclude Include="GameBoyAdvanceSRAMHeader.h" />
+    <ClInclude Include="GameBoyAdvanceSRAM.h" />
     <ClInclude Include="PocketNESConfigdata.h" />
     <ClInclude Include="PocketNESROM.h" />
     <ClInclude Include="SMSAdvanceConfigdata.h" />
