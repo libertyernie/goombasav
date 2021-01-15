@@ -13,3 +13,4 @@ ipch
 *.db
 *.opendb
 .vs
+*.pubxml

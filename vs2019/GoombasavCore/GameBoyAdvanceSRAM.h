@@ -67,7 +67,6 @@ namespace GoombasavCore {
 				if (headers[i]->type == GOOMBA_CONFIGSAVE) {
 					switch (tag) {
 					case POCKETNES_STATEID:
-					case POCKETNES_STATEID2:
 						list->Add(gcnew PocketNESConfigdata((pocketnes_configdata*)headers[i], this));
 						break;
 					default:
