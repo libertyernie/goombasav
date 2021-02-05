@@ -24,7 +24,7 @@ https://github.com/libertyernie/goombasav
 #include "goombasav.h"
 #include "platformname.h"
 
-const char* USAGE = "goombasav (2021-01-12)\n"
+const char* USAGE = "goombasav (2021-02-05)\n"
 "Usage: goombasav {x/extract} gba.sav gbc.sav\n"
 "       goombasav {r/replace} gba.sav gbc.sav\n"
 "       goombasav {c/clean} gba-in.sav gba-out.sav\n"
